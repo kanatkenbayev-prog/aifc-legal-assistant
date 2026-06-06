@@ -567,7 +567,7 @@ async function sendMessage() {
     chatHistory.push({ role: 'assistant', content: reply });
 
     typingWrap.classList.remove('visible');
-    appendBubble('ai', reply, false, data.searchCount);
+    appendBubble('ai', reply, false, data.liveCount || 0);
     scrollToBottom();
 
   } catch (err) {
