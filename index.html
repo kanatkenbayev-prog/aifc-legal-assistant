@@ -98,6 +98,9 @@
   .api-key-bar label { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; margin: 0; }
   .api-key-bar input { flex: 1; padding: 5px 9px; font-size: 12px; font-family: monospace; border: 1px solid var(--border); border-radius: 6px; background: white; outline: none; color: var(--text); }
   .api-key-bar input:focus { border-color: var(--gold); }
+  .api-key-saved { font-size: 11px; color: var(--success); font-weight: 600; white-space: nowrap; }
+  .api-key-reset { font-size: 11px; color: var(--text-muted); cursor: pointer; text-decoration: underline; background: none; border: none; font-family: inherit; padding: 0; }
+  .api-key-reset:hover { color: var(--kz-red); }
 
   .btn-submit { display: flex; align-items: center; gap: 8px; padding: 11px 26px; background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); color: white; border: none; border-radius: 8px; font-size: 13px; font-family: 'Source Serif 4', serif; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; transition: all 0.25s; box-shadow: 0 2px 12px rgba(13,27,62,0.25); }
   .btn-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(13,27,62,0.35); }
@@ -256,9 +259,11 @@
       <div class="query-box">
         <label for="query">Введите юридический вопрос по законодательству МФЦА или РК</label>
         <textarea id="query" placeholder="Например: Каковы требования к минимальному капиталу и лицензированию для открытия управляющей компании в МФЦА?"></textarea>
-        <div class="api-key-bar">
+        <div class="api-key-bar" id="apiKeyBar">
           <label for="apiKey">API КЛЮЧ</label>
-          <input type="password" id="apiKey" placeholder="sk-ant-api03-..." autocomplete="off">
+          <input type="password" id="apiKey" placeholder="sk-ant-api03-..." autocomplete="off" oninput="onApiKeyInput()">
+          <span class="api-key-saved" id="apiKeySaved" style="display:none">✓ Сохранён</span>
+          <button class="api-key-reset" id="apiKeyReset" style="display:none" onclick="resetApiKey()">Сменить</button>
         </div>
         <div class="query-actions">
           <span class="query-hint">Область: <strong id="areaLabel">Корпоративное право</strong> · Язык: <strong id="langLabel">Русский</strong></span>
@@ -425,6 +430,40 @@ const CAT_COLORS = {
 // ============================================================
 document.getElementById('currentDate').textContent = new Date().toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
 
+// API key persistence
+(function initApiKey() {
+  const saved = localStorage.getItem('aifc_api_key');
+  if (saved) {
+    document.getElementById('apiKey').value = saved;
+    document.getElementById('apiKey').style.display = 'none';
+    document.getElementById('apiKeySaved').style.display = 'inline';
+    document.getElementById('apiKeyReset').style.display = 'inline';
+    document.querySelector('#apiKeyBar label').style.display = 'none';
+  }
+})();
+
+function onApiKeyInput() {
+  const val = document.getElementById('apiKey').value.trim();
+  if (val.startsWith('sk-ant-') && val.length > 20) {
+    localStorage.setItem('aifc_api_key', val);
+    document.getElementById('apiKey').style.display = 'none';
+    document.getElementById('apiKeySaved').style.display = 'inline';
+    document.getElementById('apiKeyReset').style.display = 'inline';
+    document.querySelector('#apiKeyBar label').style.display = 'none';
+  }
+}
+
+function resetApiKey() {
+  localStorage.removeItem('aifc_api_key');
+  const inp = document.getElementById('apiKey');
+  inp.value = '';
+  inp.style.display = 'inline';
+  document.getElementById('apiKeySaved').style.display = 'none';
+  document.getElementById('apiKeyReset').style.display = 'none';
+  document.querySelector('#apiKeyBar label').style.display = 'inline';
+  inp.focus();
+}
+
 let currentLang = 'ru';
 let currentArea = 'Корпоративное право';
 let queryHistory = [];
@@ -586,12 +625,12 @@ function mdToHtml(text) {
 // ============================================================
 async function submitQuery() {
   const query = document.getElementById('query').value.trim();
-  const apiKey = document.getElementById('apiKey').value.trim();
+  const apiKey = localStorage.getItem('aifc_api_key') || document.getElementById('apiKey').value.trim();
   if (!query) { document.getElementById('query').focus(); return; }
   if (!apiKey) {
     document.getElementById('errorBox').textContent = 'Пожалуйста, введите API-ключ Anthropic (sk-ant-...).';
     document.getElementById('errorBox').classList.add('visible');
-    document.getElementById('apiKey').focus();
+    resetApiKey();
     return;
   }
 
