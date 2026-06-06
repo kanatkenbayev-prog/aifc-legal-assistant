@@ -27,621 +27,155 @@
     --shadow: 0 4px 24px rgba(13,27,62,0.10);
     --shadow-lg: 0 8px 48px rgba(13,27,62,0.16);
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Source Serif 4', Georgia, serif;
-    background: var(--cream);
-    color: var(--text);
-    min-height: 100vh;
-    line-height: 1.6;
-  }
+  body { font-family: 'Source Serif 4', Georgia, serif; background: var(--cream); color: var(--text); min-height: 100vh; line-height: 1.6; }
 
   /* HEADER */
-  header {
-    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 60%, var(--navy-mid) 100%);
-    color: white;
-    padding: 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: var(--shadow-lg);
-  }
+  header { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 60%, var(--navy-mid) 100%); color: white; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-lg); }
+  .header-inner { max-width: 1280px; margin: 0 auto; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .logo-area { display: flex; align-items: center; gap: 14px; }
+  .logo-emblem { width: 42px; height: 42px; background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: var(--navy); font-family: 'Playfair Display', serif; flex-shrink: 0; box-shadow: 0 2px 8px rgba(201,168,76,0.4); }
+  .logo-text h1 { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: white; line-height: 1.2; letter-spacing: 0.02em; }
+  .logo-text p { font-size: 10px; color: var(--gold-light); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 300; }
+  .header-meta { display: flex; align-items: center; gap: 20px; font-size: 12px; }
+  .header-date { color: var(--gold-light); font-weight: 300; letter-spacing: 0.04em; }
+  .lang-toggle { display: flex; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.15); }
+  .lang-btn { padding: 5px 12px; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; cursor: pointer; border: none; background: transparent; color: rgba(255,255,255,0.6); transition: all 0.2s; font-family: inherit; }
+  .lang-btn.active { background: var(--gold); color: var(--navy); }
 
-  .header-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 18px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-  }
+  /* TABS */
+  .tabs-bar { max-width: 1280px; margin: 0 auto; padding: 0 32px; display: flex; gap: 0; border-bottom: 2px solid var(--border); background: white; }
+  .tab { padding: 14px 22px; font-size: 13px; font-family: 'Source Serif 4', serif; color: var(--text-muted); border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; font-weight: 400; }
+  .tab.active { color: var(--navy); border-bottom-color: var(--gold); font-weight: 600; }
+  .tab:hover:not(.active) { color: var(--navy); background: var(--cream); }
 
-  .logo-area {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
+  /* LAYOUT */
+  .page { display: none; max-width: 1280px; margin: 0 auto; padding: 28px 32px; }
+  .page.active { display: block; }
 
-  .logo-emblem {
-    width: 44px;
-    height: 44px;
-    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--navy);
-    font-family: 'Playfair Display', serif;
-    flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(201,168,76,0.4);
-  }
+  /* ASSISTANT PAGE */
+  .assistant-grid { display: grid; grid-template-columns: 280px 1fr; gap: 24px; align-items: start; }
 
-  .logo-text h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: white;
-    line-height: 1.2;
-    letter-spacing: 0.02em;
-  }
+  /* CARDS */
+  .card { background: white; border-radius: 12px; padding: 18px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .card + .card { margin-top: 18px; }
+  .card-title { font-family: 'Playfair Display', serif; font-size: 12px; font-weight: 600; color: var(--navy); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--gold); display: flex; align-items: center; gap: 8px; }
 
-  .logo-text p {
-    font-size: 11px;
-    color: var(--gold-light);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-weight: 300;
-  }
+  /* AREA */
+  .area-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+  .area-btn { padding: 7px 5px; font-size: 11px; font-family: 'Source Serif 4', serif; text-align: center; background: var(--cream); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; transition: all 0.2s; color: var(--text-muted); line-height: 1.3; }
+  .area-btn:hover, .area-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
 
-  .header-meta {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    font-size: 12px;
-  }
-
-  .header-date {
-    color: var(--gold-light);
-    font-weight: 300;
-    letter-spacing: 0.04em;
-  }
-
-  .lang-toggle {
-    display: flex;
-    background: rgba(255,255,255,0.1);
-    border-radius: 6px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.15);
-  }
-
-  .lang-btn {
-    padding: 5px 12px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    color: rgba(255,255,255,0.6);
-    transition: all 0.2s;
-    font-family: inherit;
-  }
-
-  .lang-btn.active {
-    background: var(--gold);
-    color: var(--navy);
-  }
-
-  /* MAIN LAYOUT */
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 32px;
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 28px;
-    align-items: start;
-  }
-
-  /* SIDEBAR */
-  .sidebar { display: flex; flex-direction: column; gap: 20px; }
-
-  .card {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-  }
-
-  .card-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--navy);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid var(--gold);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  /* PRACTICE AREAS */
-  .area-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-  }
-
-  .area-btn {
-    padding: 8px 6px;
-    font-size: 11px;
-    font-family: 'Source Serif 4', serif;
-    text-align: center;
-    background: var(--cream);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: var(--text-muted);
-    font-weight: 400;
-    line-height: 1.3;
-  }
-
-  .area-btn:hover, .area-btn.active {
-    background: var(--navy);
-    color: white;
-    border-color: var(--navy);
-  }
-
-  /* QUICK QUERIES */
-  .quick-list { display: flex; flex-direction: column; gap: 6px; }
-
-  .quick-btn {
-    padding: 10px 12px;
-    font-size: 12px;
-    font-family: 'Source Serif 4', serif;
-    text-align: left;
-    background: var(--cream);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: var(--text);
-    line-height: 1.4;
-  }
-
-  .quick-btn:hover {
-    background: var(--cream-dark);
-    border-color: var(--gold);
-    color: var(--navy);
-  }
+  /* QUICK */
+  .quick-list { display: flex; flex-direction: column; gap: 5px; }
+  .quick-btn { padding: 9px 10px; font-size: 11.5px; font-family: 'Source Serif 4', serif; text-align: left; background: var(--cream); border: 1px solid var(--border); border-radius: 7px; cursor: pointer; transition: all 0.2s; color: var(--text); line-height: 1.4; }
+  .quick-btn:hover { background: var(--cream-dark); border-color: var(--gold); color: var(--navy); }
 
   /* SOURCE STATUS */
-  .source-list { display: flex; flex-direction: column; gap: 8px; }
-
-  .source-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 12px;
-  }
-
-  .source-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
+  .source-list { display: flex; flex-direction: column; gap: 7px; }
+  .source-item { display: flex; align-items: center; gap: 8px; font-size: 11.5px; }
+  .source-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
   .source-dot.green { background: var(--success); box-shadow: 0 0 6px rgba(26,122,74,0.4); }
-  .source-dot.yellow { background: var(--warning); box-shadow: 0 0 6px rgba(184,134,11,0.4); }
-
+  .source-dot.yellow { background: var(--warning); }
   .source-name { flex: 1; color: var(--text-muted); }
-  .source-status { font-size: 10px; color: var(--success); font-weight: 600; }
+  .source-ok { font-size: 10px; color: var(--success); font-weight: 600; }
+  .source-warn { font-size: 10px; color: var(--warning); font-weight: 600; }
 
   /* HISTORY */
-  .history-list { display: flex; flex-direction: column; gap: 6px; }
+  .history-item { padding: 7px 9px; font-size: 11px; background: var(--cream); border-radius: 6px; cursor: pointer; color: var(--text-muted); border: 1px solid transparent; transition: all 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+  .history-item:hover { border-color: var(--gold); color: var(--navy); background: white; }
 
-  .history-item {
-    padding: 8px 10px;
-    font-size: 11px;
-    background: var(--cream);
-    border-radius: 6px;
-    cursor: pointer;
-    color: var(--text-muted);
-    border: 1px solid transparent;
-    transition: all 0.2s;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .history-item:hover {
-    border-color: var(--gold);
-    color: var(--navy);
-    background: white;
-  }
-
-  /* MAIN CONTENT */
-  .main-content { display: flex; flex-direction: column; gap: 20px; }
-
-  /* QUERY BOX */
-  .query-box {
-    background: white;
-    border-radius: 14px;
-    padding: 24px;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-  }
-
-  .query-box label {
-    display: block;
-    font-family: 'Playfair Display', serif;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--navy);
-    margin-bottom: 12px;
-    letter-spacing: 0.02em;
-  }
-
-  .query-input-wrap {
-    position: relative;
-  }
-
-  textarea#query {
-    width: 100%;
-    min-height: 110px;
-    padding: 14px 16px;
-    font-size: 14px;
-    font-family: 'Source Serif 4', serif;
-    color: var(--text);
-    background: var(--cream);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    resize: vertical;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    line-height: 1.6;
-  }
-
-  textarea#query:focus {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
-    background: white;
-  }
-
-  .query-actions {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 14px;
-    gap: 12px;
-  }
-
-  .query-hint {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-style: italic;
-  }
-
-  .btn-submit {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 28px;
-    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 13px;
-    font-family: 'Source Serif 4', serif;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    cursor: pointer;
-    transition: all 0.25s;
-    box-shadow: 0 2px 12px rgba(13,27,62,0.25);
-  }
-
-  .btn-submit:hover:not(:disabled) {
-    background: linear-gradient(135deg, var(--navy-light) 0%, var(--navy-mid) 100%);
-    box-shadow: 0 4px 20px rgba(13,27,62,0.35);
-    transform: translateY(-1px);
-  }
-
-  .btn-submit:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  .btn-submit .btn-icon { font-size: 16px; }
+  /* QUERY */
+  .query-box { background: white; border-radius: 14px; padding: 22px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .query-box label { display: block; font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 10px; }
+  textarea#query { width: 100%; min-height: 100px; padding: 12px 14px; font-size: 14px; font-family: 'Source Serif 4', serif; color: var(--text); background: var(--cream); border: 1px solid var(--border); border-radius: 10px; resize: vertical; outline: none; transition: border-color 0.2s, box-shadow 0.2s; line-height: 1.6; }
+  textarea#query:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.15); background: white; }
+  .query-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; gap: 12px; }
+  .query-hint { font-size: 11px; color: var(--text-muted); font-style: italic; }
 
   /* API KEY */
-  .api-key-bar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    background: var(--cream);
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    margin-top: 14px;
-  }
-
-  .api-key-bar label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    margin: 0;
-  }
-
-  .api-key-bar input {
-    flex: 1;
-    padding: 6px 10px;
-    font-size: 12px;
-    font-family: monospace;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: white;
-    outline: none;
-    color: var(--text);
-  }
-
+  .api-key-bar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--cream); border-radius: 8px; border: 1px solid var(--border); margin-top: 12px; }
+  .api-key-bar label { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; margin: 0; }
+  .api-key-bar input { flex: 1; padding: 5px 9px; font-size: 12px; font-family: monospace; border: 1px solid var(--border); border-radius: 6px; background: white; outline: none; color: var(--text); }
   .api-key-bar input:focus { border-color: var(--gold); }
 
+  .btn-submit { display: flex; align-items: center; gap: 8px; padding: 11px 26px; background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); color: white; border: none; border-radius: 8px; font-size: 13px; font-family: 'Source Serif 4', serif; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; transition: all 0.25s; box-shadow: 0 2px 12px rgba(13,27,62,0.25); }
+  .btn-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(13,27,62,0.35); }
+  .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
   /* PROGRESS */
-  .progress-box {
-    background: white;
-    border-radius: 12px;
-    padding: 20px 24px;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-    display: none;
-  }
-
+  .progress-box { background: white; border-radius: 12px; padding: 18px 22px; box-shadow: var(--shadow); border: 1px solid var(--border); display: none; margin-top: 18px; }
   .progress-box.visible { display: block; }
-
-  .progress-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--navy);
-    margin-bottom: 14px;
-    letter-spacing: 0.04em;
-  }
-
-  .steps { display: flex; flex-direction: column; gap: 10px; }
-
-  .step {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 13px;
-    color: var(--text-muted);
-    opacity: 0.4;
-    transition: all 0.3s;
-  }
-
+  .progress-title { font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 12px; }
+  .steps { display: flex; flex-direction: column; gap: 9px; }
+  .step { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--text-muted); opacity: 0.4; transition: all 0.3s; }
   .step.active { opacity: 1; color: var(--navy); }
   .step.done { opacity: 1; color: var(--success); }
-
-  .step-icon {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    flex-shrink: 0;
-    background: var(--cream-dark);
-    border: 1px solid var(--border);
-  }
-
-  .step.active .step-icon {
-    background: var(--navy);
-    color: white;
-    border-color: var(--navy);
-    animation: pulse 1s infinite;
-  }
-
-  .step.done .step-icon {
-    background: var(--success);
-    color: white;
-    border-color: var(--success);
-  }
-
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(13,27,62,0.3); }
-    50% { box-shadow: 0 0 0 6px rgba(13,27,62,0); }
-  }
+  .step-icon { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; background: var(--cream-dark); border: 1px solid var(--border); }
+  .step.active .step-icon { background: var(--navy); color: white; border-color: var(--navy); animation: pulse 1s infinite; }
+  .step.done .step-icon { background: var(--success); color: white; border-color: var(--success); }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(13,27,62,0.3)} 50%{box-shadow:0 0 0 6px rgba(13,27,62,0)} }
 
   /* RESPONSE */
-  .response-box {
-    background: white;
-    border-radius: 14px;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-    overflow: hidden;
-    display: none;
-  }
-
+  .response-box { background: white; border-radius: 14px; box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; display: none; margin-top: 18px; }
   .response-box.visible { display: block; }
-
-  .response-header {
-    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
-    padding: 16px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .response-header-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 14px;
-    font-weight: 600;
-    color: white;
-    letter-spacing: 0.04em;
-  }
-
-  .response-meta {
-    font-size: 11px;
-    color: var(--gold-light);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .response-body {
-    padding: 28px;
-    line-height: 1.8;
-    font-size: 14px;
-  }
-
-  /* RESPONSE MARKDOWN STYLES */
-  .response-body h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--navy);
-    margin: 24px 0 10px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
+  .response-header { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); padding: 14px 22px; display: flex; align-items: center; justify-content: space-between; }
+  .response-header-title { font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 600; color: white; letter-spacing: 0.04em; }
+  .response-meta { font-size: 11px; color: var(--gold-light); display: flex; align-items: center; gap: 12px; }
+  .response-body { padding: 26px; line-height: 1.8; font-size: 14px; }
+  .response-body h2 { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: var(--navy); margin: 22px 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
   .response-body h2:first-child { margin-top: 0; }
-
-  .response-body h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--navy-light);
-    margin: 16px 0 6px;
-  }
-
-  .response-body p { margin-bottom: 12px; }
-
-  .response-body ul, .response-body ol {
-    padding-left: 20px;
-    margin-bottom: 12px;
-  }
-
-  .response-body li { margin-bottom: 4px; }
-
+  .response-body h3 { font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 600; color: var(--navy-light); margin: 14px 0 5px; }
+  .response-body p { margin-bottom: 10px; }
+  .response-body ul, .response-body ol { padding-left: 20px; margin-bottom: 10px; }
+  .response-body li { margin-bottom: 3px; }
   .response-body strong { color: var(--navy); font-weight: 600; }
-
-  .response-body a {
-    color: var(--aifc-blue);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-
+  .response-body a { color: var(--aifc-blue); text-decoration: underline; text-underline-offset: 2px; }
   .response-body a:hover { color: var(--navy); }
-
-  /* Source badges */
-  .badge-aifc {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    padding: 2px 8px;
-    border-radius: 4px;
-    background: rgba(27,79,138,0.12);
-    color: var(--aifc-blue);
-    border: 1px solid rgba(27,79,138,0.25);
-    vertical-align: middle;
-    margin: 0 3px;
-  }
-
-  .badge-kz {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    padding: 2px 8px;
-    border-radius: 4px;
-    background: rgba(192,57,43,0.10);
-    color: var(--kz-red);
-    border: 1px solid rgba(192,57,43,0.20);
-    vertical-align: middle;
-    margin: 0 3px;
-  }
-
-  /* Warning banner */
-  .warning-banner {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px 16px;
-    background: rgba(184,134,11,0.08);
-    border: 1px solid rgba(184,134,11,0.30);
-    border-radius: 8px;
-    font-size: 13px;
-    color: var(--warning);
-    margin-bottom: 20px;
-  }
-
-  .warning-banner .warn-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-
-  /* Disclaimer */
-  .disclaimer {
-    margin-top: 24px;
-    padding: 14px 16px;
-    background: var(--cream);
-    border-radius: 8px;
-    border-left: 3px solid var(--gold);
-    font-size: 12px;
-    color: var(--text-muted);
-    font-style: italic;
-    line-height: 1.6;
-  }
-
-  /* ERROR */
-  .error-box {
-    padding: 16px 20px;
-    background: rgba(192,57,43,0.08);
-    border: 1px solid rgba(192,57,43,0.25);
-    border-radius: 8px;
-    color: var(--kz-red);
-    font-size: 13px;
-    display: none;
-  }
-
+  .badge-aifc { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; padding: 1px 7px; border-radius: 4px; background: rgba(27,79,138,0.12); color: var(--aifc-blue); border: 1px solid rgba(27,79,138,0.25); vertical-align: middle; margin: 0 2px; }
+  .badge-kz { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; padding: 1px 7px; border-radius: 4px; background: rgba(192,57,43,0.10); color: var(--kz-red); border: 1px solid rgba(192,57,43,0.20); vertical-align: middle; margin: 0 2px; }
+  .error-box { padding: 14px 18px; background: rgba(192,57,43,0.08); border: 1px solid rgba(192,57,43,0.25); border-radius: 8px; color: var(--kz-red); font-size: 13px; display: none; margin-top: 14px; }
   .error-box.visible { display: block; }
+
+  /* LEGAL DATABASE PAGE */
+  .db-controls { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+  .db-search { flex: 1; min-width: 220px; padding: 10px 14px; font-size: 13px; font-family: 'Source Serif 4', serif; border: 1px solid var(--border); border-radius: 8px; outline: none; background: white; }
+  .db-search:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.12); }
+  .cat-filter { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cat-btn { padding: 6px 14px; font-size: 11px; font-family: 'Source Serif 4', serif; border: 1px solid var(--border); border-radius: 20px; background: white; cursor: pointer; color: var(--text-muted); transition: all 0.2s; }
+  .cat-btn:hover, .cat-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
+
+  .acts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+  .act-card { background: white; border-radius: 10px; padding: 16px; border: 1px solid var(--border); box-shadow: var(--shadow); transition: all 0.2s; cursor: pointer; }
+  .act-card:hover { border-color: var(--gold); box-shadow: 0 6px 24px rgba(13,27,62,0.14); transform: translateY(-1px); }
+  .act-card-cat { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 7px; }
+  .act-card-name { font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 600; color: var(--navy); line-height: 1.4; margin-bottom: 8px; }
+  .act-card-footer { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--text-muted); }
+  .act-card-link { color: var(--aifc-blue); text-decoration: none; font-weight: 600; font-size: 11px; }
+  .act-card-link:hover { text-decoration: underline; }
+  .acts-count { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
+
+  /* NEWS */
+  .news-grid { display: grid; gap: 14px; }
+  .news-card { background: white; border-radius: 10px; padding: 18px; border: 1px solid var(--border); box-shadow: var(--shadow); display: flex; gap: 16px; align-items: flex-start; }
+  .news-date { font-size: 11px; color: var(--text-muted); white-space: nowrap; min-width: 80px; padding-top: 2px; }
+  .news-body h3 { font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 5px; }
+  .news-body p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  .news-badge { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px; }
+  .news-badge.regulatory { background: rgba(27,79,138,0.12); color: var(--aifc-blue); }
+  .news-badge.warning { background: rgba(184,134,11,0.12); color: var(--warning); }
 
   /* RESPONSIVE */
   @media (max-width: 900px) {
-    .container {
-      grid-template-columns: 1fr;
-      padding: 16px;
-    }
-    .header-inner { padding: 14px 16px; }
-    .logo-text h1 { font-size: 15px; }
-    .response-body { padding: 18px; }
+    .page { padding: 16px; }
+    .assistant-grid { grid-template-columns: 1fr; }
+    .header-inner { padding: 12px 16px; }
+    .tabs-bar { padding: 0 16px; overflow-x: auto; }
+    .response-body { padding: 16px; }
   }
-
   @media (max-width: 600px) {
-    .area-grid { grid-template-columns: 1fr 1fr 1fr; }
     .header-meta { display: none; }
+    .acts-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -666,380 +200,498 @@
   </div>
 </header>
 
-<div class="container">
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
+<div class="tabs-bar">
+  <button class="tab active" onclick="showPage('assistant')">⚖️ Ассистент</button>
+  <button class="tab" onclick="showPage('database')">📚 База актов МФЦА</button>
+  <button class="tab" onclick="showPage('news')">📰 Новости &amp; изменения</button>
+</div>
 
-    <div class="card">
-      <div class="card-title">⚖️ Область права</div>
-      <div class="area-grid">
-        <button class="area-btn active" onclick="setArea(this, 'Корпоративное право')">Корпоративное</button>
-        <button class="area-btn" onclick="setArea(this, 'Финансовое право')">Финансовое</button>
-        <button class="area-btn" onclick="setArea(this, 'Налоговое право')">Налоговое</button>
-        <button class="area-btn" onclick="setArea(this, 'Трудовое право')">Трудовое</button>
-        <button class="area-btn" onclick="setArea(this, 'Разрешение споров')">Споры</button>
-        <button class="area-btn" onclick="setArea(this, 'Комплаенс и AML/KYC')">Комплаенс</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">📋 Типовые запросы</div>
-      <div class="quick-list">
-        <button class="quick-btn" onclick="setQuery(this.textContent)">Требования к регистрации финансовой организации в МФЦА</button>
-        <button class="quick-btn" onclick="setQuery(this.textContent)">Налоговые льготы и преференции для участников МФЦА</button>
-        <button class="quick-btn" onclick="setQuery(this.textContent)">Условия листинга ценных бумаг на бирже AIX</button>
-        <button class="quick-btn" onclick="setQuery(this.textContent)">Трудовое законодательство МФЦА vs Трудовой кодекс РК</button>
-        <button class="quick-btn" onclick="setQuery(this.textContent)">Требования к раскрытию информации и отчётности</button>
-        <button class="quick-btn" onclick="setQuery(this.textContent)">Разрешение споров и юрисдикция суда МФЦА</button>
-        <button class="quick-btn" onclick="setQuery(this.textContent)">Требования AML/KYC для финансовых организаций МФЦА</button>
-        <button class="quick-btn" onclick="setQuery(this.textContent)">Применимое право в МФЦА: английское или казахстанское?</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">🔗 Статус источников</div>
-      <div class="source-list">
-        <div class="source-item">
-          <div class="source-dot green"></div>
-          <span class="source-name">aifc.kz / Acts</span>
-          <span class="source-status">Онлайн</span>
-        </div>
-        <div class="source-item">
-          <div class="source-dot green"></div>
-          <span class="source-name">aifc.kz / Rules</span>
-          <span class="source-status">Онлайн</span>
-        </div>
-        <div class="source-item">
-          <div class="source-dot green"></div>
-          <span class="source-name">adilet.zan.kz</span>
-          <span class="source-status">Онлайн</span>
-        </div>
-        <div class="source-item">
-          <div class="source-dot yellow"></div>
-          <span class="source-name">AFSA Regulations</span>
-          <span class="source-status" style="color:var(--warning)">Проверяется</span>
+<!-- ASSISTANT PAGE -->
+<div class="page active" id="page-assistant">
+  <div class="assistant-grid">
+    <aside>
+      <div class="card">
+        <div class="card-title">⚖️ Область права</div>
+        <div class="area-grid">
+          <button class="area-btn active" onclick="setArea(this,'Корпоративное право')">Корпоративное</button>
+          <button class="area-btn" onclick="setArea(this,'Финансовые услуги')">Финансовое</button>
+          <button class="area-btn" onclick="setArea(this,'Налоговое право')">Налоговое</button>
+          <button class="area-btn" onclick="setArea(this,'Трудовое право')">Трудовое</button>
+          <button class="area-btn" onclick="setArea(this,'Разрешение споров')">Споры</button>
+          <button class="area-btn" onclick="setArea(this,'AML/KYC и комплаенс')">AML/Комплаенс</button>
         </div>
       </div>
-    </div>
 
-    <div class="card">
-      <div class="card-title">🕐 История запросов</div>
-      <div class="history-list" id="historyList">
-        <div style="font-size:12px;color:var(--text-muted);font-style:italic;">История запросов появится здесь</div>
-      </div>
-    </div>
-
-  </aside>
-
-  <!-- MAIN -->
-  <main class="main-content">
-
-    <div class="query-box">
-      <label for="query">Введите ваш юридический вопрос</label>
-      <div class="query-input-wrap">
-        <textarea id="query" placeholder="Например: Каковы требования к регистрации управляющей компании в МФЦА? Какие лицензии необходимы и какой минимальный уставный капитал?"></textarea>
-      </div>
-      <div class="api-key-bar">
-        <label for="apiKey">API КЛЮЧ</label>
-        <input type="password" id="apiKey" placeholder="sk-ant-api03-..." autocomplete="off">
-      </div>
-      <div class="query-actions">
-        <span class="query-hint" id="queryHint">Область: <strong id="areaLabel">Корпоративное право</strong> · Язык: <strong id="langLabel">Русский</strong></span>
-        <button class="btn-submit" id="submitBtn" onclick="submitQuery()">
-          <span class="btn-icon">⚖️</span>
-          Получить консультацию
-        </button>
-      </div>
-    </div>
-
-    <div class="progress-box" id="progressBox">
-      <div class="progress-title">Обработка запроса...</div>
-      <div class="steps">
-        <div class="step" id="step1"><div class="step-icon">1</div><span>Анализ запроса и определение применимого права</span></div>
-        <div class="step" id="step2"><div class="step-icon">2</div><span>Поиск актуальных норм на aifc.kz</span></div>
-        <div class="step" id="step3"><div class="step-icon">3</div><span>Проверка законодательства РК на adilet.zan.kz</span></div>
-        <div class="step" id="step4"><div class="step-icon">4</div><span>Проверка актуальности источников (последние 12 мес.)</span></div>
-        <div class="step" id="step5"><div class="step-icon">5</div><span>Формирование структурированной консультации</span></div>
-      </div>
-    </div>
-
-    <div class="error-box" id="errorBox"></div>
-
-    <div class="response-box" id="responseBox">
-      <div class="response-header">
-        <div class="response-header-title">⚖️ Правовая консультация МФЦА</div>
-        <div class="response-meta">
-          <span id="responseTime"></span>
-          <span id="responseLang"></span>
+      <div class="card">
+        <div class="card-title">📋 Типовые запросы</div>
+        <div class="quick-list">
+          <button class="quick-btn" onclick="setQuery(this.textContent)">Требования к регистрации финансовой организации в МФЦА</button>
+          <button class="quick-btn" onclick="setQuery(this.textContent)">Налоговые льготы для участников МФЦА (КПН, НДС)</button>
+          <button class="quick-btn" onclick="setQuery(this.textContent)">Листинг ценных бумаг на бирже AIX</button>
+          <button class="quick-btn" onclick="setQuery(this.textContent)">Трудовое законодательство МФЦА vs Трудовой кодекс РК</button>
+          <button class="quick-btn" onclick="setQuery(this.textContent)">Требования к раскрытию информации и отчётности МФЦА</button>
+          <button class="quick-btn" onclick="setQuery(this.textContent)">Разрешение споров и юрисдикция суда МФЦА</button>
+          <button class="quick-btn" onclick="setQuery(this.textContent)">Требования AML/KYC для финансовых организаций МФЦА</button>
+          <button class="quick-btn" onclick="setQuery(this.textContent)">Применимое право в МФЦА: английское или казахстанское?</button>
         </div>
       </div>
-      <div class="response-body" id="responseBody"></div>
-    </div>
 
-  </main>
+      <div class="card">
+        <div class="card-title">🔗 Источники</div>
+        <div class="source-list">
+          <div class="source-item"><div class="source-dot green"></div><span class="source-name">aifc.kz — Acts &amp; Rules</span><span class="source-ok">Онлайн</span></div>
+          <div class="source-item"><div class="source-dot green"></div><span class="source-name">adilet.zan.kz</span><span class="source-ok">Онлайн</span></div>
+          <div class="source-item"><div class="source-dot green"></div><span class="source-name">publicreg.myafsa.com</span><span class="source-ok">Онлайн</span></div>
+          <div class="source-item"><div class="source-dot yellow"></div><span class="source-name">AFSA orderly.myafsa.com</span><span class="source-warn">Авторизация</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🕐 История</div>
+        <div id="historyList"><div style="font-size:11px;color:var(--text-muted);font-style:italic">История появится здесь</div></div>
+      </div>
+    </aside>
+
+    <main>
+      <div class="query-box">
+        <label for="query">Введите юридический вопрос по законодательству МФЦА или РК</label>
+        <textarea id="query" placeholder="Например: Каковы требования к минимальному капиталу и лицензированию для открытия управляющей компании в МФЦА?"></textarea>
+        <div class="api-key-bar">
+          <label for="apiKey">API КЛЮЧ</label>
+          <input type="password" id="apiKey" placeholder="sk-ant-api03-..." autocomplete="off">
+        </div>
+        <div class="query-actions">
+          <span class="query-hint">Область: <strong id="areaLabel">Корпоративное право</strong> · Язык: <strong id="langLabel">Русский</strong></span>
+          <button class="btn-submit" id="submitBtn" onclick="submitQuery()">
+            <span>⚖️</span> Получить консультацию
+          </button>
+        </div>
+      </div>
+
+      <div class="progress-box" id="progressBox">
+        <div class="progress-title">Обработка запроса...</div>
+        <div class="steps">
+          <div class="step" id="step1"><div class="step-icon">1</div><span>Анализ запроса и определение применимого права</span></div>
+          <div class="step" id="step2"><div class="step-icon">2</div><span>Поиск актуальных норм МФЦА на aifc.kz</span></div>
+          <div class="step" id="step3"><div class="step-icon">3</div><span>Проверка законодательства РК на adilet.zan.kz</span></div>
+          <div class="step" id="step4"><div class="step-icon">4</div><span>Проверка актуальности источников (последние 12 мес.)</span></div>
+          <div class="step" id="step5"><div class="step-icon">5</div><span>Формирование структурированной консультации</span></div>
+        </div>
+      </div>
+
+      <div class="error-box" id="errorBox"></div>
+
+      <div class="response-box" id="responseBox">
+        <div class="response-header">
+          <div class="response-header-title">⚖️ Правовая консультация МФЦА</div>
+          <div class="response-meta"><span id="responseTime"></span><span id="responseLang"></span></div>
+        </div>
+        <div class="response-body" id="responseBody"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- DATABASE PAGE -->
+<div class="page" id="page-database">
+  <div class="db-controls">
+    <input type="text" class="db-search" id="dbSearch" placeholder="🔍 Поиск по названию акта..." oninput="filterActs()">
+  </div>
+  <div class="cat-filter" id="catFilter"></div>
+  <div class="acts-count" id="actsCount"></div>
+  <div class="acts-grid" id="actsGrid"></div>
+</div>
+
+<!-- NEWS PAGE -->
+<div class="page" id="page-news">
+  <div class="news-grid" id="newsGrid"></div>
 </div>
 
 <script>
-  // State
-  let currentLang = 'ru';
-  let currentArea = 'Корпоративное право';
-  let queryHistory = [];
+// ============================================================
+// DATA — fetched from aifc.kz on 06.06.2026
+// ============================================================
+const ACTS = [
+  // AIFC Bodies
+  {cat:'AIFC Bodies', name:'AIFC Regulations on AIFC Acts', url:'https://aifc.kz/legal-framework/aifc-regulations-on-aifc-acts/'},
+  {cat:'AIFC Bodies', name:'The Charter of the Astana Financial Services Authority (AFSA)', url:'https://aifc.kz/legal-framework/the-charter-of-the-astana-financial-services-authority/'},
+  {cat:'AIFC Bodies', name:'The Structure of the Bodies of the AIFC', url:'https://aifc.kz/legal-framework/the-structure-of-the-bodies-of-the-aifc/'},
+  {cat:'AIFC Bodies', name:'AIFC Common Reporting Standard Regulations', url:'https://aifc.kz/legal-framework/aifc-common-reporting-standard-regulations/'},
+  {cat:'AIFC Bodies', name:'AIFC Common Reporting Standard Rules', url:'https://aifc.kz/legal-framework/common-reporting-standard-rules/'},
+  {cat:'AIFC Bodies', name:'Cooperation And Exchange Of Information Rules', url:'https://aifc.kz/legal-framework/cooperation-and-exchange-of-information-rules-cooperation-and-exchange-of-information-rules/'},
+  {cat:'AIFC Bodies', name:'Rules on Registration of the Bodies of the AIFC', url:'https://aifc.kz/legal-framework/on-approval-of-rules-on-registration-of-the-bodies-of-the-astana-international-financial-centre/'},
+  {cat:'AIFC Bodies', name:'Interim Procedure for Entering Information on AIFC Bodies into National Register', url:'https://aifc.kz/legal-framework/interim-procedure-for-entering-information-on-the-astana-international-financial-centre-bodies-their-organizations-and-participants-of-the-astana-international-financial-centre-into-the-national-regi/'},
 
-  // Date
-  const dateEl = document.getElementById('currentDate');
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
-  dateEl.textContent = dateStr;
+  // Corporate
+  {cat:'Корпоративное право', name:'AIFC Companies Regulations', url:'https://aifc.kz/legal-framework/aifc-companies-regulations/'},
+  {cat:'Корпоративное право', name:'Companies Rules', url:'https://aifc.kz/legal-framework/companies-rules/'},
+  {cat:'Корпоративное право', name:'AIFC General Partnership Regulations', url:'https://aifc.kz/legal-framework/partnerships/'},
+  {cat:'Корпоративное право', name:'General Partnership Rules', url:'https://aifc.kz/legal-framework/general-partnership-rules/'},
+  {cat:'Корпоративное право', name:'AIFC Limited Partnership Regulations', url:'https://aifc.kz/legal-framework/aifc-limited-partnership-regulations/'},
+  {cat:'Корпоративное право', name:'Limited Partnership Rules', url:'https://aifc.kz/legal-framework/aifc-limited-partnership-rules/'},
+  {cat:'Корпоративное право', name:'AIFC Limited Liability Partnership Regulations', url:'https://aifc.kz/legal-framework/aifc-limited-liability-partnership-regulations/'},
+  {cat:'Корпоративное право', name:'Limited Liability Partnership Rules', url:'https://aifc.kz/legal-framework/aifc-limited-liability-partnership-rules/'},
+  {cat:'Корпоративное право', name:'AIFC Foundations Regulations', url:'https://aifc.kz/legal-framework/aifc-foundations-regulations/'},
+  {cat:'Корпоративное право', name:'Special Purpose Company Rules', url:'https://aifc.kz/legal-framework/special-purpose-company-rules/'},
+  {cat:'Корпоративное право', name:'Non-Profit Incorporated Organisations Regulations', url:'https://aifc.kz/legal-framework/non-profit-incorporated-organisations/'},
+  {cat:'Корпоративное право', name:'Non-Profit Incorporated Organizations Rules', url:'https://aifc.kz/legal-framework/non-profit-incorporated-organizations-rules/'},
+  {cat:'Корпоративное право', name:'Venture Studio Rules', url:'https://aifc.kz/legal-framework/venture-studio-rules/'},
 
-  function setLang(lang) {
-    currentLang = lang;
-    document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
-    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-    document.getElementById('langLabel').textContent = lang === 'ru' ? 'Русский' : 'English';
-  }
+  // Financial Services
+  {cat:'Финансовые услуги', name:'AIFC Financial Services Framework Regulations', url:'https://aifc.kz/legal-framework/aifc-financial-services-framework-regulations/'},
+  {cat:'Финансовые услуги', name:'General Rules', url:'https://aifc.kz/legal-framework/general-rules/'},
+  {cat:'Финансовые услуги', name:'Conduct Of Business Rules', url:'https://aifc.kz/legal-framework/conduct-of-business-rules/'},
+  {cat:'Финансовые услуги', name:'Authorised Market Institution Rules', url:'https://aifc.kz/legal-framework/authorised-market-institution-rules/'},
+  {cat:'Финансовые услуги', name:'Market Rules', url:'https://aifc.kz/legal-framework/market-rules/'},
+  {cat:'Финансовые услуги', name:'Banking Business Prudential Rules', url:'https://aifc.kz/legal-framework/banking-business-prudential-rules/'},
+  {cat:'Финансовые услуги', name:'Islamic Banking Business Prudential Rules', url:'https://aifc.kz/legal-framework/islamic-banking-business-prudential-rules/'},
+  {cat:'Финансовые услуги', name:'Prudential Rules For Investment Firms', url:'https://aifc.kz/legal-framework/prudential-rules-for-investment-firms/'},
+  {cat:'Финансовые услуги', name:'Insurance And Reinsurance Prudential Rules', url:'https://aifc.kz/legal-framework/insurance-and-reinsurance-prudential-rules/'},
+  {cat:'Финансовые услуги', name:'Takaful And Retakaful Prudential Rules', url:'https://aifc.kz/legal-framework/takaful-and-retakaful-prudential-rules/'},
+  {cat:'Финансовые услуги', name:'Prudential Rules For Insurance Intermediaries', url:'https://aifc.kz/legal-framework/prudential-rules-for-insurance-intermediaries/'},
+  {cat:'Финансовые услуги', name:'Collective Investment Scheme Rules', url:'https://aifc.kz/legal-framework/collective-investment-scheme-rules/'},
+  {cat:'Финансовые услуги', name:'AIFC Financial Technology Rules', url:'https://aifc.kz/legal-framework/aifc-financial-technology-rules/'},
+  {cat:'Финансовые услуги', name:'AIFC Rules on Digital Asset Activities', url:'https://aifc.kz/legal-framework/aifc-rules-on-digital-asset-activities/'},
+  {cat:'Финансовые услуги', name:'AIFC Rules and Mechanisms of Cooperation of Unbacked Digital Asset Exchanges', url:'https://aifc.kz/legal-framework/aifc-rules-and-mechanisms-of-cooperation-of-unbacked-digital-asset-exchanges/'},
+  {cat:'Финансовые услуги', name:'Multilateral And Organised Trading Facilities Rules', url:'https://aifc.kz/legal-framework/multilateral-and-organised-trading-facilities-rules/'},
+  {cat:'Финансовые услуги', name:'Sovereign Bonds Rules', url:'https://aifc.kz/legal-framework/sovereign-bonds-rules/'},
+  {cat:'Финансовые услуги', name:'Dematerialised Investment Rules', url:'https://aifc.kz/legal-framework/dematerialised-investment-rules/'},
+  {cat:'Финансовые услуги', name:'Rules For Pre-IPO Listings', url:'https://aifc.kz/legal-framework/rules-for-pre-ipo-listings/'},
+  {cat:'Финансовые услуги', name:'Recognition Rules', url:'https://aifc.kz/legal-framework/recognition-rules/'},
+  {cat:'Финансовые услуги', name:'Representative Office Rules', url:'https://aifc.kz/legal-framework/representative-office-rules/'},
+  {cat:'Финансовые услуги', name:'AIFC Rules on Providing Money Services', url:'https://aifc.kz/legal-framework/aifc-rules-on-providing-money-services/'},
+  {cat:'Финансовые услуги', name:'AIFC Rules on Facilitating the Safekeeping and Settlement of the Sovereign Bonds', url:'https://aifc.kz/legal-framework/aifc-rules-on-facilitating-the-safekeeping-and-settlement-of-the-sovereign-bonds/'},
+  {cat:'Финансовые услуги', name:'AIFC Auditor Rules', url:'https://aifc.kz/legal-framework/aifc-auditor-rules/'},
+  {cat:'Финансовые услуги', name:'Islamic Finance Rules', url:'https://aifc.kz/legal-framework/islamic-finance-rules/'},
+  {cat:'Финансовые услуги', name:'Perimeter Guidance', url:'https://aifc.kz/legal-framework/perimeter-guidance/'},
+  {cat:'Финансовые услуги', name:'Glossary', url:'https://aifc.kz/legal-framework/glossary/'},
 
-  function setArea(btn, area) {
-    document.querySelectorAll('.area-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentArea = area;
-    document.getElementById('areaLabel').textContent = area;
-  }
+  // AML/CTF
+  {cat:'AML/CTF', name:'Anti-Money Laundering And Counter-Terrorist Financing Rules', url:'https://aifc.kz/legal-framework/anti-money-laundering-and-counter-terrorist-financing-rules-full-text/'},
+  {cat:'AML/CTF', name:'Practical Guidance to AIFC AML/CTF Framework', url:'https://aifc.kz/legal-framework/practical-guidance-to-aifc-anti-money-laundering-and-counter-terrorist-financing-framework/'},
+  {cat:'AML/CTF', name:'Guidance — Customer Due Diligence (Non-Face to Face)', url:'https://aifc.kz/legal-framework/guidance-requirements-applicable-to-the-rules-of-internal-control-for-the-purposes-of-counteracting-the-legislation-laudering-of-proceeds-from-crime-and-the-financing-of-terrorism-for-financial-mon-2/'},
+  {cat:'AML/CTF', name:'Guidance — Rules of Internal Control (Financial Monitoring Entities)', url:'https://aifc.kz/legal-framework/guidance-requirements-applicable-to-the-rules-of-internal-control-for-the-purposes-of-counteracting-the-legislation-laudering-of-proceeds-from-crime-and-the-financing-of-terrorism-for-financial-mon/'},
+  {cat:'AML/CTF', name:'Joint Order AIFC/MoF on AML/CTF', url:'https://aifc.kz/legal-framework/joint-order-between-aifc-and-mof-on-aml-on-counteracting-legalisation-laundering-of-proceeds-obtained-through-criminal-means-and-financing-of-terrorism/'},
+  {cat:'AML/CTF', name:'Annual AML Return Form', url:'https://aifc.kz/legal-framework/annual-aml-return-form/'},
 
-  function setQuery(text) {
-    document.getElementById('query').value = text;
-    document.getElementById('query').focus();
-  }
+  // Employment
+  {cat:'Трудовое право', name:'AIFC Employment Regulations', url:'https://aifc.kz/legal-framework/aifc-employment-regulations/'},
+  {cat:'Трудовое право', name:'AIFC Rules on Keeping Records of Foreign Labour', url:'https://aifc.kz/legal-framework/aifc-rules-on-keeping-records-of-foreign-labour-attracted-by-aifc-participants-and-aifc-bodies/'},
+  {cat:'Трудовое право', name:'AIFC Qualifications Necessary for Employment in the AIFC', url:'https://aifc.kz/legal-framework/aifc-qualifications-necessary-for-employment-in-the-aifc/'},
 
-  function addHistory(text) {
-    queryHistory.unshift(text);
-    if (queryHistory.length > 5) queryHistory.pop();
-    const list = document.getElementById('historyList');
-    list.innerHTML = queryHistory.map(q =>
-      `<div class="history-item" onclick="setQuery(this.textContent)" title="${q}">${q}</div>`
-    ).join('');
-  }
+  // Dispute Resolution
+  {cat:'Разрешение споров', name:'AIFC Court Regulations 2017', url:'https://aifc.kz/legal-framework/aifc-court-regulations-2017/'},
+  {cat:'Разрешение споров', name:'AIFC Court Rules 2018', url:'https://aifc.kz/legal-framework/aifc-court-rules-2018/'},
+  {cat:'Разрешение споров', name:'AIFC Court Practice Directions', url:'https://aifc.kz/legal-framework/aifc-court-practice-directions/'},
+  {cat:'Разрешение споров', name:'AIFC Arbitration Regulations', url:'https://aifc.kz/legal-framework/aifc-arbitration-regulations/'},
+  {cat:'Разрешение споров', name:'IAC Arbitration and Mediation Rules 2022', url:'https://aifc.kz/legal-framework/iac-arbitration-and-mediation-rules-2022/'},
 
-  // Progress steps animation
-  let stepTimer = null;
-  function startProgress() {
-    const steps = ['step1','step2','step3','step4','step5'];
-    let i = 0;
-    steps.forEach(s => {
-      const el = document.getElementById(s);
-      el.className = 'step';
-      el.querySelector('.step-icon').textContent = s.replace('step','');
-    });
-    document.getElementById('progressBox').classList.add('visible');
+  // Taxation
+  {cat:'Налоговое право', name:'Rules on Substantial Presence of AIFC Participants (CIT, VAT exemptions)', url:'https://aifc.kz/legal-framework/rules-on-the-substantial-presence-of-the-aifc-participants-applying-tax-exemptions-for-the-payment-of-cit-vat/'},
+  {cat:'Налоговое право', name:'Rules on Tax Administration and Interaction with State Revenue Authorities', url:'https://aifc.kz/legal-framework/tax-administration-rules-of-aifc-bodies-and-participants/'},
+  {cat:'Налоговое право', name:'Regulations on Keeping Separate Accounting (CIT)', url:'https://aifc.kz/legal-framework/the-regulations-on-keeping-separate-accounting-by-the-participants-of-aifc-for-the-corporate-income-tax/'},
+  {cat:'Налоговое право', name:'List of Financial Services Exempt from CIT and VAT', url:'https://aifc.kz/legal-framework/the-list-of-financial-services-provided-by-the-aifc-participants-income-from-which-is-exempt-from-cit-and-vat/'},
+  {cat:'Налоговое право', name:'Criteria for Securities Trading on AIX Stock Exchange', url:'https://aifc.kz/legal-framework/on-determining-the-criteria-for-securities-trading-on-stock-exchange-of-astana-international-financial-centre/'},
+  {cat:'Налоговое право', name:'Special Provision on Tax Accounting Policy for AIFC Participants', url:'https://aifc.kz/legal-framework/special-provision-no-1-on-tax-accounting-policy-for-aifc-participants/'},
+  {cat:'Налоговое право', name:'Special Provision on Tax Registers (CIT and VAT)', url:'https://aifc.kz/legal-framework/special-provision-no-2-on-tax-registers-for-cit-and-vat-for-aifc-participants/'},
+  {cat:'Налоговое право', name:'Special Provision on Tax Reporting Forms (CIT and VAT)', url:'https://aifc.kz/legal-framework/special-provision-no-3-on-the-forms-of-tax-reporting-and-the-procedure-of-its-compilation-for-cit-and-vat-for-aifc-participants/'},
+];
 
-    function nextStep() {
-      if (i < steps.length) {
-        if (i > 0) {
-          const prev = document.getElementById(steps[i-1]);
-          prev.classList.remove('active');
-          prev.classList.add('done');
-          prev.querySelector('.step-icon').textContent = '✓';
-        }
-        document.getElementById(steps[i]).classList.add('active');
-        i++;
-        stepTimer = setTimeout(nextStep, 1800 + Math.random() * 1200);
-      }
+const NEWS = [
+  {date:'03.06.2026', badge:'regulatory', title:'Визит президента Кипра в МФЦА', desc:'Президент Кипра посетил Международный финансовый центр «Астана» в рамках двустороннего сотрудничества.'},
+  {date:'02.06.2026', badge:'regulatory', title:'SCMP и МФЦА подписали меморандум о взаимопонимании', desc:'Соглашение направлено на укрепление экономических связей между Центральной Азией и Китаем.'},
+  {date:'29.05.2026', badge:'regulatory', title:'Казахстан разместил дебютные Panda Bonds', desc:'Рекордное размещение достигнуто при дебютной эмиссии Panda Bonds через AIX.'},
+  {date:'22.05.2026', badge:'regulatory', title:'Опубликован годовой отчёт AFSA за 2025 год', desc:'Астанинский финансовый регулятор опубликовал Annual Report 2025. Доступен на сайте AFSA.'},
+  {date:'2026', badge:'warning', title:'Предупреждение: несанкционированное использование бренда МФЦА', desc:'AFSA предупреждает о мошенниках, использующих наименование «Unilive Central Asia Ltd» для незаконного продвижения инвестиционных услуг.'},
+  {date:'2026', badge:'warning', title:'Предупреждение: выдача себя за Jade Capital OEIC Ltd', desc:'Выявлены случаи мошенничества с использованием поддельных лицензий AFSA от имени Jade Capital OEIC Ltd.'},
+  {date:'2026', badge:'regulatory', title:'МФЦА и HKEX укрепляют сотрудничество в сфере зелёных финансов', desc:'Подписано соглашение о партнёрстве AIX-HKEX в области трансграничных рынков капитала и углеродных рынков.'},
+];
+
+// ============================================================
+// CAT COLORS
+// ============================================================
+const CAT_COLORS = {
+  'AIFC Bodies':        {bg:'rgba(13,27,62,0.09)',  color:'#0D1B3E'},
+  'Корпоративное право':{bg:'rgba(27,79,138,0.12)', color:'#1B4F8A'},
+  'Финансовые услуги':  {bg:'rgba(201,168,76,0.15)',color:'#9B7B2E'},
+  'AML/CTF':            {bg:'rgba(192,57,43,0.10)', color:'#C0392B'},
+  'Трудовое право':     {bg:'rgba(26,122,74,0.11)', color:'#1A7A4A'},
+  'Разрешение споров':  {bg:'rgba(128,0,128,0.10)', color:'#6B0E6B'},
+  'Налоговое право':    {bg:'rgba(184,134,11,0.12)',color:'#B8860B'},
+};
+
+// ============================================================
+// INIT
+// ============================================================
+document.getElementById('currentDate').textContent = new Date().toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
+
+let currentLang = 'ru';
+let currentArea = 'Корпоративное право';
+let queryHistory = [];
+let activeDbCat = 'Все';
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  event.target.classList.add('active');
+  if (id === 'database') renderDatabase();
+  if (id === 'news') renderNews();
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('btn-ru').classList.toggle('active', lang==='ru');
+  document.getElementById('btn-en').classList.toggle('active', lang==='en');
+  document.getElementById('langLabel').textContent = lang==='ru' ? 'Русский' : 'English';
+}
+
+function setArea(btn, area) {
+  document.querySelectorAll('.area-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentArea = area;
+  document.getElementById('areaLabel').textContent = area;
+}
+
+function setQuery(text) {
+  document.getElementById('query').value = text;
+  document.getElementById('query').focus();
+}
+
+function addHistory(text) {
+  queryHistory.unshift(text);
+  if (queryHistory.length > 5) queryHistory.pop();
+  const list = document.getElementById('historyList');
+  list.innerHTML = queryHistory.map(q =>
+    `<div class="history-item" onclick="setQuery('${q.replace(/'/g,"\\'")}');" title="${q}">${q}</div>`
+  ).join('');
+}
+
+// ============================================================
+// DATABASE
+// ============================================================
+function renderDatabase() {
+  const cats = ['Все', ...Object.keys(CAT_COLORS)];
+  const cf = document.getElementById('catFilter');
+  cf.innerHTML = cats.map(c =>
+    `<button class="cat-btn${c===activeDbCat?' active':''}" onclick="setCat('${c}')">${c}</button>`
+  ).join('');
+  filterActs();
+}
+
+function setCat(cat) {
+  activeDbCat = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.textContent===cat));
+  filterActs();
+}
+
+function filterActs() {
+  const q = (document.getElementById('dbSearch')?.value||'').toLowerCase();
+  const filtered = ACTS.filter(a => {
+    const matchCat = activeDbCat==='Все' || a.cat===activeDbCat;
+    const matchQ = !q || a.name.toLowerCase().includes(q) || a.cat.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+  document.getElementById('actsCount').textContent = `Найдено: ${filtered.length} из ${ACTS.length} документов`;
+  document.getElementById('actsGrid').innerHTML = filtered.map(a => {
+    const style = CAT_COLORS[a.cat] || {bg:'#eee',color:'#333'};
+    return `<div class="act-card" onclick="window.open('${a.url}','_blank')">
+      <div class="act-card-cat" style="color:${style.color};background:${style.bg};display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.06em;margin-bottom:6px">${a.cat}</div>
+      <div class="act-card-name">${a.name}</div>
+      <div class="act-card-footer">
+        <span>aifc.kz</span>
+        <a class="act-card-link" href="${a.url}" target="_blank" onclick="event.stopPropagation()">Открыть →</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// NEWS
+// ============================================================
+function renderNews() {
+  document.getElementById('newsGrid').innerHTML = NEWS.map(n => `
+    <div class="news-card">
+      <div class="news-date">${n.date}</div>
+      <div class="news-body">
+        <div class="news-badge ${n.badge}">${n.badge==='regulatory'?'МФЦА / AFSA':'⚠️ Предупреждение'}</div>
+        <h3>${n.title}</h3>
+        <p>${n.desc}</p>
+      </div>
+    </div>`).join('');
+}
+
+// ============================================================
+// PROGRESS
+// ============================================================
+let stepTimer = null;
+function startProgress() {
+  ['step1','step2','step3','step4','step5'].forEach((s,i) => {
+    const el = document.getElementById(s);
+    el.className = 'step';
+    el.querySelector('.step-icon').textContent = i+1;
+  });
+  document.getElementById('progressBox').classList.add('visible');
+  let i = 0;
+  const steps = ['step1','step2','step3','step4','step5'];
+  function next() {
+    if (i < steps.length) {
+      if (i>0) { const p=document.getElementById(steps[i-1]); p.classList.remove('active'); p.classList.add('done'); p.querySelector('.step-icon').textContent='✓'; }
+      document.getElementById(steps[i]).classList.add('active');
+      i++;
+      stepTimer = setTimeout(next, 1600+Math.random()*1000);
     }
-    nextStep();
+  }
+  next();
+}
+
+function stopProgress() {
+  clearTimeout(stepTimer);
+  ['step1','step2','step3','step4','step5'].forEach(s => {
+    const el = document.getElementById(s);
+    el.classList.remove('active'); el.classList.add('done');
+    el.querySelector('.step-icon').textContent='✓';
+  });
+  setTimeout(()=>document.getElementById('progressBox').classList.remove('visible'), 700);
+}
+
+// ============================================================
+// MARKDOWN → HTML
+// ============================================================
+function mdToHtml(text) {
+  let h = text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+    .replace(/^# (.+)$/gm,'<h2>$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/(^|[\s(])(https?:\/\/[^\s)<]+)/g,'$1<a href="$2" target="_blank" rel="noopener">$2</a>')
+    .replace(/^---+$/gm,'<hr style="border:none;border-top:1px solid var(--border);margin:18px 0">')
+    .replace(/^\s*[-*•] (.+)$/gm,'<li>$1</li>')
+    .replace(/^\s*\d+\. (.+)$/gm,'<li>$1</li>');
+  h = h.replace(/(<li>.*?<\/li>\n?)+/gs, m=>`<ul>${m}</ul>`);
+  h = h.split('\n').map(line => {
+    const t = line.trim();
+    if (!t) return '';
+    if (t.startsWith('<h')||t.startsWith('<ul')||t.startsWith('<li')||t.startsWith('<hr')) return t;
+    return `<p>${t}</p>`;
+  }).filter(Boolean).join('\n');
+  return h;
+}
+
+// ============================================================
+// SUBMIT
+// ============================================================
+async function submitQuery() {
+  const query = document.getElementById('query').value.trim();
+  const apiKey = document.getElementById('apiKey').value.trim();
+  if (!query) { document.getElementById('query').focus(); return; }
+  if (!apiKey) {
+    document.getElementById('errorBox').textContent = 'Пожалуйста, введите API-ключ Anthropic (sk-ant-...).';
+    document.getElementById('errorBox').classList.add('visible');
+    document.getElementById('apiKey').focus();
+    return;
   }
 
-  function stopProgress() {
-    clearTimeout(stepTimer);
-    ['step1','step2','step3','step4','step5'].forEach(s => {
-      const el = document.getElementById(s);
-      el.classList.remove('active');
-      el.classList.add('done');
-      el.querySelector('.step-icon').textContent = '✓';
-    });
-    setTimeout(() => {
-      document.getElementById('progressBox').classList.remove('visible');
-    }, 800);
-  }
+  document.getElementById('errorBox').classList.remove('visible');
+  document.getElementById('responseBox').classList.remove('visible');
+  document.getElementById('submitBtn').disabled = true;
 
-  // Simple markdown to HTML (subset)
-  function mdToHtml(text) {
-    let html = text
-      // escape potential XSS but keep structure
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      // headings
-      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-      .replace(/^# (.+)$/gm, '<h2>$1</h2>')
-      // bold
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      // italic
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      // links
-      .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
-      // bare urls
-      .replace(/(^|[\s(])(https?:\/\/[^\s)]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>')
-      // horizontal rule
-      .replace(/^---+$/gm, '<hr style="border:none;border-top:1px solid var(--border);margin:20px 0">')
-      // unordered list items
-      .replace(/^\s*[-*•] (.+)$/gm, '<li>$1</li>')
-      // ordered list items
-      .replace(/^\s*\d+\. (.+)$/gm, '<li>$1</li>');
+  const t0 = Date.now();
+  startProgress();
+  addHistory(query.length>60 ? query.slice(0,57)+'...' : query);
 
-    // Wrap consecutive <li> in <ul>
-    html = html.replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`);
+  // Build acts index string for system prompt
+  const actsIndex = ACTS.map(a=>`- ${a.name} [${a.cat}]: ${a.url}`).join('\n');
 
-    // Paragraphs (lines not already in tags)
-    html = html.split('\n').map(line => {
-      const trimmed = line.trim();
-      if (!trimmed) return '';
-      if (trimmed.startsWith('<h') || trimmed.startsWith('<ul') || trimmed.startsWith('<li') || trimmed.startsWith('<hr')) return trimmed;
-      return `<p>${trimmed}</p>`;
-    }).filter(l => l).join('\n');
+  const langInstruction = currentLang==='en' ? 'Respond in English.' : 'Отвечай на русском языке.';
 
-    // AIFC/KZ badges
-    html = html.replace(/\bАИФЦ\b|\bМФЦА\b|\bAIFC\b/g, m => `${m}<span class="badge-aifc">AIFC</span>`);
-
-    return html;
-  }
-
-  async function submitQuery() {
-    const query = document.getElementById('query').value.trim();
-    const apiKey = document.getElementById('apiKey').value.trim();
-
-    if (!query) {
-      document.getElementById('query').focus();
-      return;
-    }
-    if (!apiKey) {
-      document.getElementById('errorBox').textContent = 'Пожалуйста, введите API-ключ Anthropic.';
-      document.getElementById('errorBox').classList.add('visible');
-      document.getElementById('apiKey').focus();
-      return;
-    }
-
-    // Reset UI
-    document.getElementById('errorBox').classList.remove('visible');
-    document.getElementById('responseBox').classList.remove('visible');
-    document.getElementById('submitBtn').disabled = true;
-
-    const startTime = Date.now();
-    startProgress();
-    addHistory(query.length > 60 ? query.substring(0,57) + '...' : query);
-
-    const langInstruction = currentLang === 'en'
-      ? 'Respond in English.'
-      : 'Отвечай на русском языке.';
-
-    const systemPrompt = `Ты — специализированный юридический ассистент по законодательству МФЦА (Международного финансового центра «Астана») и Республики Казахстан.
+  const systemPrompt = `Ты — специализированный юридический ассистент по законодательству МФЦА (Международного финансового центра «Астана») и Республики Казахстан.
 
 == ОБЛАСТЬ ПРАВА ==
-Текущий запрос относится к области: ${currentArea}
+Текущий запрос: ${currentArea}
 
-== ИСТОЧНИКИ ==
-При ответе на каждый запрос ты ОБЯЗАН обращаться к следующим источникам в порядке приоритета:
-1. Нормативные акты МФЦА: https://aifc.kz/legal-framework/acts/
-2. Правила и регуляции МФЦА: https://aifc.kz/legal-framework/rules/
-3. Руководства и разъяснения: https://aifc.kz/legal-framework/guidance/
-4. Конституционный закон РК «О МФЦА» от 7 декабря 2015 года № 438-V
-5. Действующее законодательство РК (ГК, НК, ТК, отраслевые законы): https://adilet.zan.kz
-6. Акты Национального банка РК и АРРФР (если применимо)
+== БАЗА АКТОВ МФЦА (актуально на ${new Date().toLocaleDateString('ru-RU')}) ==
+Ниже приведён полный перечень действующих нормативных актов МФЦА, полученных с сайта aifc.kz:
+
+${actsIndex}
+
+== ДОПОЛНИТЕЛЬНЫЕ ИСТОЧНИКИ ==
+- Конституционный закон РК «О МФЦА» № 438-V от 7 декабря 2015 года
+- Законодательство РК: https://adilet.zan.kz
+- Реестр лицензий AFSA: https://publicreg.myafsa.com/
 
 == ПРОВЕРКА АКТУАЛЬНОСТИ ==
-- Использовать веб-поиск для проверки актуальности при каждом запросе
-- Искать последние изменения на aifc.kz и adilet.zan.kz
-- Явно сообщать об изменениях за последние 12 месяцев
-- При невозможности подтвердить актуальность — предупреждать пользователя
+- Используй веб-поиск для проверки последних изменений
+- Сообщай об изменениях за последние 12 месяцев
+- Явно указывай дату проверки в ответе
 
-== СТРУКТУРА ОТВЕТА (строго соблюдать) ==
+== ПРИОРИТЕТ НОРМ ==
+В периметре МФЦА право Центра (основанное на английском общем праве) имеет приоритет над общим законодательством РК.
+
+== СТРУКТУРА ОТВЕТА ==
 ## I. Краткий вывод
-[2-3 предложения по существу вопроса]
-
-## II. Применимое законодательство
-[Перечень актов: полное название + номер статьи + URL]
-
+## II. Применимое законодательство (название + статья + прямой URL из базы выше)
 ## III. Детальный правовой анализ
-[Разбор норм применительно к запросу]
-
-## IV. Приоритет норм МФЦА vs РК
-[Если применимо — объяснение коллизии]
-
+## IV. Приоритет норм МФЦА vs РК (если применимо)
 ## V. Практические рекомендации
-[Конкретные шаги]
-
 ## VI. Актуальность источников
-[Дата проверки, наличие изменений, прямые ссылки]
-
 ## VII. Оговорка
-[Стандартная юридическая оговорка]
-
-== ЦИТИРОВАНИЕ ==
-- Полное название акта
-- Номер статьи, пункта или правила
-- Прямые кликабельные URL-ссылки на источники
-- Явное указание на приоритет права МФЦА в его периметре
 
 ${langInstruction}`;
 
-    try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 4096,
-          system: systemPrompt,
-          tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-          messages: [{ role: 'user', content: query }]
-        })
-      });
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        system: systemPrompt,
+        tools: [{type:'web_search_20250305', name:'web_search'}],
+        messages: [{role:'user', content: query}]
+      })
+    });
 
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err.error?.message || `HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      // Extract text from response (may contain tool_use blocks)
-      let text = '';
-      if (data.content) {
-        for (const block of data.content) {
-          if (block.type === 'text') text += block.text;
-        }
-      }
-
-      stopProgress();
-
-      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-      document.getElementById('responseTime').textContent = `${elapsed}с`;
-      document.getElementById('responseLang').textContent = currentLang === 'ru' ? 'Русский' : 'English';
-      document.getElementById('responseBody').innerHTML = mdToHtml(text);
-      document.getElementById('responseBox').classList.add('visible');
-      document.getElementById('responseBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-    } catch (err) {
-      stopProgress();
-      document.getElementById('progressBox').classList.remove('visible');
-      const msg = err.message.includes('Failed to fetch')
-        ? 'Ошибка подключения. Проверьте API-ключ и интернет-соединение. При локальном открытии файла используйте локальный сервер (CORS).'
-        : `Ошибка: ${err.message}`;
-      document.getElementById('errorBox').textContent = msg;
-      document.getElementById('errorBox').classList.add('visible');
-    } finally {
-      document.getElementById('submitBtn').disabled = false;
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
     }
-  }
 
-  // Submit on Ctrl+Enter
-  document.getElementById('query').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) submitQuery();
-  });
+    const data = await res.json();
+    let text = '';
+    if (data.content) for (const b of data.content) if (b.type==='text') text += b.text;
+
+    stopProgress();
+    const elapsed = ((Date.now()-t0)/1000).toFixed(1);
+    document.getElementById('responseTime').textContent = `${elapsed}с`;
+    document.getElementById('responseLang').textContent = currentLang==='ru' ? 'Русский' : 'English';
+    document.getElementById('responseBody').innerHTML = mdToHtml(text);
+    document.getElementById('responseBox').classList.add('visible');
+    document.getElementById('responseBox').scrollIntoView({behavior:'smooth',block:'start'});
+  } catch(err) {
+    stopProgress();
+    document.getElementById('progressBox').classList.remove('visible');
+    const msg = err.message.includes('Failed to fetch')
+      ? 'Ошибка подключения. Проверьте API-ключ и сеть. При локальном открытии файла запустите локальный сервер (python3 -m http.server).'
+      : `Ошибка: ${err.message}`;
+    document.getElementById('errorBox').textContent = msg;
+    document.getElementById('errorBox').classList.add('visible');
+  } finally {
+    document.getElementById('submitBtn').disabled = false;
+  }
+}
+
+document.getElementById('query').addEventListener('keydown', e => {
+  if (e.key==='Enter' && (e.ctrlKey||e.metaKey)) submitQuery();
+});
 </script>
 </body>
 </html>
