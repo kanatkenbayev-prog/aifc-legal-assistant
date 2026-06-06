@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>МФЦА Правовой Ассистент — AIFC Legal Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --gold-dark: #9B7B2E;
+    --navy: #0D1B3E;
+    --navy-light: #1A2D5A;
+    --navy-mid: #243566;
+    --cream: #FAF7F2;
+    --cream-dark: #F0EBE0;
+    --text: #1A1A2E;
+    --text-muted: #5A5A72;
+    --aifc-blue: #1B4F8A;
+    --kz-red: #C0392B;
+    --success: #1A7A4A;
+    --warning: #B8860B;
+    --border: #DDD5C8;
+    --shadow: 0 4px 24px rgba(13,27,62,0.10);
+    --shadow-lg: 0 8px 48px rgba(13,27,62,0.16);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 60%, var(--navy-mid) 100%);
+    color: white;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-emblem {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+    font-family: 'Playfair Display', serif;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(201,168,76,0.4);
+  }
+
+  .logo-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+  }
+
+  .logo-text p {
+    font-size: 11px;
+    color: var(--gold-light);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 300;
+  }
+
+  .header-meta {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 12px;
+  }
+
+  .header-date {
+    color: var(--gold-light);
+    font-weight: 300;
+    letter-spacing: 0.04em;
+  }
+
+  .lang-toggle {
+    display: flex;
+    background: rgba(255,255,255,0.1);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .lang-btn {
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .lang-btn.active {
+    background: var(--gold);
+    color: var(--navy);
+  }
+
+  /* MAIN LAYOUT */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  /* SIDEBAR */
+  .sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* PRACTICE AREAS */
+  .area-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .area-btn {
+    padding: 8px 6px;
+    font-size: 11px;
+    font-family: 'Source Serif 4', serif;
+    text-align: center;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-muted);
+    font-weight: 400;
+    line-height: 1.3;
+  }
+
+  .area-btn:hover, .area-btn.active {
+    background: var(--navy);
+    color: white;
+    border-color: var(--navy);
+  }
+
+  /* QUICK QUERIES */
+  .quick-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .quick-btn {
+    padding: 10px 12px;
+    font-size: 12px;
+    font-family: 'Source Serif 4', serif;
+    text-align: left;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .quick-btn:hover {
+    background: var(--cream-dark);
+    border-color: var(--gold);
+    color: var(--navy);
+  }
+
+  /* SOURCE STATUS */
+  .source-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .source-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  .source-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .source-dot.green { background: var(--success); box-shadow: 0 0 6px rgba(26,122,74,0.4); }
+  .source-dot.yellow { background: var(--warning); box-shadow: 0 0 6px rgba(184,134,11,0.4); }
+
+  .source-name { flex: 1; color: var(--text-muted); }
+  .source-status { font-size: 10px; color: var(--success); font-weight: 600; }
+
+  /* HISTORY */
+  .history-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .history-item {
+    padding: 8px 10px;
+    font-size: 11px;
+    background: var(--cream);
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-muted);
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .history-item:hover {
+    border-color: var(--gold);
+    color: var(--navy);
+    background: white;
+  }
+
+  /* MAIN CONTENT */
+  .main-content { display: flex; flex-direction: column; gap: 20px; }
+
+  /* QUERY BOX */
+  .query-box {
+    background: white;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+
+  .query-box label {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 12px;
+    letter-spacing: 0.02em;
+  }
+
+  .query-input-wrap {
+    position: relative;
+  }
+
+  textarea#query {
+    width: 100%;
+    min-height: 110px;
+    padding: 14px 16px;
+    font-size: 14px;
+    font-family: 'Source Serif 4', serif;
+    color: var(--text);
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    line-height: 1.6;
+  }
+
+  textarea#query:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+    background: white;
+  }
+
+  .query-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+    gap: 12px;
+  }
+
+  .query-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .btn-submit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 2px 12px rgba(13,27,62,0.25);
+  }
+
+  .btn-submit:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--navy-light) 0%, var(--navy-mid) 100%);
+    box-shadow: 0 4px 20px rgba(13,27,62,0.35);
+    transform: translateY(-1px);
+  }
+
+  .btn-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-submit .btn-icon { font-size: 16px; }
+
+  /* API KEY */
+  .api-key-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--cream);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-top: 14px;
+  }
+
+  .api-key-bar label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    margin: 0;
+  }
+
+  .api-key-bar input {
+    flex: 1;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-family: monospace;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: white;
+    outline: none;
+    color: var(--text);
+  }
+
+  .api-key-bar input:focus { border-color: var(--gold); }
+
+  /* PROGRESS */
+  .progress-box {
+    background: white;
+    border-radius: 12px;
+    padding: 20px 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    display: none;
+  }
+
+  .progress-box.visible { display: block; }
+
+  .progress-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 14px;
+    letter-spacing: 0.04em;
+  }
+
+  .steps { display: flex; flex-direction: column; gap: 10px; }
+
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+    opacity: 0.4;
+    transition: all 0.3s;
+  }
+
+  .step.active { opacity: 1; color: var(--navy); }
+  .step.done { opacity: 1; color: var(--success); }
+
+  .step-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    background: var(--cream-dark);
+    border: 1px solid var(--border);
+  }
+
+  .step.active .step-icon {
+    background: var(--navy);
+    color: white;
+    border-color: var(--navy);
+    animation: pulse 1s infinite;
+  }
+
+  .step.done .step-icon {
+    background: var(--success);
+    color: white;
+    border-color: var(--success);
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(13,27,62,0.3); }
+    50% { box-shadow: 0 0 0 6px rgba(13,27,62,0); }
+  }
+
+  /* RESPONSE */
+  .response-box {
+    background: white;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    display: none;
+  }
+
+  .response-box.visible { display: block; }
+
+  .response-header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .response-header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    letter-spacing: 0.04em;
+  }
+
+  .response-meta {
+    font-size: 11px;
+    color: var(--gold-light);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .response-body {
+    padding: 28px;
+    line-height: 1.8;
+    font-size: 14px;
+  }
+
+  /* RESPONSE MARKDOWN STYLES */
+  .response-body h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 24px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .response-body h2:first-child { margin-top: 0; }
+
+  .response-body h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy-light);
+    margin: 16px 0 6px;
+  }
+
+  .response-body p { margin-bottom: 12px; }
+
+  .response-body ul, .response-body ol {
+    padding-left: 20px;
+    margin-bottom: 12px;
+  }
+
+  .response-body li { margin-bottom: 4px; }
+
+  .response-body strong { color: var(--navy); font-weight: 600; }
+
+  .response-body a {
+    color: var(--aifc-blue);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .response-body a:hover { color: var(--navy); }
+
+  /* Source badges */
+  .badge-aifc {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(27,79,138,0.12);
+    color: var(--aifc-blue);
+    border: 1px solid rgba(27,79,138,0.25);
+    vertical-align: middle;
+    margin: 0 3px;
+  }
+
+  .badge-kz {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(192,57,43,0.10);
+    color: var(--kz-red);
+    border: 1px solid rgba(192,57,43,0.20);
+    vertical-align: middle;
+    margin: 0 3px;
+  }
+
+  /* Warning banner */
+  .warning-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(184,134,11,0.08);
+    border: 1px solid rgba(184,134,11,0.30);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--warning);
+    margin-bottom: 20px;
+  }
+
+  .warning-banner .warn-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* Disclaimer */
+  .disclaimer {
+    margin-top: 24px;
+    padding: 14px 16px;
+    background: var(--cream);
+    border-radius: 8px;
+    border-left: 3px solid var(--gold);
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  /* ERROR */
+  .error-box {
+    padding: 16px 20px;
+    background: rgba(192,57,43,0.08);
+    border: 1px solid rgba(192,57,43,0.25);
+    border-radius: 8px;
+    color: var(--kz-red);
+    font-size: 13px;
+    display: none;
+  }
+
+  .error-box.visible { display: block; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .container {
+      grid-template-columns: 1fr;
+      padding: 16px;
+    }
+    .header-inner { padding: 14px 16px; }
+    .logo-text h1 { font-size: 15px; }
+    .response-body { padding: 18px; }
+  }
+
+  @media (max-width: 600px) {
+    .area-grid { grid-template-columns: 1fr 1fr 1fr; }
+    .header-meta { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-area">
+      <div class="logo-emblem">А</div>
+      <div class="logo-text">
+        <h1>МФЦА Правовой Ассистент</h1>
+        <p>AIFC Legal Assistant · AI-powered</p>
+      </div>
+    </div>
+    <div class="header-meta">
+      <span class="header-date" id="currentDate"></span>
+      <div class="lang-toggle">
+        <button class="lang-btn active" onclick="setLang('ru')" id="btn-ru">РУС</button>
+        <button class="lang-btn" onclick="setLang('en')" id="btn-en">ENG</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="card">
+      <div class="card-title">⚖️ Область права</div>
+      <div class="area-grid">
+        <button class="area-btn active" onclick="setArea(this, 'Корпоративное право')">Корпоративное</button>
+        <button class="area-btn" onclick="setArea(this, 'Финансовое право')">Финансовое</button>
+        <button class="area-btn" onclick="setArea(this, 'Налоговое право')">Налоговое</button>
+        <button class="area-btn" onclick="setArea(this, 'Трудовое право')">Трудовое</button>
+        <button class="area-btn" onclick="setArea(this, 'Разрешение споров')">Споры</button>
+        <button class="area-btn" onclick="setArea(this, 'Комплаенс и AML/KYC')">Комплаенс</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 Типовые запросы</div>
+      <div class="quick-list">
+        <button class="quick-btn" onclick="setQuery(this.textContent)">Требования к регистрации финансовой организации в МФЦА</button>
+        <button class="quick-btn" onclick="setQuery(this.textContent)">Налоговые льготы и преференции для участников МФЦА</button>
+        <button class="quick-btn" onclick="setQuery(this.textContent)">Условия листинга ценных бумаг на бирже AIX</button>
+        <button class="quick-btn" onclick="setQuery(this.textContent)">Трудовое законодательство МФЦА vs Трудовой кодекс РК</button>
+        <button class="quick-btn" onclick="setQuery(this.textContent)">Требования к раскрытию информации и отчётности</button>
+        <button class="quick-btn" onclick="setQuery(this.textContent)">Разрешение споров и юрисдикция суда МФЦА</button>
+        <button class="quick-btn" onclick="setQuery(this.textContent)">Требования AML/KYC для финансовых организаций МФЦА</button>
+        <button class="quick-btn" onclick="setQuery(this.textContent)">Применимое право в МФЦА: английское или казахстанское?</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔗 Статус источников</div>
+      <div class="source-list">
+        <div class="source-item">
+          <div class="source-dot green"></div>
+          <span class="source-name">aifc.kz / Acts</span>
+          <span class="source-status">Онлайн</span>
+        </div>
+        <div class="source-item">
+          <div class="source-dot green"></div>
+          <span class="source-name">aifc.kz / Rules</span>
+          <span class="source-status">Онлайн</span>
+        </div>
+        <div class="source-item">
+          <div class="source-dot green"></div>
+          <span class="source-name">adilet.zan.kz</span>
+          <span class="source-status">Онлайн</span>
+        </div>
+        <div class="source-item">
+          <div class="source-dot yellow"></div>
+          <span class="source-name">AFSA Regulations</span>
+          <span class="source-status" style="color:var(--warning)">Проверяется</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🕐 История запросов</div>
+      <div class="history-list" id="historyList">
+        <div style="font-size:12px;color:var(--text-muted);font-style:italic;">История запросов появится здесь</div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <div class="query-box">
+      <label for="query">Введите ваш юридический вопрос</label>
+      <div class="query-input-wrap">
+        <textarea id="query" placeholder="Например: Каковы требования к регистрации управляющей компании в МФЦА? Какие лицензии необходимы и какой минимальный уставный капитал?"></textarea>
+      </div>
+      <div class="api-key-bar">
+        <label for="apiKey">API КЛЮЧ</label>
+        <input type="password" id="apiKey" placeholder="sk-ant-api03-..." autocomplete="off">
+      </div>
+      <div class="query-actions">
+        <span class="query-hint" id="queryHint">Область: <strong id="areaLabel">Корпоративное право</strong> · Язык: <strong id="langLabel">Русский</strong></span>
+        <button class="btn-submit" id="submitBtn" onclick="submitQuery()">
+          <span class="btn-icon">⚖️</span>
+          Получить консультацию
+        </button>
+      </div>
+    </div>
+
+    <div class="progress-box" id="progressBox">
+      <div class="progress-title">Обработка запроса...</div>
+      <div class="steps">
+        <div class="step" id="step1"><div class="step-icon">1</div><span>Анализ запроса и определение применимого права</span></div>
+        <div class="step" id="step2"><div class="step-icon">2</div><span>Поиск актуальных норм на aifc.kz</span></div>
+        <div class="step" id="step3"><div class="step-icon">3</div><span>Проверка законодательства РК на adilet.zan.kz</span></div>
+        <div class="step" id="step4"><div class="step-icon">4</div><span>Проверка актуальности источников (последние 12 мес.)</span></div>
+        <div class="step" id="step5"><div class="step-icon">5</div><span>Формирование структурированной консультации</span></div>
+      </div>
+    </div>
+
+    <div class="error-box" id="errorBox"></div>
+
+    <div class="response-box" id="responseBox">
+      <div class="response-header">
+        <div class="response-header-title">⚖️ Правовая консультация МФЦА</div>
+        <div class="response-meta">
+          <span id="responseTime"></span>
+          <span id="responseLang"></span>
+        </div>
+      </div>
+      <div class="response-body" id="responseBody"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // State
+  let currentLang = 'ru';
+  let currentArea = 'Корпоративное право';
+  let queryHistory = [];
+
+  // Date
+  const dateEl = document.getElementById('currentDate');
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+  dateEl.textContent = dateStr;
+
+  function setLang(lang) {
+    currentLang = lang;
+    document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    document.getElementById('langLabel').textContent = lang === 'ru' ? 'Русский' : 'English';
+  }
+
+  function setArea(btn, area) {
+    document.querySelectorAll('.area-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentArea = area;
+    document.getElementById('areaLabel').textContent = area;
+  }
+
+  function setQuery(text) {
+    document.getElementById('query').value = text;
+    document.getElementById('query').focus();
+  }
+
+  function addHistory(text) {
+    queryHistory.unshift(text);
+    if (queryHistory.length > 5) queryHistory.pop();
+    const list = document.getElementById('historyList');
+    list.innerHTML = queryHistory.map(q =>
+      `<div class="history-item" onclick="setQuery(this.textContent)" title="${q}">${q}</div>`
+    ).join('');
+  }
+
+  // Progress steps animation
+  let stepTimer = null;
+  function startProgress() {
+    const steps = ['step1','step2','step3','step4','step5'];
+    let i = 0;
+    steps.forEach(s => {
+      const el = document.getElementById(s);
+      el.className = 'step';
+      el.querySelector('.step-icon').textContent = s.replace('step','');
+    });
+    document.getElementById('progressBox').classList.add('visible');
+
+    function nextStep() {
+      if (i < steps.length) {
+        if (i > 0) {
+          const prev = document.getElementById(steps[i-1]);
+          prev.classList.remove('active');
+          prev.classList.add('done');
+          prev.querySelector('.step-icon').textContent = '✓';
+        }
+        document.getElementById(steps[i]).classList.add('active');
+        i++;
+        stepTimer = setTimeout(nextStep, 1800 + Math.random() * 1200);
+      }
+    }
+    nextStep();
+  }
+
+  function stopProgress() {
+    clearTimeout(stepTimer);
+    ['step1','step2','step3','step4','step5'].forEach(s => {
+      const el = document.getElementById(s);
+      el.classList.remove('active');
+      el.classList.add('done');
+      el.querySelector('.step-icon').textContent = '✓';
+    });
+    setTimeout(() => {
+      document.getElementById('progressBox').classList.remove('visible');
+    }, 800);
+  }
+
+  // Simple markdown to HTML (subset)
+  function mdToHtml(text) {
+    let html = text
+      // escape potential XSS but keep structure
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      // headings
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^# (.+)$/gm, '<h2>$1</h2>')
+      // bold
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      // italic
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      // links
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+      // bare urls
+      .replace(/(^|[\s(])(https?:\/\/[^\s)]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>')
+      // horizontal rule
+      .replace(/^---+$/gm, '<hr style="border:none;border-top:1px solid var(--border);margin:20px 0">')
+      // unordered list items
+      .replace(/^\s*[-*•] (.+)$/gm, '<li>$1</li>')
+      // ordered list items
+      .replace(/^\s*\d+\. (.+)$/gm, '<li>$1</li>');
+
+    // Wrap consecutive <li> in <ul>
+    html = html.replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`);
+
+    // Paragraphs (lines not already in tags)
+    html = html.split('\n').map(line => {
+      const trimmed = line.trim();
+      if (!trimmed) return '';
+      if (trimmed.startsWith('<h') || trimmed.startsWith('<ul') || trimmed.startsWith('<li') || trimmed.startsWith('<hr')) return trimmed;
+      return `<p>${trimmed}</p>`;
+    }).filter(l => l).join('\n');
+
+    // AIFC/KZ badges
+    html = html.replace(/\bАИФЦ\b|\bМФЦА\b|\bAIFC\b/g, m => `${m}<span class="badge-aifc">AIFC</span>`);
+
+    return html;
+  }
+
+  async function submitQuery() {
+    const query = document.getElementById('query').value.trim();
+    const apiKey = document.getElementById('apiKey').value.trim();
+
+    if (!query) {
+      document.getElementById('query').focus();
+      return;
+    }
+    if (!apiKey) {
+      document.getElementById('errorBox').textContent = 'Пожалуйста, введите API-ключ Anthropic.';
+      document.getElementById('errorBox').classList.add('visible');
+      document.getElementById('apiKey').focus();
+      return;
+    }
+
+    // Reset UI
+    document.getElementById('errorBox').classList.remove('visible');
+    document.getElementById('responseBox').classList.remove('visible');
+    document.getElementById('submitBtn').disabled = true;
+
+    const startTime = Date.now();
+    startProgress();
+    addHistory(query.length > 60 ? query.substring(0,57) + '...' : query);
+
+    const langInstruction = currentLang === 'en'
+      ? 'Respond in English.'
+      : 'Отвечай на русском языке.';
+
+    const systemPrompt = `Ты — специализированный юридический ассистент по законодательству МФЦА (Международного финансового центра «Астана») и Республики Казахстан.
+
+== ОБЛАСТЬ ПРАВА ==
+Текущий запрос относится к области: ${currentArea}
+
+== ИСТОЧНИКИ ==
+При ответе на каждый запрос ты ОБЯЗАН обращаться к следующим источникам в порядке приоритета:
+1. Нормативные акты МФЦА: https://aifc.kz/legal-framework/acts/
+2. Правила и регуляции МФЦА: https://aifc.kz/legal-framework/rules/
+3. Руководства и разъяснения: https://aifc.kz/legal-framework/guidance/
+4. Конституционный закон РК «О МФЦА» от 7 декабря 2015 года № 438-V
+5. Действующее законодательство РК (ГК, НК, ТК, отраслевые законы): https://adilet.zan.kz
+6. Акты Национального банка РК и АРРФР (если применимо)
+
+== ПРОВЕРКА АКТУАЛЬНОСТИ ==
+- Использовать веб-поиск для проверки актуальности при каждом запросе
+- Искать последние изменения на aifc.kz и adilet.zan.kz
+- Явно сообщать об изменениях за последние 12 месяцев
+- При невозможности подтвердить актуальность — предупреждать пользователя
+
+== СТРУКТУРА ОТВЕТА (строго соблюдать) ==
+## I. Краткий вывод
+[2-3 предложения по существу вопроса]
+
+## II. Применимое законодательство
+[Перечень актов: полное название + номер статьи + URL]
+
+## III. Детальный правовой анализ
+[Разбор норм применительно к запросу]
+
+## IV. Приоритет норм МФЦА vs РК
+[Если применимо — объяснение коллизии]
+
+## V. Практические рекомендации
+[Конкретные шаги]
+
+## VI. Актуальность источников
+[Дата проверки, наличие изменений, прямые ссылки]
+
+## VII. Оговорка
+[Стандартная юридическая оговорка]
+
+== ЦИТИРОВАНИЕ ==
+- Полное название акта
+- Номер статьи, пункта или правила
+- Прямые кликабельные URL-ссылки на источники
+- Явное указание на приоритет права МФЦА в его периметре
+
+${langInstruction}`;
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 4096,
+          system: systemPrompt,
+          tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+          messages: [{ role: 'user', content: query }]
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error?.message || `HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Extract text from response (may contain tool_use blocks)
+      let text = '';
+      if (data.content) {
+        for (const block of data.content) {
+          if (block.type === 'text') text += block.text;
+        }
+      }
+
+      stopProgress();
+
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      document.getElementById('responseTime').textContent = `${elapsed}с`;
+      document.getElementById('responseLang').textContent = currentLang === 'ru' ? 'Русский' : 'English';
+      document.getElementById('responseBody').innerHTML = mdToHtml(text);
+      document.getElementById('responseBox').classList.add('visible');
+      document.getElementById('responseBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    } catch (err) {
+      stopProgress();
+      document.getElementById('progressBox').classList.remove('visible');
+      const msg = err.message.includes('Failed to fetch')
+        ? 'Ошибка подключения. Проверьте API-ключ и интернет-соединение. При локальном открытии файла используйте локальный сервер (CORS).'
+        : `Ошибка: ${err.message}`;
+      document.getElementById('errorBox').textContent = msg;
+      document.getElementById('errorBox').classList.add('visible');
+    } finally {
+      document.getElementById('submitBtn').disabled = false;
+    }
+  }
+
+  // Submit on Ctrl+Enter
+  document.getElementById('query').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) submitQuery();
+  });
+</script>
+</body>
+</html>
