@@ -94,13 +94,8 @@
   .query-hint { font-size: 11px; color: var(--text-muted); font-style: italic; }
 
   /* API KEY */
-  .api-key-bar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--cream); border-radius: 8px; border: 1px solid var(--border); margin-top: 12px; }
-  .api-key-bar label { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; margin: 0; }
-  .api-key-bar input { flex: 1; padding: 5px 9px; font-size: 12px; font-family: monospace; border: 1px solid var(--border); border-radius: 6px; background: white; outline: none; color: var(--text); }
-  .api-key-bar input:focus { border-color: var(--gold); }
-  .api-key-saved { font-size: 11px; color: var(--success); font-weight: 600; white-space: nowrap; }
-  .api-key-reset { font-size: 11px; color: var(--text-muted); cursor: pointer; text-decoration: underline; background: none; border: none; font-family: inherit; padding: 0; }
-  .api-key-reset:hover { color: var(--kz-red); }
+  .powered-badge { font-size: 11px; color: var(--text-muted); margin-top: 10px; display: flex; align-items: center; gap: 6px; }
+  .powered-badge span { background: var(--cream-dark); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border); }
 
   .btn-submit { display: flex; align-items: center; gap: 8px; padding: 11px 26px; background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); color: white; border: none; border-radius: 8px; font-size: 13px; font-family: 'Source Serif 4', serif; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; transition: all 0.25s; box-shadow: 0 2px 12px rgba(13,27,62,0.25); }
   .btn-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(13,27,62,0.35); }
@@ -259,12 +254,7 @@
       <div class="query-box">
         <label for="query">Введите юридический вопрос по законодательству МФЦА или РК</label>
         <textarea id="query" placeholder="Например: Каковы требования к минимальному капиталу и лицензированию для открытия управляющей компании в МФЦА?"></textarea>
-        <div class="api-key-bar" id="apiKeyBar">
-          <label for="apiKey">API КЛЮЧ</label>
-          <input type="password" id="apiKey" placeholder="sk-ant-api03-..." autocomplete="off" oninput="onApiKeyInput()">
-          <span class="api-key-saved" id="apiKeySaved" style="display:none">✓ Сохранён</span>
-          <button class="api-key-reset" id="apiKeyReset" style="display:none" onclick="resetApiKey()">Сменить</button>
-        </div>
+        <div class="powered-badge">Работает на <span>⚡ Cloudflare AI · Llama 3.3 70B</span></div>
         <div class="query-actions">
           <span class="query-hint">Область: <strong id="areaLabel">Корпоративное право</strong> · Язык: <strong id="langLabel">Русский</strong></span>
           <button class="btn-submit" id="submitBtn" onclick="submitQuery()">
@@ -430,39 +420,7 @@ const CAT_COLORS = {
 // ============================================================
 document.getElementById('currentDate').textContent = new Date().toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
 
-// API key persistence
-(function initApiKey() {
-  const saved = localStorage.getItem('aifc_api_key');
-  if (saved) {
-    document.getElementById('apiKey').value = saved;
-    document.getElementById('apiKey').style.display = 'none';
-    document.getElementById('apiKeySaved').style.display = 'inline';
-    document.getElementById('apiKeyReset').style.display = 'inline';
-    document.querySelector('#apiKeyBar label').style.display = 'none';
-  }
-})();
-
-function onApiKeyInput() {
-  const val = document.getElementById('apiKey').value.trim();
-  if (val.startsWith('sk-ant-') && val.length > 20) {
-    localStorage.setItem('aifc_api_key', val);
-    document.getElementById('apiKey').style.display = 'none';
-    document.getElementById('apiKeySaved').style.display = 'inline';
-    document.getElementById('apiKeyReset').style.display = 'inline';
-    document.querySelector('#apiKeyBar label').style.display = 'none';
-  }
-}
-
-function resetApiKey() {
-  localStorage.removeItem('aifc_api_key');
-  const inp = document.getElementById('apiKey');
-  inp.value = '';
-  inp.style.display = 'inline';
-  document.getElementById('apiKeySaved').style.display = 'none';
-  document.getElementById('apiKeyReset').style.display = 'none';
-  document.querySelector('#apiKeyBar label').style.display = 'inline';
-  inp.focus();
-}
+const WORKER_URL = 'https://aifc-legal-proxy.aifclegal.workers.dev';
 
 let currentLang = 'ru';
 let currentArea = 'Корпоративное право';
@@ -625,14 +583,7 @@ function mdToHtml(text) {
 // ============================================================
 async function submitQuery() {
   const query = document.getElementById('query').value.trim();
-  const apiKey = localStorage.getItem('aifc_api_key') || document.getElementById('apiKey').value.trim();
   if (!query) { document.getElementById('query').focus(); return; }
-  if (!apiKey) {
-    document.getElementById('errorBox').textContent = 'Пожалуйста, введите API-ключ Anthropic (sk-ant-...).';
-    document.getElementById('errorBox').classList.add('visible');
-    resetApiKey();
-    return;
-  }
 
   document.getElementById('errorBox').classList.remove('visible');
   document.getElementById('responseBox').classList.remove('visible');
@@ -640,88 +591,34 @@ async function submitQuery() {
 
   const t0 = Date.now();
   startProgress();
-  addHistory(query.length>60 ? query.slice(0,57)+'...' : query);
-
-  // Build acts index string for system prompt
-  const actsIndex = ACTS.map(a=>`- ${a.name} [${a.cat}]: ${a.url}`).join('\n');
-
-  const langInstruction = currentLang==='en' ? 'Respond in English.' : 'Отвечай на русском языке.';
-
-  const systemPrompt = `Ты — специализированный юридический ассистент по законодательству МФЦА (Международного финансового центра «Астана») и Республики Казахстан.
-
-== ОБЛАСТЬ ПРАВА ==
-Текущий запрос: ${currentArea}
-
-== БАЗА АКТОВ МФЦА (актуально на ${new Date().toLocaleDateString('ru-RU')}) ==
-Ниже приведён полный перечень действующих нормативных актов МФЦА, полученных с сайта aifc.kz:
-
-${actsIndex}
-
-== ДОПОЛНИТЕЛЬНЫЕ ИСТОЧНИКИ ==
-- Конституционный закон РК «О МФЦА» № 438-V от 7 декабря 2015 года
-- Законодательство РК: https://adilet.zan.kz
-- Реестр лицензий AFSA: https://publicreg.myafsa.com/
-
-== ПРОВЕРКА АКТУАЛЬНОСТИ ==
-- Используй веб-поиск для проверки последних изменений
-- Сообщай об изменениях за последние 12 месяцев
-- Явно указывай дату проверки в ответе
-
-== ПРИОРИТЕТ НОРМ ==
-В периметре МФЦА право Центра (основанное на английском общем праве) имеет приоритет над общим законодательством РК.
-
-== СТРУКТУРА ОТВЕТА ==
-## I. Краткий вывод
-## II. Применимое законодательство (название + статья + прямой URL из базы выше)
-## III. Детальный правовой анализ
-## IV. Приоритет норм МФЦА vs РК (если применимо)
-## V. Практические рекомендации
-## VI. Актуальность источников
-## VII. Оговорка
-
-${langInstruction}`;
+  addHistory(query.length > 60 ? query.slice(0, 57) + '...' : query);
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch(WORKER_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
-        system: systemPrompt,
-        tools: [{type:'web_search_20250305', name:'web_search'}],
-        messages: [{role:'user', content: query}]
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, area: currentArea, lang: currentLang })
     });
 
     if (!res.ok) {
-      const err = await res.json().catch(()=>({}));
-      throw new Error(err.error?.message || `HTTP ${res.status}`);
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${res.status}`);
     }
 
     const data = await res.json();
-    let text = '';
-    if (data.content) for (const b of data.content) if (b.type==='text') text += b.text;
+    if (data.error) throw new Error(data.error);
 
     stopProgress();
-    const elapsed = ((Date.now()-t0)/1000).toFixed(1);
+    const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
     document.getElementById('responseTime').textContent = `${elapsed}с`;
-    document.getElementById('responseLang').textContent = currentLang==='ru' ? 'Русский' : 'English';
-    document.getElementById('responseBody').innerHTML = mdToHtml(text);
+    document.getElementById('responseLang').textContent = currentLang === 'ru' ? 'Русский' : 'English';
+    document.getElementById('responseBody').innerHTML = mdToHtml(data.text || '');
     document.getElementById('responseBox').classList.add('visible');
-    document.getElementById('responseBox').scrollIntoView({behavior:'smooth',block:'start'});
-  } catch(err) {
+    document.getElementById('responseBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (err) {
     stopProgress();
     document.getElementById('progressBox').classList.remove('visible');
-    const msg = err.message.includes('Failed to fetch')
-      ? 'Ошибка подключения. Проверьте API-ключ и сеть. При локальном открытии файла запустите локальный сервер (python3 -m http.server).'
-      : `Ошибка: ${err.message}`;
-    document.getElementById('errorBox').textContent = msg;
+    document.getElementById('errorBox').textContent = `Ошибка: ${err.message}`;
     document.getElementById('errorBox').classList.add('visible');
   } finally {
     document.getElementById('submitBtn').disabled = false;
