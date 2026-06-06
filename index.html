@@ -229,6 +229,21 @@
     background: rgba(26,122,74,.08); border: 1px solid rgba(26,122,74,.2);
     border-radius: 4px; padding: 2px 8px; margin-top: 2px;
   }
+  .link-ok   { color: var(--aifc-blue) !important; }
+  .link-ok::before { content: '✓ '; font-size: 10px; color: var(--success); }
+  .link-broken { color: var(--kz-red) !important; text-decoration: line-through !important; cursor: not-allowed !important; }
+  .link-broken::after { content: ' ⚠️ недоступна'; font-size: 10px; text-decoration: none; display: inline; }
+  .link-broken[title] { pointer-events: auto; }
+  .verify-summary {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 6px;
+    font-size: 11px;
+  }
+  .verify-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 4px; font-weight: 600;
+  }
+  .verify-chip.ok     { background: rgba(26,122,74,.08); color: var(--success); border: 1px solid rgba(26,122,74,.2); }
+  .verify-chip.broken { background: rgba(192,57,43,.08); color: var(--kz-red);  border: 1px solid rgba(192,57,43,.2); }
 
   /* ── INPUT BAR ───────────────────────────── */
   .input-bar {
@@ -567,7 +582,7 @@ async function sendMessage() {
     chatHistory.push({ role: 'assistant', content: reply });
 
     typingWrap.classList.remove('visible');
-    appendBubble('ai', reply, false, data.liveCount || 0);
+    appendBubble('ai', reply, false, data.liveCount || 0, data.linkStatus || {}, data.brokenCount || 0);
     scrollToBottom();
 
   } catch (err) {
@@ -581,7 +596,7 @@ async function sendMessage() {
   }
 }
 
-function appendBubble(role, text, isError = false, searchCount = 0) {
+function appendBubble(role, text, isError = false, liveCount = 0, linkStatus = {}, brokenCount = 0) {
   const msgs = document.getElementById('messages');
   const time  = new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
 
@@ -589,17 +604,25 @@ function appendBubble(role, text, isError = false, searchCount = 0) {
     text.trim().split('\n').length < 6 &&
     (text.includes('?') || text.includes('уточн') || text.includes('Уточн'));
 
-  const searchBadge = (role === 'ai' && !isError && searchCount > 0)
-    ? `<div class="search-badge">🔍 Найдено ${searchCount} актуальных источников · ${new Date().toLocaleDateString('ru-RU')}</div>`
-    : '';
+  // Build meta bar (only for full AI responses)
+  let metaBar = '';
+  if (role === 'ai' && !isError && Object.keys(linkStatus).length > 0) {
+    const okCount = Object.values(linkStatus).filter(v => v.ok).length;
+    const today = new Date().toLocaleDateString('ru-RU');
+    metaBar = `<div class="verify-summary">`;
+    if (liveCount > 0)  metaBar += `<span class="verify-chip ok">🔍 ${liveCount} источников с aifc.kz · ${today}</span>`;
+    if (okCount > 0)    metaBar += `<span class="verify-chip ok">✓ ${okCount} ссылок проверено</span>`;
+    if (brokenCount > 0) metaBar += `<span class="verify-chip broken">⚠️ ${brokenCount} ссылок недоступны</span>`;
+    metaBar += `</div>`;
+  }
 
   const div = document.createElement('div');
   div.className = `msg ${role}${isClarify ? ' clarify' : ''}`;
   div.innerHTML = `
     <div class="msg-avatar">${role === 'user' ? 'Вы' : '⚖'}</div>
     <div>
-      ${searchBadge}
-      <div class="msg-bubble">${role === 'user' ? escHtml(text) : mdToHtml(text)}</div>
+      ${metaBar}
+      <div class="msg-bubble">${role === 'user' ? escHtml(text) : mdToHtml(text, linkStatus)}</div>
       <div class="msg-time">${time}</div>
     </div>`;
   msgs.appendChild(div);
@@ -624,7 +647,7 @@ function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-function mdToHtml(text) {
+function mdToHtml(text, linkStatus = {}) {
   let h = text
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/^### (.+)$/gm,'<h3>$1</h3>')
@@ -632,8 +655,17 @@ function mdToHtml(text) {
     .replace(/^# (.+)$/gm,'<h2>$1</h2>')
     .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
     .replace(/\*(.+?)\*/g,'<em>$1</em>')
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>')
-    .replace(/(^|[\s(])(https?:\/\/[^\s)<]+)/g,'$1<a href="$2" target="_blank" rel="noopener">$2</a>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, (_, label, url) => {
+      const status = linkStatus[url];
+      if (!status) return `<a href="${url}" target="_blank" rel="noopener">${label}</a>`;
+      if (status.ok) return `<a href="${url}" target="_blank" rel="noopener" class="link-ok">${label}</a>`;
+      return `<a href="${url}" target="_blank" rel="noopener" class="link-broken" title="HTTP ${status.status || 'недоступна'}">${label}</a>`;
+    })
+    .replace(/(^|[\s(])(https?:\/\/[^\s)<]+)/g, (_, pre, url) => {
+      const status = linkStatus[url];
+      const cls = !status ? '' : status.ok ? ' class="link-ok"' : ' class="link-broken"';
+      return `${pre}<a href="${url}" target="_blank" rel="noopener"${cls}>${url}</a>`;
+    })
     .replace(/^---+$/gm,'<hr>')
     .replace(/^\s*[-*•] (.+)$/gm,'<li>$1</li>')
     .replace(/^\s*\d+\. (.+)$/gm,'<li>$1</li>');

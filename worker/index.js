@@ -199,6 +199,38 @@ function formatLiveContext(news, notices, legalDocs, area) {
   return { ctx: count > 0 ? ctx : '', count };
 }
 
+// ── Link verification ─────────────────────────────────────────────────────────
+function extractUrls(text) {
+  const seen = new Set();
+  const matches = [...text.matchAll(/\]\((https?:\/\/[^)]+)\)/g),
+                   ...text.matchAll(/(?<!\()(https?:\/\/(?:aifc\.kz|adilet\.zan\.kz|afsa\.aifc\.kz|publicreg\.myafsa\.com)[^\s),>"]+)/g)];
+  return matches
+    .map(m => m[1] || m[0])
+    .filter(url => { if (seen.has(url)) return false; seen.add(url); return true; })
+    .slice(0, 20); // cap at 20 to stay within Worker CPU limits
+}
+
+async function verifyUrl(url) {
+  try {
+    const res = await fetch(url, {
+      method: 'HEAD',
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LegalBot/1.0)' },
+      cf: { cacheTtl: 3600 },
+      signal: AbortSignal.timeout(5000),
+    });
+    return { url, ok: res.ok, status: res.status };
+  } catch {
+    return { url, ok: false, status: 0 };
+  }
+}
+
+async function verifyLinks(text) {
+  const urls = extractUrls(text);
+  if (!urls.length) return {};
+  const results = await Promise.all(urls.map(verifyUrl));
+  return Object.fromEntries(results.map(r => [r.url, { ok: r.ok, status: r.status }]));
+}
+
 // ── Main handler ──────────────────────────────────────────────────────────────
 export default {
   async fetch(request, env) {
@@ -277,10 +309,16 @@ ${langInstruction}`;
         temperature: 0.2,
       });
 
+      // Verify all links in the response in parallel
+      const linkStatus = await verifyLinks(response.response);
+      const brokenCount = Object.values(linkStatus).filter(v => !v.ok).length;
+
       return new Response(
         JSON.stringify({
           text: response.response,
           liveCount,
+          linkStatus,   // { url: { ok, status } }
+          brokenCount,
           fetchDate: new Date().toISOString(),
         }),
         {
