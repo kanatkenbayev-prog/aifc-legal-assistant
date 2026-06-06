@@ -245,6 +245,26 @@
   .verify-chip.ok     { background: rgba(26,122,74,.08); color: var(--success); border: 1px solid rgba(26,122,74,.2); }
   .verify-chip.broken { background: rgba(192,57,43,.08); color: var(--kz-red);  border: 1px solid rgba(192,57,43,.2); }
 
+  /* Quick chips */
+  .chips-row {
+    display: flex; flex-wrap: wrap; gap: 7px;
+    margin-top: 8px; padding-left: 42px;
+    animation: fadein .25s ease;
+  }
+  .chip {
+    padding: 7px 14px; font-size: 12px; font-family: inherit;
+    background: white; border: 1.5px solid var(--gold);
+    border-radius: 20px; cursor: pointer; color: var(--navy);
+    transition: all .18s; font-weight: 500; line-height: 1;
+    box-shadow: 0 1px 4px rgba(201,168,76,.15);
+  }
+  .chip:hover {
+    background: var(--navy); color: white; border-color: var(--navy);
+    transform: translateY(-1px); box-shadow: 0 3px 10px rgba(13,27,62,.2);
+  }
+  .chip:active { transform: scale(.97); }
+  .chips-row.used .chip { opacity: .4; pointer-events: none; }
+
   /* ── INPUT BAR ───────────────────────────── */
   .input-bar {
     border-top: 1px solid var(--border);
@@ -600,19 +620,19 @@ function appendBubble(role, text, isError = false, liveCount = 0, linkStatus = {
   const msgs = document.getElementById('messages');
   const time  = new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
 
-  const isClarify = role === 'ai' && !isError &&
-    text.trim().split('\n').length < 6 &&
-    (text.includes('?') || text.includes('уточн') || text.includes('Уточн'));
+  // Extract chips before rendering
+  const { text: cleanText, chips } = role === 'ai' ? extractChips(text) : { text, chips: [] };
+  const isClarify = role === 'ai' && !isError && chips.length > 0;
 
-  // Build meta bar (only for full AI responses)
+  // Meta bar for verified responses
   let metaBar = '';
   if (role === 'ai' && !isError && Object.keys(linkStatus).length > 0) {
     const okCount = Object.values(linkStatus).filter(v => v.ok).length;
     const today = new Date().toLocaleDateString('ru-RU');
     metaBar = `<div class="verify-summary">`;
-    if (liveCount > 0)  metaBar += `<span class="verify-chip ok">🔍 ${liveCount} источников с aifc.kz · ${today}</span>`;
-    if (okCount > 0)    metaBar += `<span class="verify-chip ok">✓ ${okCount} ссылок проверено</span>`;
-    if (brokenCount > 0) metaBar += `<span class="verify-chip broken">⚠️ ${brokenCount} ссылок недоступны</span>`;
+    if (liveCount > 0)    metaBar += `<span class="verify-chip ok">🔍 ${liveCount} источников · ${today}</span>`;
+    if (okCount > 0)      metaBar += `<span class="verify-chip ok">✓ ${okCount} ссылок проверено</span>`;
+    if (brokenCount > 0)  metaBar += `<span class="verify-chip broken">⚠️ ${brokenCount} недоступны</span>`;
     metaBar += `</div>`;
   }
 
@@ -620,11 +640,35 @@ function appendBubble(role, text, isError = false, liveCount = 0, linkStatus = {
   div.className = `msg ${role}${isClarify ? ' clarify' : ''}`;
   div.innerHTML = `
     <div class="msg-avatar">${role === 'user' ? 'Вы' : '⚖'}</div>
-    <div>
+    <div style="flex:1;min-width:0">
       ${metaBar}
-      <div class="msg-bubble">${role === 'user' ? escHtml(text) : mdToHtml(text, linkStatus)}</div>
+      <div class="msg-bubble">${role === 'user' ? escHtml(text) : mdToHtml(cleanText, linkStatus)}</div>
       <div class="msg-time">${time}</div>
     </div>`;
+
+  // Render chips outside the bubble, below the message
+  if (chips.length > 0) {
+    const chipsRow = document.createElement('div');
+    chipsRow.className = 'chips-row';
+    chipsRow.dataset.used = 'false';
+    chips.forEach(chip => {
+      const btn = document.createElement('button');
+      btn.className = 'chip';
+      btn.textContent = chip;
+      btn.onclick = () => {
+        // Mark row as used (dim all chips)
+        chipsRow.classList.add('used');
+        // Send chip text as user message
+        document.getElementById('msgInput').value = chip;
+        sendMessage();
+      };
+      chipsRow.appendChild(btn);
+    });
+    msgs.appendChild(div);
+    msgs.appendChild(chipsRow);
+    return;
+  }
+
   msgs.appendChild(div);
 }
 
@@ -641,6 +685,16 @@ document.getElementById('msgInput').addEventListener('input', function() {
 document.getElementById('msgInput').addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
+
+// ── Chip parsing ──────────────────────────────
+// Extracts "ЧИПЫ: A | B | C" line from AI text, returns { text, chips }
+function extractChips(text) {
+  const match = text.match(/^ЧИПЫ:\s*(.+)$/m);
+  if (!match) return { text, chips: [] };
+  const chips = match[1].split('|').map(s => s.trim()).filter(Boolean);
+  const cleaned = text.replace(/^ЧИПЫ:\s*.+$/m, '').trim();
+  return { text: cleaned, chips };
+}
 
 // ── Helpers ───────────────────────────────────
 function escHtml(s) {
