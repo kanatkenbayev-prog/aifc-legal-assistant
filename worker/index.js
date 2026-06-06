@@ -24,11 +24,9 @@ const ACTS_INDEX = `
 - Prudential Rules For Investment Firms: https://aifc.kz/legal-framework/prudential-rules-for-investment-firms/
 - Insurance And Reinsurance Prudential Rules: https://aifc.kz/legal-framework/insurance-and-reinsurance-prudential-rules/
 - Takaful And Retakaful Prudential Rules: https://aifc.kz/legal-framework/takaful-and-retakaful-prudential-rules/
-- Prudential Rules For Insurance Intermediaries: https://aifc.kz/legal-framework/prudential-rules-for-insurance-intermediaries/
 - Collective Investment Scheme Rules: https://aifc.kz/legal-framework/collective-investment-scheme-rules/
 - AIFC Financial Technology Rules: https://aifc.kz/legal-framework/aifc-financial-technology-rules/
 - AIFC Rules on Digital Asset Activities: https://aifc.kz/legal-framework/aifc-rules-on-digital-asset-activities/
-- AIFC Rules and Mechanisms of Cooperation of Unbacked Digital Asset Exchanges: https://aifc.kz/legal-framework/aifc-rules-and-mechanisms-of-cooperation-of-unbacked-digital-asset-exchanges/
 - Multilateral And Organised Trading Facilities Rules: https://aifc.kz/legal-framework/multilateral-and-organised-trading-facilities-rules/
 - Sovereign Bonds Rules: https://aifc.kz/legal-framework/sovereign-bonds-rules/
 - Dematerialised Investment Rules: https://aifc.kz/legal-framework/dematerialised-investment-rules/
@@ -36,7 +34,6 @@ const ACTS_INDEX = `
 - Recognition Rules: https://aifc.kz/legal-framework/recognition-rules/
 - Representative Office Rules: https://aifc.kz/legal-framework/representative-office-rules/
 - AIFC Rules on Providing Money Services: https://aifc.kz/legal-framework/aifc-rules-on-providing-money-services/
-- AIFC Rules on Facilitating Safekeeping and Settlement of Sovereign Bonds: https://aifc.kz/legal-framework/aifc-rules-on-facilitating-the-safekeeping-and-settlement-of-the-sovereign-bonds/
 - AIFC Auditor Rules: https://aifc.kz/legal-framework/aifc-auditor-rules/
 - Islamic Finance Rules: https://aifc.kz/legal-framework/islamic-finance-rules/
 - Perimeter Guidance: https://aifc.kz/legal-framework/perimeter-guidance/
@@ -64,17 +61,9 @@ AML/CTF:
 НАЛОГОВОЕ ПРАВО:
 - Rules on Substantial Presence of AIFC Participants (CIT, VAT exemptions): https://aifc.kz/legal-framework/rules-on-the-substantial-presence-of-the-aifc-participants-applying-tax-exemptions-for-the-payment-of-cit-vat/
 - Rules on Tax Administration and Interaction with State Revenue Authorities: https://aifc.kz/legal-framework/tax-administration-rules-of-aifc-bodies-and-participants/
-- Regulations on Keeping Separate Accounting (CIT): https://aifc.kz/legal-framework/the-regulations-on-keeping-separate-accounting-by-the-participants-of-aifc-for-the-corporate-income-tax/
 - List of Financial Services Exempt from CIT and VAT: https://aifc.kz/legal-framework/the-list-of-financial-services-provided-by-the-aifc-participants-income-from-which-is-exempt-from-cit-and-vat/
-- Criteria for Securities Trading on AIX: https://aifc.kz/legal-framework/on-determining-the-criteria-for-securities-trading-on-stock-exchange-of-astana-international-financial-centre/
 - Special Provision on Tax Accounting Policy for AIFC Participants: https://aifc.kz/legal-framework/special-provision-no-1-on-tax-accounting-policy-for-aifc-participants/
-- Special Provision on Tax Registers (CIT and VAT): https://aifc.kz/legal-framework/special-provision-no-2-on-tax-registers-for-cit-and-vat-for-aifc-participants/
-
-ОРГАНЫ МФЦА:
-- AIFC Regulations on AIFC Acts: https://aifc.kz/legal-framework/aifc-regulations-on-aifc-acts/
-- The Charter of the Astana Financial Services Authority (AFSA): https://aifc.kz/legal-framework/the-charter-of-the-astana-financial-services-authority/
-- AIFC Common Reporting Standard Regulations: https://aifc.kz/legal-framework/aifc-common-reporting-standard-regulations/
-- Cooperation And Exchange Of Information Rules: https://aifc.kz/legal-framework/cooperation-and-exchange-of-information-rules-cooperation-and-exchange-of-information-rules/
+- Criteria for Securities Trading on AIX: https://aifc.kz/legal-framework/on-determining-the-criteria-for-securities-trading-on-stock-exchange-of-astana-international-financial-centre/
 
 ЗАКОНОДАТЕЛЬСТВО РК:
 - Конституционный закон РК «О МФЦА» № 438-V от 7 декабря 2015 года: https://adilet.zan.kz/rus/docs/Z1500000438
@@ -84,6 +73,56 @@ AML/CTF:
 - Реестр лицензий AFSA: https://publicreg.myafsa.com/
 `;
 
+// ── Brave Search ──────────────────────────────────────────────────────────────
+async function searchLegalUpdates(query, braveKey) {
+  // Two targeted searches: AIFC and Kazakhstan law
+  const searches = [
+    `site:aifc.kz ${query}`,
+    `site:adilet.zan.kz ${query}`,
+  ];
+
+  const results = [];
+
+  await Promise.all(searches.map(async (q) => {
+    try {
+      const res = await fetch(
+        `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(q)}&count=4&freshness=py`, // py = past year
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Accept-Encoding': 'gzip',
+            'X-Subscription-Token': braveKey,
+          },
+        }
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+      const hits = data.web?.results || [];
+      hits.forEach(h => {
+        results.push({
+          title: h.title,
+          url: h.url,
+          snippet: h.description || '',
+          age: h.age || '',
+        });
+      });
+    } catch {
+      // search failure is non-fatal
+    }
+  }));
+
+  return results;
+}
+
+function formatSearchResults(results) {
+  if (!results.length) return '';
+  const lines = results.map(r =>
+    `- [${r.title}](${r.url})${r.age ? ` (${r.age})` : ''}\n  ${r.snippet}`
+  );
+  return `\n== РЕЗУЛЬТАТЫ ПОИСКА (актуальные данные из aifc.kz и adilet.zan.kz) ==\nДата поиска: ${new Date().toLocaleDateString('ru-RU')}\n${lines.join('\n')}\n`;
+}
+
+// ── Main handler ──────────────────────────────────────────────────────────────
 export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') {
@@ -108,27 +147,44 @@ export default {
     }
 
     const { messages, area, lang } = body;
+    const lastUserMsg = [...messages].reverse().find(m => m.role === 'user')?.content || '';
     const langInstruction = lang === 'en'
       ? 'Respond in English.'
       : 'Отвечай строго на русском языке.';
 
-    const systemPrompt = `Ты — специализированный юридический ассистент по законодательству МФЦА (Международного финансового центра «Астана») и Республики Казахстан. Текущая область права: ${area || 'Общее'}.
+    // Run search in parallel with building the prompt
+    const searchQuery = `МФЦА AIFC ${area || ''} ${lastUserMsg}`.slice(0, 200);
+    const searchPromise = env.BRAVE_API_KEY
+      ? searchLegalUpdates(searchQuery, env.BRAVE_API_KEY)
+      : Promise.resolve([]);
 
-== ОБЯЗАТЕЛЬНАЯ БАЗА НОРМАТИВНЫХ АКТОВ (актуально на 06.06.2026) ==
-При каждом ответе ты ОБЯЗАН ссылаться на конкретные акты из списка ниже с точными URL:
+    const searchResults = await searchPromise;
+    const searchContext = formatSearchResults(searchResults);
+
+    const hasSearch = searchResults.length > 0;
+    const searchNote = hasSearch
+      ? `⚠️ Поиск выполнен: найдено ${searchResults.length} актуальных источников. Проверь наличие изменений за последние 12 месяцев.`
+      : `ℹ️ Веб-поиск недоступен. Используй встроенную базу актов.`;
+
+    const systemPrompt = `Ты — специализированный юридический ассистент по законодательству МФЦА (Международного финансового центра «Астана») и Республики Казахстан. Область права: ${area || 'Общее'}.
+${searchNote}
+${searchContext}
+== ВСТРОЕННАЯ БАЗА НОРМАТИВНЫХ АКТОВ МФЦА ==
+При ответе ОБЯЗАН ссылаться на конкретные акты с точными URL:
 ${ACTS_INDEX}
 
 == ПРАВИЛА ЦИТИРОВАНИЯ ==
-- Всегда указывай полное название акта и прямую URL-ссылку из списка выше
-- Формат ссылки: [Название акта](URL)
-- Ссылки на законодательство РК: всегда указывай номер и дату закона
-- НИКОГДА не выдумывай URL — используй только ссылки из базы выше
+- Всегда указывай полное название акта и прямую URL-ссылку
+- Формат: [Название акта](URL)
+- Если поиск нашёл более свежую версию акта — используй найденный URL
+- Если найдены изменения за последние 12 месяцев — явно предупреди пользователя с отметкой ⚠️
+- НИКОГДА не выдумывай URL — только из базы выше или из результатов поиска
 
 == ПРИОРИТЕТ НОРМ ==
-В периметре МФЦА право Центра (основанное на английском общем праве) ИМЕЕТ ПРИОРИТЕТ над законодательством РК. Всегда явно указывай на это при наличии коллизии.
+В периметре МФЦА право Центра (на основе английского общего права) приоритетнее законодательства РК. Явно указывай на коллизии.
 
-== СТИЛЬ РАБОТЫ — ДИАЛОГОВЫЙ ==
-- Если вопрос неполный — задай 1-2 уточняющих вопроса ПЕРЕД полным ответом
+== СТИЛЬ — ДИАЛОГОВЫЙ ==
+- Если вопрос неполный — задай 1-2 уточняющих вопроса перед полным ответом
 - Уточняй: тип организации, гражданство, вид деятельности, наличие лицензий
 - В продолжении диалога ссылайся на сказанное ранее
 
@@ -139,7 +195,9 @@ ${ACTS_INDEX}
 ## III. Детальный правовой анализ
 ## IV. Приоритет норм МФЦА vs РК (если применимо)
 ## V. Практические рекомендации
-## VI. Оговорка
+## VI. Актуальность источников
+[Дата поиска, найденные изменения или их отсутствие]
+## VII. Оговорка
 
 ${langInstruction}`;
 
@@ -153,12 +211,19 @@ ${langInstruction}`;
         temperature: 0.2,
       });
 
-      return new Response(JSON.stringify({ text: response.response }), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-      });
+      return new Response(
+        JSON.stringify({
+          text: response.response,
+          searchCount: searchResults.length,
+          searchDate: new Date().toISOString(),
+        }),
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+        }
+      );
     } catch (err) {
       return new Response(JSON.stringify({ error: err.message }), {
         status: 500,

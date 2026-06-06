@@ -196,14 +196,15 @@
   }
 
   /* Typing indicator */
+  .typing-wrap { display: none; align-self: flex-start; flex-direction: column; gap: 6px; }
+  .typing-wrap.visible { display: flex; }
   .typing-indicator {
-    display: none; align-self: flex-start;
+    display: flex; align-items: center; gap: 5px;
     background: var(--cream); border: 1px solid var(--border);
     border-radius: 12px; border-bottom-left-radius: 3px;
     padding: 12px 18px;
     box-shadow: 0 1px 6px rgba(0,0,0,.06);
   }
-  .typing-indicator.visible { display: flex; align-items: center; gap: 5px; }
   .typing-dot {
     width: 7px; height: 7px; border-radius: 50%;
     background: var(--text-muted); opacity: .4;
@@ -212,6 +213,22 @@
   .typing-dot:nth-child(2) { animation-delay: .2s; }
   .typing-dot:nth-child(3) { animation-delay: .4s; }
   @keyframes blink { 0%,100%{opacity:.4;transform:scale(1)} 50%{opacity:1;transform:scale(1.2)} }
+  .search-status {
+    font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;
+    padding: 0 4px; animation: fadein .3s ease;
+  }
+  .search-status .pulse {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--gold);
+    animation: pulse-dot 1s infinite;
+  }
+  @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+  @keyframes fadein { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+  .search-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; color: var(--success); font-weight: 600;
+    background: rgba(26,122,74,.08); border: 1px solid rgba(26,122,74,.2);
+    border-radius: 4px; padding: 2px 8px; margin-top: 2px;
+  }
 
   /* ── INPUT BAR ───────────────────────────── */
   .input-bar {
@@ -383,10 +400,16 @@
           </div>
         </div>
 
-        <div class="typing-indicator" id="typingIndicator">
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
+        <div class="typing-wrap" id="typingWrap">
+          <div class="search-status" id="searchStatus">
+            <div class="pulse"></div>
+            <span id="searchStatusText">Поиск актуальных норм на aifc.kz и adilet.zan.kz...</span>
+          </div>
+          <div class="typing-indicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
         </div>
 
         <div class="input-bar">
@@ -502,23 +525,35 @@ async function sendMessage() {
   appendBubble('user', text);
   chatHistory.push({ role: 'user', content: text });
 
-  // Show typing
+  // Show typing + search indicator
   isLoading = true;
   document.getElementById('sendBtn').disabled = true;
-  const typing = document.getElementById('typingIndicator');
-  typing.classList.add('visible');
+  const typingWrap = document.getElementById('typingWrap');
+  const searchStatusText = document.getElementById('searchStatusText');
+  typingWrap.classList.add('visible');
   scrollToBottom();
+
+  // Animate search status text
+  const searchPhrases = [
+    'Поиск актуальных норм на aifc.kz...',
+    'Проверка adilet.zan.kz...',
+    'Анализ последних изменений...',
+    'Формирование консультации...',
+  ];
+  let phraseIdx = 0;
+  const phraseTimer = setInterval(() => {
+    phraseIdx = (phraseIdx + 1) % searchPhrases.length;
+    searchStatusText.textContent = searchPhrases[phraseIdx];
+  }, 2500);
 
   try {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: chatHistory,
-        area: currentArea,
-        lang: currentLang
-      })
+      body: JSON.stringify({ messages: chatHistory, area: currentArea, lang: currentLang })
     });
+
+    clearInterval(phraseTimer);
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -531,12 +566,13 @@ async function sendMessage() {
     const reply = data.text || '';
     chatHistory.push({ role: 'assistant', content: reply });
 
-    typing.classList.remove('visible');
-    appendBubble('ai', reply);
+    typingWrap.classList.remove('visible');
+    appendBubble('ai', reply, false, data.searchCount);
     scrollToBottom();
 
   } catch (err) {
-    typing.classList.remove('visible');
+    clearInterval(phraseTimer);
+    typingWrap.classList.remove('visible');
     appendBubble('ai', `⚠️ Ошибка: ${err.message}`, true);
   } finally {
     isLoading = false;
@@ -545,20 +581,24 @@ async function sendMessage() {
   }
 }
 
-function appendBubble(role, text, isError = false) {
+function appendBubble(role, text, isError = false, searchCount = 0) {
   const msgs = document.getElementById('messages');
   const time  = new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
 
-  // Detect clarifying question (short, ends with ?)
   const isClarify = role === 'ai' && !isError &&
     text.trim().split('\n').length < 6 &&
     (text.includes('?') || text.includes('уточн') || text.includes('Уточн'));
+
+  const searchBadge = (role === 'ai' && !isError && searchCount > 0)
+    ? `<div class="search-badge">🔍 Найдено ${searchCount} актуальных источников · ${new Date().toLocaleDateString('ru-RU')}</div>`
+    : '';
 
   const div = document.createElement('div');
   div.className = `msg ${role}${isClarify ? ' clarify' : ''}`;
   div.innerHTML = `
     <div class="msg-avatar">${role === 'user' ? 'Вы' : '⚖'}</div>
     <div>
+      ${searchBadge}
       <div class="msg-bubble">${role === 'user' ? escHtml(text) : mdToHtml(text)}</div>
       <div class="msg-time">${time}</div>
     </div>`;
