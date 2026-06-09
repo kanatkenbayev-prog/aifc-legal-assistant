@@ -1,4 +1,3 @@
-// BUILD: cf-git-test v1 (auto-deploy verification)
 // ═══════════════════════════════════════════════════════════════════════════
 //  МФЦА Правовой Ассистент — Cloudflare Worker (backend)
 //  Возможности: чат со стримингом · RAG (Vectorize) · верификация ссылок ·
@@ -402,7 +401,6 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
-    if (request.method === 'GET' && path === '/version') return json({ build: 'cf-git-test-v1', deployedVia: 'cloudflare-workers-builds', ts: new Date().toISOString() });
     if (request.method === 'GET' && path === '/changes') return handleChanges(env);
     if (request.method === 'GET' && path === '/ingest') return handleIngest(request, env);
     if (request.method !== 'POST' && path !== '/') return new Response('Not found', { status: 404 });
