@@ -251,6 +251,18 @@
   }
   .verify-chip.ok     { background: rgba(26,122,74,.08); color: var(--success); border: 1px solid rgba(26,122,74,.2); }
   .verify-chip.broken { background: rgba(192,57,43,.08); color: var(--kz-red);  border: 1px solid rgba(192,57,43,.2); }
+  .verify-chip.rag    { background: rgba(27,79,138,.10); color: var(--aifc-blue); border: 1px solid rgba(27,79,138,.25); cursor: help; }
+
+  /* Rating row */
+  .rate-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .rate-label { font-size: 11px; color: var(--text-muted); }
+  .rate-btn {
+    border: 1px solid var(--border); background: #fff; border-radius: 16px;
+    padding: 3px 10px; font-size: 13px; cursor: pointer; transition: all .15s; line-height: 1;
+  }
+  .rate-btn:hover:not(:disabled) { border-color: var(--gold); transform: translateY(-1px); }
+  .rate-btn.voted { background: var(--cream-dark); border-color: var(--gold); }
+  .rate-btn:disabled { cursor: default; opacity: .55; }
 
   /* Quick chips */
   .chips-row {
@@ -304,6 +316,7 @@
   .input-hint strong { font-style: normal; }
   .powered { display: flex; align-items: center; gap: 5px; }
   .powered span { background: var(--cream-dark); padding: 2px 7px; border-radius: 4px; border: 1px solid var(--border); font-size: 10px; }
+  .disclaimer { font-size: 10.5px; color: var(--text-muted); line-height: 1.45; padding: 6px 2px 0; border-top: 1px dashed var(--border); margin-top: 2px; }
 
   /* ══════════════════════════════════════════
      DATABASE PAGE
@@ -327,6 +340,52 @@
   .act-card-link:hover { text-decoration: underline; }
 
   /* ══════════════════════════════════════════
+     TOOLS PAGE
+  ══════════════════════════════════════════ */
+  .tools-page { overflow-y: auto; }
+  .tools-inner { max-width: 1000px; margin: 0 auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 26px; }
+  .tool-block { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); }
+  .tool-h { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid var(--gold); }
+  .tool-block h3 { font-family: 'Playfair Display', serif; font-size: 13px; color: var(--navy); margin-bottom: 6px; }
+
+  .cmp-wrap { overflow-x: auto; }
+  .cmp-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .cmp-table th, .cmp-table td { text-align: left; padding: 9px 11px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .cmp-table th { background: var(--cream); color: var(--navy); font-weight: 600; }
+  .cmp-table th:nth-child(2) { color: var(--aifc-blue); }
+  .cmp-table td:first-child { font-weight: 600; color: var(--text); white-space: nowrap; }
+  .cmp-table tr:hover td { background: var(--cream); }
+
+  .checklist-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .cl-tab { padding: 6px 13px; font-size: 11.5px; font-family: inherit; border: 1px solid var(--border); border-radius: 18px; background: #fff; cursor: pointer; color: var(--text-muted); transition: all .2s; }
+  .cl-tab.active, .cl-tab:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .checklist-body { display: flex; flex-direction: column; gap: 8px; }
+  .cl-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; background: var(--cream); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all .15s; }
+  .cl-item:hover { border-color: var(--gold); }
+  .cl-item.done { background: rgba(26,122,74,.07); border-color: rgba(26,122,74,.3); }
+  .cl-check { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; }
+  .cl-item.done .cl-check { background: var(--success); border-color: var(--success); }
+  .cl-text { font-size: 12.5px; line-height: 1.5; }
+  .cl-item.done .cl-text { text-decoration: line-through; color: var(--text-muted); }
+  .cl-text small { display: block; color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+  .cl-text small a { color: var(--aifc-blue); }
+  .checklist-progress { margin-top: 12px; font-size: 12px; color: var(--text-muted); }
+  .cl-bar { height: 6px; background: var(--cream-dark); border-radius: 3px; overflow: hidden; margin-top: 5px; }
+  .cl-bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--gold), var(--success)); transition: width .3s; }
+
+  .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .calc-card { background: var(--cream); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .calc-note { font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px; }
+  .calc-card label { display: block; font-size: 11.5px; color: var(--text); margin-bottom: 9px; }
+  .calc-card input, .calc-card select { width: 100%; margin-top: 4px; padding: 8px 10px; font-size: 12.5px; font-family: inherit; border: 1px solid var(--border); border-radius: 7px; background: #fff; outline: none; }
+  .calc-card input:focus, .calc-card select:focus { border-color: var(--gold); }
+  .calc-btn { width: 100%; padding: 9px; font-size: 12.5px; font-family: inherit; font-weight: 600; background: var(--navy); color: #fff; border: none; border-radius: 7px; cursor: pointer; margin-top: 4px; transition: all .2s; }
+  .calc-btn:hover { background: var(--navy-light); }
+  .calc-result { margin-top: 12px; font-size: 12.5px; line-height: 1.6; color: var(--text); }
+  .calc-result strong { color: var(--navy); font-size: 15px; }
+  @media (max-width: 700px) { .calc-grid { grid-template-columns: 1fr; } }
+
+  /* ══════════════════════════════════════════
      NEWS PAGE
   ══════════════════════════════════════════ */
   .news-page { overflow-y: auto; }
@@ -338,6 +397,7 @@
   .news-badge { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 2px 8px; border-radius: 4px; margin-bottom: 5px; }
   .news-badge.regulatory { background: rgba(27,79,138,.12); color: var(--aifc-blue); }
   .news-badge.warning    { background: rgba(184,134,11,.12); color: var(--warning); }
+  .news-badge.change     { background: rgba(26,122,74,.12); color: var(--success); }
 
   /* ── RESPONSIVE ──────────────────────────── */
   @media (max-width: 860px) {
@@ -380,6 +440,7 @@
   <div class="tabs-inner">
     <button class="tab active" data-page="chat"     onclick="showPage('chat',this)">💬 Консультация</button>
     <button class="tab"        data-page="database" onclick="showPage('database',this)">📚 База актов</button>
+    <button class="tab"        data-page="tools"    onclick="showPage('tools',this)">🧰 Инструменты</button>
     <button class="tab"        data-page="news"     onclick="showPage('news',this)">📰 Новости</button>
   </div>
 </div>
@@ -463,9 +524,10 @@
             <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Отправить (Enter)">➤</button>
           </div>
           <div class="input-meta">
-            <span class="input-hint">Область: <strong id="areaLabel">Корпоративное право</strong> · <kbd>Enter</kbd> — отправить · <kbd>Shift+Enter</kbd> — новая строка</span>
-            <span class="powered">⚡ <span>Cloudflare AI · Llama 3.3</span></span>
+            <span class="input-hint">Область: <strong id="areaLabel">Корпоративное право</strong> · <kbd>Enter</kbd> — отправить</span>
+            <span class="powered">⚡ <span>Llama 3.3 · RAG · Cloudflare</span></span>
           </div>
+          <div class="disclaimer">⚠️ Ответы сгенерированы ИИ и носят справочный характер. Они не являются юридической консультацией — проверяйте первоисточники и обращайтесь к квалифицированному юристу.</div>
         </div>
       </div>
 
@@ -481,6 +543,69 @@
       <div class="cat-filter" id="catFilter"></div>
       <div class="acts-count" id="actsCount"></div>
       <div class="acts-grid" id="actsGrid"></div>
+    </div>
+  </div>
+
+  <!-- ══ TOOLS PAGE ══ -->
+  <div class="page tools-page" id="page-tools">
+    <div class="tools-inner">
+
+      <!-- Comparison: AIFC vs RK -->
+      <section class="tool-block">
+        <h2 class="tool-h">⚖️ МФЦА vs Республика Казахстан — ключевые отличия</h2>
+        <div class="cmp-wrap">
+          <table class="cmp-table">
+            <thead><tr><th>Параметр</th><th>МФЦА (AIFC)</th><th>РК (общий режим)</th></tr></thead>
+            <tbody id="cmpBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Checklists -->
+      <section class="tool-block">
+        <h2 class="tool-h">✅ Пошаговые чек-листы</h2>
+        <div class="checklist-tabs" id="checklistTabs"></div>
+        <div class="checklist-body" id="checklistBody"></div>
+        <div class="checklist-progress" id="checklistProgress"></div>
+      </section>
+
+      <!-- Calculators -->
+      <section class="tool-block">
+        <h2 class="tool-h">🧮 Калькуляторы</h2>
+        <div class="calc-grid">
+          <div class="calc-card">
+            <h3>Налог у источника (CIT) в периметре МФЦА</h3>
+            <p class="calc-note">Доход участника МФЦА от «финансовых услуг» из утверждённого перечня освобождён от КПН до 1 января 2066 г.</p>
+            <label>Годовой доход, ₸ <input type="number" id="calcIncome" placeholder="например 100000000"></label>
+            <label>Тип дохода
+              <select id="calcType">
+                <option value="exempt">Финансовые услуги из перечня МФЦА (освобождён)</option>
+                <option value="standard">Прочий доход (общий режим РК)</option>
+              </select>
+            </label>
+            <button class="calc-btn" onclick="calcCit()">Рассчитать</button>
+            <div class="calc-result" id="calcCitResult"></div>
+          </div>
+
+          <div class="calc-card">
+            <h3>Срок регистрации компании в МФЦА</h3>
+            <p class="calc-note">Ориентировочные сроки по данным AFSA (рабочие дни).</p>
+            <label>Тип организации
+              <select id="calcOrg">
+                <option value="5">Private Company (Ltd) — без лицензии</option>
+                <option value="7">Partnership / LLP</option>
+                <option value="20">Лицензируемая финансовая фирма (AFSA)</option>
+              </select>
+            </label>
+            <label>Нужна виза/разрешение на работу?
+              <select id="calcVisa"><option value="0">Нет</option><option value="10">Да (+10 дн.)</option></select>
+            </label>
+            <button class="calc-btn" onclick="calcTerm()">Рассчитать</button>
+            <div class="calc-result" id="calcTermResult"></div>
+          </div>
+        </div>
+      </section>
+
     </div>
   </div>
 
@@ -572,6 +697,7 @@ function showPage(id, btn) {
   document.getElementById('page-' + id).classList.add('active');
   btn.classList.add('active');
   if (id === 'database') renderDatabase();
+  if (id === 'tools')    renderTools();
   if (id === 'news')     renderNews();
 }
 
@@ -598,7 +724,7 @@ function sendStarter(text) {
   sendMessage();
 }
 
-// ── Chat send ─────────────────────────────────
+// ── Chat send (STREAMING) ─────────────────────
 async function sendMessage() {
   const input = document.getElementById('msgInput');
   const text  = input.value.trim();
@@ -607,15 +733,12 @@ async function sendMessage() {
   input.value = '';
   input.style.height = 'auto';
 
-  // Hide welcome
   const welcome = document.getElementById('welcome');
   if (welcome) welcome.remove();
 
-  // Add user bubble
   appendBubble('user', text);
   chatHistory.push({ role: 'user', content: text });
 
-  // Show typing + search indicator
   isLoading = true;
   document.getElementById('sendBtn').disabled = true;
   const typingWrap = document.getElementById('typingWrap');
@@ -623,18 +746,35 @@ async function sendMessage() {
   typingWrap.classList.add('visible');
   scrollToBottom();
 
-  // Animate search status text
   const searchPhrases = [
-    'Поиск актуальных норм на aifc.kz...',
-    'Проверка adilet.zan.kz...',
-    'Анализ последних изменений...',
+    'Семантический поиск по текстам актов (RAG)...',
+    'Получение свежих данных с aifc.kz...',
+    'Проверка уведомлений AFSA...',
     'Формирование консультации...',
   ];
   let phraseIdx = 0;
   const phraseTimer = setInterval(() => {
     phraseIdx = (phraseIdx + 1) % searchPhrases.length;
     searchStatusText.textContent = searchPhrases[phraseIdx];
-  }, 2500);
+  }, 2200);
+
+  // Pre-create AI streaming bubble (hidden until first token)
+  let ai = null;
+  let rawText = '';
+  let meta = { msgId: '', liveCount: 0, ragCount: 0, ragSources: [] };
+  let renderScheduled = false;
+  const scheduleRender = () => {
+    if (renderScheduled) return;
+    renderScheduled = true;
+    requestAnimationFrame(() => {
+      renderScheduled = false;
+      if (ai) {
+        const { text: clean } = extractChips(rawText);
+        ai.bubble.innerHTML = mdToHtml(clean, {});
+        scrollToBottom();
+      }
+    });
+  };
 
   try {
     const res = await fetch(WORKER_URL, {
@@ -642,29 +782,50 @@ async function sendMessage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ messages: chatHistory, area: currentArea, lang: currentLang })
     });
-
-    clearInterval(phraseTimer);
-
-    if (!res.ok) {
+    if (!res.ok || !res.body) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.error || `HTTP ${res.status}`);
     }
 
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
 
-    const reply = data.text || '';
-    chatHistory.push({ role: 'assistant', content: reply });
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      let nl;
+      while ((nl = buf.indexOf('\n')) !== -1) {
+        const line = buf.slice(0, nl).trim();
+        buf = buf.slice(nl + 1);
+        if (!line) continue;
+        let evt; try { evt = JSON.parse(line); } catch { continue; }
+
+        if (evt.type === 'meta') {
+          meta = evt;
+          clearInterval(phraseTimer);
+          typingWrap.classList.remove('visible');
+          ai = createAiBubble();
+        } else if (evt.type === 'token') {
+          rawText += evt.t;
+          scheduleRender();
+        } else if (evt.type === 'error') {
+          throw new Error(evt.error || 'stream error');
+        } else if (evt.type === 'done') {
+          finalizeAiBubble(ai, rawText, meta, evt.linkStatus || {}, evt.brokenCount || 0);
+        }
+      }
+    }
+
+    chatHistory.push({ role: 'assistant', content: rawText });
     saveHistory();
-
-    typingWrap.classList.remove('visible');
-    appendBubble('ai', reply, false, data.liveCount || 0, data.linkStatus || {}, data.brokenCount || 0);
-    scrollToBottom();
 
   } catch (err) {
     clearInterval(phraseTimer);
     typingWrap.classList.remove('visible');
-    appendBubble('ai', `⚠️ Ошибка: ${err.message}`, true);
+    if (ai && ai.bubble) ai.bubble.innerHTML = `⚠️ Ошибка: ${escHtml(err.message)}`;
+    else appendBubble('ai', `⚠️ Ошибка: ${err.message}`, true);
   } finally {
     isLoading = false;
     document.getElementById('sendBtn').disabled = false;
@@ -672,60 +833,98 @@ async function sendMessage() {
   }
 }
 
-function appendBubble(role, text, isError = false, liveCount = 0, linkStatus = {}, brokenCount = 0) {
+// ── Simple bubble (user / error) ──────────────
+function appendBubble(role, text, isError = false) {
   const msgs = document.getElementById('messages');
-  const time  = new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
-
-  // Extract chips before rendering
-  const { text: cleanText, chips } = role === 'ai' ? extractChips(text) : { text, chips: [] };
-  const isClarify = role === 'ai' && !isError && chips.length > 0;
-
-  // Meta bar for verified responses
-  let metaBar = '';
-  if (role === 'ai' && !isError && Object.keys(linkStatus).length > 0) {
-    const okCount = Object.values(linkStatus).filter(v => v.ok).length;
-    const today = new Date().toLocaleDateString('ru-RU');
-    metaBar = `<div class="verify-summary">`;
-    if (liveCount > 0)    metaBar += `<span class="verify-chip ok">🔍 ${liveCount} источников · ${today}</span>`;
-    if (okCount > 0)      metaBar += `<span class="verify-chip ok">✓ ${okCount} ссылок проверено</span>`;
-    if (brokenCount > 0)  metaBar += `<span class="verify-chip broken">⚠️ ${brokenCount} недоступны</span>`;
-    metaBar += `</div>`;
-  }
-
+  const time = new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
   const div = document.createElement('div');
-  div.className = `msg ${role}${isClarify ? ' clarify' : ''}`;
+  div.className = `msg ${role}`;
   div.innerHTML = `
     <div class="msg-avatar">${role === 'user' ? 'Вы' : '⚖'}</div>
     <div style="flex:1;min-width:0">
-      ${metaBar}
-      <div class="msg-bubble">${role === 'user' ? escHtml(text) : mdToHtml(cleanText, linkStatus)}</div>
+      <div class="msg-bubble">${role === 'user' ? escHtml(text) : mdToHtml(text, {})}</div>
       <div class="msg-time">${time}</div>
     </div>`;
+  msgs.appendChild(div);
+  scrollToBottom();
+}
 
-  // Render chips outside the bubble, below the message
+// ── AI streaming bubble lifecycle ─────────────
+function createAiBubble() {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  const meta   = document.createElement('div'); // meta bar slot
+  const bubble = document.createElement('div'); bubble.className = 'msg-bubble';
+  const timeEl = document.createElement('div'); timeEl.className = 'msg-time';
+  timeEl.textContent = new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+  const inner = document.createElement('div');
+  inner.style.cssText = 'flex:1;min-width:0';
+  inner.appendChild(meta); inner.appendChild(bubble); inner.appendChild(timeEl);
+  const avatar = document.createElement('div'); avatar.className = 'msg-avatar'; avatar.textContent = '⚖';
+  div.appendChild(avatar); div.appendChild(inner);
+  msgs.appendChild(div);
+  return { wrapper: div, metaSlot: meta, bubble, inner };
+}
+
+function finalizeAiBubble(ai, rawText, meta, linkStatus, brokenCount) {
+  if (!ai) return;
+  const { text: clean, chips } = extractChips(rawText);
+  ai.bubble.innerHTML = mdToHtml(clean, linkStatus);
+  if (chips.length > 0) ai.wrapper.classList.add('clarify');
+
+  // Meta bar: live sources + RAG + verified links
+  const okCount = Object.values(linkStatus).filter(v => v.ok).length;
+  const today = new Date().toLocaleDateString('ru-RU');
+  let html = '<div class="verify-summary">';
+  if (meta.ragCount > 0)  html += `<span class="verify-chip rag" title="${meta.ragSources.map(s=>s.act).join(', ')}">📖 RAG: ${meta.ragCount} фрагмента</span>`;
+  if (meta.liveCount > 0) html += `<span class="verify-chip ok">🔍 ${meta.liveCount} источников · ${today}</span>`;
+  if (okCount > 0)        html += `<span class="verify-chip ok">✓ ${okCount} ссылок проверено</span>`;
+  if (brokenCount > 0)    html += `<span class="verify-chip broken">⚠️ ${brokenCount} недоступны</span>`;
+  html += '</div>';
+  ai.metaSlot.innerHTML = html;
+
+  // Rating row (skip for clarifying questions)
+  if (chips.length === 0 && meta.msgId) {
+    const rate = document.createElement('div');
+    rate.className = 'rate-row';
+    rate.innerHTML = `<span class="rate-label">Полезен ответ?</span>`;
+    ['up','down'].forEach(v => {
+      const b = document.createElement('button');
+      b.className = 'rate-btn';
+      b.textContent = v === 'up' ? '👍' : '👎';
+      b.onclick = () => {
+        rate.querySelectorAll('.rate-btn').forEach(x => x.disabled = true);
+        b.classList.add('voted');
+        rate.querySelector('.rate-label').textContent = 'Спасибо за отзыв!';
+        fetch(WORKER_URL + '/rate', {
+          method: 'POST', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ msgId: meta.msgId, vote: v })
+        }).catch(()=>{});
+      };
+      rate.appendChild(b);
+    });
+    ai.inner.appendChild(rate);
+  }
+
+  // Quick chips
   if (chips.length > 0) {
-    const chipsRow = document.createElement('div');
-    chipsRow.className = 'chips-row';
-    chipsRow.dataset.used = 'false';
+    const row = document.createElement('div');
+    row.className = 'chips-row';
     chips.forEach(chip => {
       const btn = document.createElement('button');
       btn.className = 'chip';
       btn.textContent = chip;
       btn.onclick = () => {
-        // Mark row as used (dim all chips)
-        chipsRow.classList.add('used');
-        // Send chip text as user message
+        row.classList.add('used');
         document.getElementById('msgInput').value = chip;
         sendMessage();
       };
-      chipsRow.appendChild(btn);
+      row.appendChild(btn);
     });
-    msgs.appendChild(div);
-    msgs.appendChild(chipsRow);
-    return;
+    document.getElementById('messages').appendChild(row);
   }
-
-  msgs.appendChild(div);
+  scrollToBottom();
 }
 
 function scrollToBottom() {
@@ -900,6 +1099,127 @@ function filterActs() {
 }
 
 // ══════════════════════════════════════════════
+// TOOLS
+// ══════════════════════════════════════════════
+const COMPARISON = [
+  ['Применимое право', 'Английское общее право (acts МФЦА)', 'Континентальное право РК'],
+  ['Язык права/судов', 'Английский', 'Казахский / русский'],
+  ['Корпоративный налог (КПН)', '0% на фин. услуги из перечня до 2066 г.', '20% общий режим'],
+  ['НДС', '0% на освобождённые фин. услуги', '12% общий режим'],
+  ['Индивидуальный подоходный налог', 'Льготы для иностранных сотрудников', '10% общий режим'],
+  ['Регулятор фин. услуг', 'AFSA', 'АРРФР / Нацбанк РК'],
+  ['Суд', 'Суд МФЦА (по модели английского)', 'Суды общей юрисдикции РК'],
+  ['Арбитраж', 'IAC (Международный арбитражный центр)', 'Арбитражи по Закону «Об арбитраже»'],
+  ['Валютное регулирование', 'Свободный режим', 'Закон РК «О валютном регулировании»'],
+  ['Иностранная рабочая сила', 'Без квот и спец. разрешений', 'Квоты и разрешения МТСЗН'],
+  ['Репатриация прибыли', 'Без ограничений', 'С учётом валютного контроля'],
+];
+
+const CHECKLISTS = {
+  'Регистрация компании': [
+    ['Выбрать организационно-правовую форму (Private/Public Company, LLP, Foundation)', 'AIFC Companies Regulations', 'https://aifc.kz/legal-framework/aifc-companies-regulations/'],
+    ['Зарезервировать наименование компании в AFSA', 'Companies Rules', 'https://aifc.kz/legal-framework/companies-rules/'],
+    ['Подготовить учредительные документы (Articles of Association)', '', ''],
+    ['Определить зарегистрированный офис в периметре МФЦА', '', ''],
+    ['Назначить директора(ов) и секретаря', '', ''],
+    ['Подать заявление через портал AFSA (digital onboarding)', '', ''],
+    ['Оплатить регистрационный сбор', '', ''],
+    ['Получить Certificate of Incorporation', '', ''],
+    ['Открыть банковский счёт и зарегистрироваться в налоговой', '', ''],
+  ],
+  'Получение лицензии AFSA': [
+    ['Определить регулируемый вид деятельности (Regulated Activity)', 'AIFC General Rules', 'https://aifc.kz/legal-framework/general-rules/'],
+    ['Подготовить Regulatory Business Plan', '', ''],
+    ['Сформировать структуру капитала по пруденциальным требованиям', 'Prudential Rules', 'https://aifc.kz/legal-framework/prudential-rules-for-investment-firms/'],
+    ['Назначить Approved Individuals (SEO, Compliance, MLRO)', '', ''],
+    ['Разработать политику AML/CTF', 'AML/CTF Rules', 'https://aifc.kz/legal-framework/anti-money-laundering-and-counter-terrorist-financing-rules-full-text/'],
+    ['Подать заявление в AFSA и пройти интервью', '', ''],
+    ['Получить In-Principle Approval, затем лицензию', '', ''],
+  ],
+  'Комплаенс AML/CTF': [
+    ['Назначить MLRO (Money Laundering Reporting Officer)', 'AML/CTF Rules', 'https://aifc.kz/legal-framework/anti-money-laundering-and-counter-terrorist-financing-rules-full-text/'],
+    ['Провести оценку рисков (Business Risk Assessment)', '', ''],
+    ['Внедрить процедуры CDD/KYC по клиентам', '', ''],
+    ['Настроить мониторинг транзакций и скрининг санкций', '', ''],
+    ['Вести учёт и хранить документы 5+ лет', '', ''],
+    ['Подавать Annual AML Return в AFSA', '', ''],
+    ['Обучать персонал и обновлять политики', '', ''],
+  ],
+};
+
+let activeChecklist = Object.keys(CHECKLISTS)[0];
+const CL_KEY = 'aifc_checklist_state';
+function clState() { try { return JSON.parse(localStorage.getItem(CL_KEY) || '{}'); } catch { return {}; } }
+function clSave(s) { try { localStorage.setItem(CL_KEY, JSON.stringify(s)); } catch {} }
+
+function renderTools() {
+  // Comparison table
+  document.getElementById('cmpBody').innerHTML = COMPARISON.map(r =>
+    `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');
+  // Checklist tabs
+  document.getElementById('checklistTabs').innerHTML = Object.keys(CHECKLISTS).map(name =>
+    `<button class="cl-tab${name === activeChecklist ? ' active' : ''}" onclick="setChecklist('${name}')">${name}</button>`).join('');
+  renderChecklist();
+}
+
+function setChecklist(name) {
+  activeChecklist = name;
+  document.querySelectorAll('.cl-tab').forEach(b => b.classList.toggle('active', b.textContent === name));
+  renderChecklist();
+}
+
+function renderChecklist() {
+  const items = CHECKLISTS[activeChecklist];
+  const state = clState();
+  const done = state[activeChecklist] || {};
+  document.getElementById('checklistBody').innerHTML = items.map((it, i) => {
+    const isDone = done[i] ? ' done' : '';
+    const src = it[1] ? `<small>📄 <a href="${it[2]}" target="_blank" onclick="event.stopPropagation()">${it[1]}</a></small>` : '';
+    return `<div class="cl-item${isDone}" onclick="toggleChecklistItem(${i})">
+      <div class="cl-check">✓</div>
+      <div class="cl-text">${it[0]}${src}</div>
+    </div>`;
+  }).join('');
+  const total = items.length;
+  const count = Object.values(done).filter(Boolean).length;
+  const pct = Math.round(count / total * 100);
+  document.getElementById('checklistProgress').innerHTML =
+    `Выполнено: ${count} из ${total} (${pct}%)<div class="cl-bar"><span style="width:${pct}%"></span></div>`;
+}
+
+function toggleChecklistItem(i) {
+  const state = clState();
+  if (!state[activeChecklist]) state[activeChecklist] = {};
+  state[activeChecklist][i] = !state[activeChecklist][i];
+  clSave(state);
+  renderChecklist();
+}
+
+function calcCit() {
+  const income = parseFloat(document.getElementById('calcIncome').value) || 0;
+  const type = document.getElementById('calcType').value;
+  let html;
+  if (type === 'exempt') {
+    html = `Доход от финансовых услуг из перечня МФЦА.<br>КПН: <strong>0 ₸</strong><br>
+      <small style="color:var(--text-muted)">Освобождение действует до 1 января 2066 г. согласно Конституционному закону «О МФЦА». <a href="https://aifc.kz/legal-framework/the-list-of-financial-services-provided-by-the-aifc-participants-income-from-which-is-exempt-from-cit-and-vat/" target="_blank">Перечень услуг</a></small>`;
+  } else {
+    const cit = income * 0.20;
+    html = `Прочий доход (общий режим РК, КПН 20%).<br>КПН: <strong>${cit.toLocaleString('ru-RU')} ₸</strong><br>
+      <small style="color:var(--text-muted)">Расчёт ориентировочный, без учёта вычетов и зачётов.</small>`;
+  }
+  document.getElementById('calcCitResult').innerHTML = html;
+}
+
+function calcTerm() {
+  const base = parseInt(document.getElementById('calcOrg').value, 10);
+  const visa = parseInt(document.getElementById('calcVisa').value, 10);
+  const total = base + visa;
+  document.getElementById('calcTermResult').innerHTML =
+    `Ориентировочный срок: <strong>~${total} раб. дней</strong><br>
+     <small style="color:var(--text-muted)">Без учёта времени на подготовку документов. Лицензируемая деятельность зависит от полноты заявки и решения AFSA.</small>`;
+}
+
+// ══════════════════════════════════════════════
 // NEWS
 // ══════════════════════════════════════════════
 const NEWS = [
@@ -912,16 +1232,32 @@ const NEWS = [
   {date:'2026', badge:'regulatory', title:'МФЦА и HKEX — сотрудничество в зелёных финансах', desc:'Подписано соглашение о партнёрстве AIX-HKEX в области углеродных рынков.'},
 ];
 
-function renderNews() {
-  document.getElementById('newsGrid').innerHTML = NEWS.map(n => `
-    <div class="news-card">
+function newsCardHtml(n) {
+  return `<div class="news-card">
       <div class="news-date">${n.date}</div>
       <div class="news-body">
-        <div class="news-badge ${n.badge}">${n.badge === 'regulatory' ? 'МФЦА / AFSA' : 'Предупреждение'}</div>
-        <h3>${n.title}</h3>
-        <p>${n.desc}</p>
+        <div class="news-badge ${n.badge}">${n.badge === 'regulatory' ? 'МФЦА / AFSA' : n.badge === 'change' ? 'Изменение акта' : 'Предупреждение'}</div>
+        <h3>${n.url ? `<a href="${n.url}" target="_blank" style="color:inherit">${n.title}</a>` : n.title}</h3>
+        <p>${n.desc || ''}</p>
       </div>
-    </div>`).join('');
+    </div>`;
+}
+
+async function renderNews() {
+  const grid = document.getElementById('newsGrid');
+  grid.innerHTML = NEWS.map(newsCardHtml).join('');
+  // Append cron-monitored act changes
+  try {
+    const res = await fetch(WORKER_URL + '/changes');
+    const data = await res.json();
+    if (data.changes && data.changes.length) {
+      const changeCards = data.changes.map(c => newsCardHtml({
+        date: c.date, badge: 'change', title: `Обновление: ${c.act}`,
+        desc: 'Обнаружено изменение в тексте акта на aifc.kz (автомониторинг).', url: c.url,
+      })).join('');
+      grid.insertAdjacentHTML('afterbegin', changeCards);
+    }
+  } catch {}
 }
 </script>
 </body>

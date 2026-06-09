@@ -1,351 +1,421 @@
-const ACTS_INDEX = `
-КОРПОРАТИВНОЕ ПРАВО:
-- AIFC Companies Regulations: https://aifc.kz/legal-framework/aifc-companies-regulations/
-- Companies Rules: https://aifc.kz/legal-framework/companies-rules/
-- AIFC General Partnership Regulations: https://aifc.kz/legal-framework/partnerships/
-- General Partnership Rules: https://aifc.kz/legal-framework/general-partnership-rules/
-- AIFC Limited Partnership Regulations: https://aifc.kz/legal-framework/aifc-limited-partnership-regulations/
-- Limited Partnership Rules: https://aifc.kz/legal-framework/aifc-limited-partnership-rules/
-- AIFC Limited Liability Partnership Regulations: https://aifc.kz/legal-framework/aifc-limited-liability-partnership-regulations/
-- Limited Liability Partnership Rules: https://aifc.kz/legal-framework/aifc-limited-liability-partnership-rules/
-- AIFC Foundations Regulations: https://aifc.kz/legal-framework/aifc-foundations-regulations/
-- Special Purpose Company Rules: https://aifc.kz/legal-framework/special-purpose-company-rules/
-- Non-Profit Incorporated Organisations Regulations: https://aifc.kz/legal-framework/non-profit-incorporated-organisations/
-- Venture Studio Rules: https://aifc.kz/legal-framework/venture-studio-rules/
+// ═══════════════════════════════════════════════════════════════════════════
+//  МФЦА Правовой Ассистент — Cloudflare Worker (backend)
+//  Возможности: чат со стримингом · RAG (Vectorize) · верификация ссылок ·
+//  рейтинг ответов (KV) · rate-limiting · cron-мониторинг изменений в актах
+// ═══════════════════════════════════════════════════════════════════════════
 
-ФИНАНСОВЫЕ УСЛУГИ:
-- AIFC Financial Services Framework Regulations: https://aifc.kz/legal-framework/aifc-financial-services-framework-regulations/
-- General Rules: https://aifc.kz/legal-framework/general-rules/
-- Conduct Of Business Rules: https://aifc.kz/legal-framework/conduct-of-business-rules/
-- Authorised Market Institution Rules: https://aifc.kz/legal-framework/authorised-market-institution-rules/
-- Market Rules: https://aifc.kz/legal-framework/market-rules/
-- Banking Business Prudential Rules: https://aifc.kz/legal-framework/banking-business-prudential-rules/
-- Islamic Banking Business Prudential Rules: https://aifc.kz/legal-framework/islamic-banking-business-prudential-rules/
-- Prudential Rules For Investment Firms: https://aifc.kz/legal-framework/prudential-rules-for-investment-firms/
-- Insurance And Reinsurance Prudential Rules: https://aifc.kz/legal-framework/insurance-and-reinsurance-prudential-rules/
-- Takaful And Retakaful Prudential Rules: https://aifc.kz/legal-framework/takaful-and-retakaful-prudential-rules/
-- Collective Investment Scheme Rules: https://aifc.kz/legal-framework/collective-investment-scheme-rules/
-- AIFC Financial Technology Rules: https://aifc.kz/legal-framework/aifc-financial-technology-rules/
-- AIFC Rules on Digital Asset Activities: https://aifc.kz/legal-framework/aifc-rules-on-digital-asset-activities/
-- Multilateral And Organised Trading Facilities Rules: https://aifc.kz/legal-framework/multilateral-and-organised-trading-facilities-rules/
-- Sovereign Bonds Rules: https://aifc.kz/legal-framework/sovereign-bonds-rules/
-- Dematerialised Investment Rules: https://aifc.kz/legal-framework/dematerialised-investment-rules/
-- Rules For Pre-IPO Listings: https://aifc.kz/legal-framework/rules-for-pre-ipo-listings/
-- Recognition Rules: https://aifc.kz/legal-framework/recognition-rules/
-- Representative Office Rules: https://aifc.kz/legal-framework/representative-office-rules/
-- AIFC Rules on Providing Money Services: https://aifc.kz/legal-framework/aifc-rules-on-providing-money-services/
-- AIFC Auditor Rules: https://aifc.kz/legal-framework/aifc-auditor-rules/
-- Islamic Finance Rules: https://aifc.kz/legal-framework/islamic-finance-rules/
-- Perimeter Guidance: https://aifc.kz/legal-framework/perimeter-guidance/
-- Banking Prudential Guideline: https://aifc.kz/legal-framework/banking-prudential-guideline/
+const INGEST_SECRET = 'aifc-rag-2026';      // защита эндпоинта загрузки RAG
+const RATE_LIMIT_PER_MIN = 25;              // запросов в минуту с одного IP
+const EMBED_MODEL = '@cf/baai/bge-base-en-v1.5';
+const CHAT_MODEL  = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 
-AML/CTF:
-- Anti-Money Laundering And Counter-Terrorist Financing Rules: https://aifc.kz/legal-framework/anti-money-laundering-and-counter-terrorist-financing-rules-full-text/
-- Practical Guidance to AIFC AML/CTF Framework: https://aifc.kz/legal-framework/practical-guidance-to-aifc-anti-money-laundering-and-counter-terrorist-financing-framework/
-- Guidance — Customer Due Diligence (Non-Face to Face): https://aifc.kz/legal-framework/guidance-requirements-applicable-to-the-rules-of-internal-control-for-the-purposes-of-counteracting-the-legislation-laudering-of-proceeds-from-crime-and-the-financing-of-terrorism-for-financial-mon-2/
-- Joint Order AIFC/MoF on AML/CTF: https://aifc.kz/legal-framework/joint-order-between-aifc-and-mof-on-aml-on-counteracting-legalisation-laundering-of-proceeds-obtained-through-criminal-means-and-financing-of-terrorism/
+// ── Полный список актов (название → URL) ──────────────────────────────────────
+const ACTS = [
+  ['AIFC Companies Regulations','https://aifc.kz/legal-framework/aifc-companies-regulations/','Корпоративное право'],
+  ['Companies Rules','https://aifc.kz/legal-framework/companies-rules/','Корпоративное право'],
+  ['AIFC General Partnership Regulations','https://aifc.kz/legal-framework/partnerships/','Корпоративное право'],
+  ['General Partnership Rules','https://aifc.kz/legal-framework/general-partnership-rules/','Корпоративное право'],
+  ['AIFC Limited Partnership Regulations','https://aifc.kz/legal-framework/aifc-limited-partnership-regulations/','Корпоративное право'],
+  ['Limited Partnership Rules','https://aifc.kz/legal-framework/aifc-limited-partnership-rules/','Корпоративное право'],
+  ['AIFC Limited Liability Partnership Regulations','https://aifc.kz/legal-framework/aifc-limited-liability-partnership-regulations/','Корпоративное право'],
+  ['Limited Liability Partnership Rules','https://aifc.kz/legal-framework/aifc-limited-liability-partnership-rules/','Корпоративное право'],
+  ['AIFC Foundations Regulations','https://aifc.kz/legal-framework/aifc-foundations-regulations/','Корпоративное право'],
+  ['Special Purpose Company Rules','https://aifc.kz/legal-framework/special-purpose-company-rules/','Корпоративное право'],
+  ['Non-Profit Incorporated Organisations Regulations','https://aifc.kz/legal-framework/non-profit-incorporated-organisations/','Корпоративное право'],
+  ['Venture Studio Rules','https://aifc.kz/legal-framework/venture-studio-rules/','Корпоративное право'],
+  ['AIFC Financial Services Framework Regulations','https://aifc.kz/legal-framework/aifc-financial-services-framework-regulations/','Финансовые услуги'],
+  ['General Rules','https://aifc.kz/legal-framework/general-rules/','Финансовые услуги'],
+  ['Conduct Of Business Rules','https://aifc.kz/legal-framework/conduct-of-business-rules/','Финансовые услуги'],
+  ['Authorised Market Institution Rules','https://aifc.kz/legal-framework/authorised-market-institution-rules/','Финансовые услуги'],
+  ['Market Rules','https://aifc.kz/legal-framework/market-rules/','Финансовые услуги'],
+  ['Banking Business Prudential Rules','https://aifc.kz/legal-framework/banking-business-prudential-rules/','Финансовые услуги'],
+  ['Islamic Banking Business Prudential Rules','https://aifc.kz/legal-framework/islamic-banking-business-prudential-rules/','Финансовые услуги'],
+  ['Prudential Rules For Investment Firms','https://aifc.kz/legal-framework/prudential-rules-for-investment-firms/','Финансовые услуги'],
+  ['Insurance And Reinsurance Prudential Rules','https://aifc.kz/legal-framework/insurance-and-reinsurance-prudential-rules/','Финансовые услуги'],
+  ['Collective Investment Scheme Rules','https://aifc.kz/legal-framework/collective-investment-scheme-rules/','Финансовые услуги'],
+  ['AIFC Financial Technology Rules','https://aifc.kz/legal-framework/aifc-financial-technology-rules/','Финансовые услуги'],
+  ['AIFC Rules on Digital Asset Activities','https://aifc.kz/legal-framework/aifc-rules-on-digital-asset-activities/','Финансовые услуги'],
+  ['Multilateral And Organised Trading Facilities Rules','https://aifc.kz/legal-framework/multilateral-and-organised-trading-facilities-rules/','Финансовые услуги'],
+  ['Sovereign Bonds Rules','https://aifc.kz/legal-framework/sovereign-bonds-rules/','Финансовые услуги'],
+  ['Dematerialised Investment Rules','https://aifc.kz/legal-framework/dematerialised-investment-rules/','Финансовые услуги'],
+  ['Rules For Pre-IPO Listings','https://aifc.kz/legal-framework/rules-for-pre-ipo-listings/','Финансовые услуги'],
+  ['Recognition Rules','https://aifc.kz/legal-framework/recognition-rules/','Финансовые услуги'],
+  ['Representative Office Rules','https://aifc.kz/legal-framework/representative-office-rules/','Финансовые услуги'],
+  ['AIFC Rules on Providing Money Services','https://aifc.kz/legal-framework/aifc-rules-on-providing-money-services/','Финансовые услуги'],
+  ['AIFC Auditor Rules','https://aifc.kz/legal-framework/aifc-auditor-rules/','Финансовые услуги'],
+  ['Islamic Finance Rules','https://aifc.kz/legal-framework/islamic-finance-rules/','Финансовые услуги'],
+  ['Perimeter Guidance','https://aifc.kz/legal-framework/perimeter-guidance/','Финансовые услуги'],
+  ['Anti-Money Laundering And Counter-Terrorist Financing Rules','https://aifc.kz/legal-framework/anti-money-laundering-and-counter-terrorist-financing-rules-full-text/','AML/CTF'],
+  ['Practical Guidance to AIFC AML/CTF Framework','https://aifc.kz/legal-framework/practical-guidance-to-aifc-anti-money-laundering-and-counter-terrorist-financing-framework/','AML/CTF'],
+  ['AIFC Employment Regulations','https://aifc.kz/legal-framework/aifc-employment-regulations/','Трудовое право'],
+  ['AIFC Rules on Keeping Records of Foreign Labour','https://aifc.kz/legal-framework/aifc-rules-on-keeping-records-of-foreign-labour-attracted-by-aifc-participants-and-aifc-bodies/','Трудовое право'],
+  ['AIFC Qualifications Necessary for Employment','https://aifc.kz/legal-framework/aifc-qualifications-necessary-for-employment-in-the-aifc/','Трудовое право'],
+  ['AIFC Court Regulations 2017','https://aifc.kz/legal-framework/aifc-court-regulations-2017/','Разрешение споров'],
+  ['AIFC Court Rules 2018','https://aifc.kz/legal-framework/aifc-court-rules-2018/','Разрешение споров'],
+  ['AIFC Arbitration Regulations','https://aifc.kz/legal-framework/aifc-arbitration-regulations/','Разрешение споров'],
+  ['IAC Arbitration and Mediation Rules 2022','https://aifc.kz/legal-framework/iac-arbitration-and-mediation-rules-2022/','Разрешение споров'],
+  ['Rules on Substantial Presence of AIFC Participants (CIT, VAT)','https://aifc.kz/legal-framework/rules-on-the-substantial-presence-of-the-aifc-participants-applying-tax-exemptions-for-the-payment-of-cit-vat/','Налоговое право'],
+  ['Rules on Tax Administration','https://aifc.kz/legal-framework/tax-administration-rules-of-aifc-bodies-and-participants/','Налоговое право'],
+  ['List of Financial Services Exempt from CIT and VAT','https://aifc.kz/legal-framework/the-list-of-financial-services-provided-by-the-aifc-participants-income-from-which-is-exempt-from-cit-and-vat/','Налоговое право'],
+];
 
-ТРУДОВОЕ ПРАВО:
-- AIFC Employment Regulations: https://aifc.kz/legal-framework/aifc-employment-regulations/
-- AIFC Rules on Keeping Records of Foreign Labour: https://aifc.kz/legal-framework/aifc-rules-on-keeping-records-of-foreign-labour-attracted-by-aifc-participants-and-aifc-bodies/
-- AIFC Qualifications Necessary for Employment: https://aifc.kz/legal-framework/aifc-qualifications-necessary-for-employment-in-the-aifc/
-
-РАЗРЕШЕНИЕ СПОРОВ:
-- AIFC Court Regulations 2017: https://aifc.kz/legal-framework/aifc-court-regulations-2017/
-- AIFC Court Rules 2018: https://aifc.kz/legal-framework/aifc-court-rules-2018/
-- AIFC Court Practice Directions: https://aifc.kz/legal-framework/aifc-court-practice-directions/
-- AIFC Arbitration Regulations: https://aifc.kz/legal-framework/aifc-arbitration-regulations/
-- IAC Arbitration and Mediation Rules 2022: https://aifc.kz/legal-framework/iac-arbitration-and-mediation-rules-2022/
-
-НАЛОГОВОЕ ПРАВО:
-- Rules on Substantial Presence of AIFC Participants (CIT, VAT): https://aifc.kz/legal-framework/rules-on-the-substantial-presence-of-the-aifc-participants-applying-tax-exemptions-for-the-payment-of-cit-vat/
-- Rules on Tax Administration: https://aifc.kz/legal-framework/tax-administration-rules-of-aifc-bodies-and-participants/
-- List of Financial Services Exempt from CIT and VAT: https://aifc.kz/legal-framework/the-list-of-financial-services-provided-by-the-aifc-participants-income-from-which-is-exempt-from-cit-and-vat/
-- Special Provision on Tax Accounting Policy: https://aifc.kz/legal-framework/special-provision-no-1-on-tax-accounting-policy-for-aifc-participants/
-- Criteria for Securities Trading on AIX: https://aifc.kz/legal-framework/on-determining-the-criteria-for-securities-trading-on-stock-exchange-of-astana-international-financial-centre/
-
-ЗАКОНОДАТЕЛЬСТВО РК:
-- Конституционный закон РК «О МФЦА» № 438-V от 7 декабря 2015 года: https://adilet.zan.kz/rus/docs/Z1500000438
-- Гражданский кодекс РК: https://adilet.zan.kz/rus/docs/K940001000_
-- Налоговый кодекс РК: https://adilet.zan.kz/rus/docs/K1700000120
-- Трудовой кодекс РК: https://adilet.zan.kz/rus/docs/K150000414_
-- Реестр лицензий AFSA: https://publicreg.myafsa.com/
-`;
+const ACTS_INDEX = ACTS.map(([n,u,c]) => `- ${n} (${c}): ${u}`).join('\n');
 
 // ── HTML helpers ──────────────────────────────────────────────────────────────
 function stripTags(html) {
-  return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/\s+/g, ' ').trim();
 }
 
 function extractBetween(html, open, close) {
-  const results = [];
-  let pos = 0;
+  const out = []; let pos = 0;
   while (pos < html.length) {
-    const start = html.indexOf(open, pos);
-    if (start === -1) break;
-    const end = html.indexOf(close, start + open.length);
-    if (end === -1) break;
-    results.push(html.slice(start + open.length, end));
-    pos = end + close.length;
+    const s = html.indexOf(open, pos); if (s === -1) break;
+    const e = html.indexOf(close, s + open.length); if (e === -1) break;
+    out.push(html.slice(s + open.length, e)); pos = e + close.length;
   }
-  return results;
+  return out;
 }
 
-// ── Fetch AIFC news page ──────────────────────────────────────────────────────
+// ── CORS ──────────────────────────────────────────────────────────────────────
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+const json = (obj, status = 200) =>
+  new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json', ...CORS } });
+
+// ── Live data fetchers (free scraping) ────────────────────────────────────────
 async function fetchAifcNews() {
   try {
-    const res = await fetch('https://aifc.kz/', {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LegalBot/1.0)' },
-      cf: { cacheTtl: 3600 }, // cache 1 hour on Cloudflare edge
-    });
+    const res = await fetch('https://aifc.kz/', { cf: { cacheTtl: 3600 } });
     if (!res.ok) return [];
-
     const html = await res.text();
-    const items = [];
-
-    // Extract news cards — look for date + title patterns
-    const dateMatches = [...html.matchAll(/(\d{2}\.\d{2}\.\d{4})/g)];
-    const titleMatches = [...html.matchAll(/<h[23][^>]*>([^<]{10,200})<\/h[23]>/gi)];
-
-    // Pair dates with nearby titles
-    titleMatches.slice(0, 10).forEach((m, i) => {
-      const title = stripTags(m[1]).trim();
-      const date  = dateMatches[i]?.[1] || '';
-      if (title.length > 10) items.push({ title, date, url: 'https://aifc.kz/news/' });
-    });
-
-    return items.slice(0, 8);
-  } catch {
-    return [];
-  }
+    const dates = [...html.matchAll(/(\d{2}\.\d{2}\.\d{4})/g)];
+    const titles = [...html.matchAll(/<h[23][^>]*>([^<]{10,200})<\/h[23]>/gi)];
+    return titles.slice(0, 8).map((m, i) => ({
+      title: stripTags(m[1]).trim(), date: dates[i]?.[1] || '', url: 'https://aifc.kz/news/',
+    })).filter(x => x.title.length > 10);
+  } catch { return []; }
 }
 
-// ── Fetch AFSA notice register ────────────────────────────────────────────────
 async function fetchAfsaNotices() {
   try {
-    const res = await fetch('https://afsa.aifc.kz/notice-register/', {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LegalBot/1.0)' },
-      cf: { cacheTtl: 3600 },
-    });
+    const res = await fetch('https://afsa.aifc.kz/notice-register/', { cf: { cacheTtl: 3600 } });
     if (!res.ok) return [];
-
     const html = await res.text();
-    const rows = extractBetween(html, '<tr', '</tr>').slice(0, 10);
-    return rows.map(row => ({
-      title: stripTags(row).slice(0, 150).trim(),
-      url: 'https://afsa.aifc.kz/notice-register/',
-    })).filter(r => r.title.length > 10).slice(0, 5);
-  } catch {
-    return [];
-  }
+    return extractBetween(html, '<tr', '</tr>').slice(0, 8)
+      .map(r => ({ title: stripTags(r).slice(0, 150).trim(), url: 'https://afsa.aifc.kz/notice-register/' }))
+      .filter(r => r.title.length > 10).slice(0, 5);
+  } catch { return []; }
 }
 
-// ── Fetch legal framework category page ──────────────────────────────────────
-async function fetchLegalFrameworkCategory(category) {
+// ── RAG: retrieval ────────────────────────────────────────────────────────────
+async function ragRetrieve(env, query) {
   try {
-    const url = `https://aifc.kz/legal-framework-cat/${category}/`;
-    const res = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LegalBot/1.0)' },
-      cf: { cacheTtl: 7200 },
-    });
-    if (!res.ok) return [];
-
-    const html = await res.text();
-    // Extract document links
-    const links = [...html.matchAll(/href="(https:\/\/aifc\.kz\/legal-framework\/[^"]+)"[^>]*>([^<]{5,200})</gi)];
-    return links.map(m => ({
-      url: m[1],
-      title: stripTags(m[2]).trim(),
-    })).filter(r => r.title.length > 5).slice(0, 10);
-  } catch {
-    return [];
-  }
+    const emb = await env.AI.run(EMBED_MODEL, { text: [query] });
+    const vector = emb.data[0];
+    const matches = await env.VECTORIZE.query(vector, { topK: 5, returnMetadata: 'all' });
+    return (matches.matches || [])
+      .filter(m => m.score > 0.45)
+      .map(m => ({
+        score: m.score,
+        text: m.metadata?.text || '',
+        act: m.metadata?.act || '',
+        url: m.metadata?.url || '',
+      }))
+      .filter(m => m.text);
+  } catch { return []; }
 }
 
-// ── Map area to category slug ─────────────────────────────────────────────────
-function areaToCategory(area) {
-  const map = {
-    'Корпоративное право':  'corporate-legal-framework',
-    'Финансовые услуги':    'financial-services',
-    'AML/KYC':              'aml-ctf',
-    'Трудовое право':       'employment',
-    'Разрешение споров':    'dispute-resolution',
-    'Налоговое право':      'taxation',
-  };
-  return map[area] || null;
+function formatRag(chunks) {
+  if (!chunks.length) return '';
+  let s = `\n== РЕЛЕВАНТНЫЕ ФРАГМЕНТЫ ИЗ ПОЛНЫХ ТЕКСТОВ АКТОВ (RAG) ==\n`;
+  chunks.forEach((c, i) => {
+    s += `\n[Фрагмент ${i + 1}] из «${c.act}» (${c.url}):\n«${c.text.slice(0, 700)}»\n`;
+  });
+  s += `\nИспользуй эти фрагменты как первоисточник. Цитируй конкретные положения дословно, когда уместно.\n`;
+  return s;
 }
 
-// ── Format live data for prompt ───────────────────────────────────────────────
-function formatLiveContext(news, notices, legalDocs, area) {
+// ── Live context ──────────────────────────────────────────────────────────────
+function formatLive(news, notices) {
   const today = new Date().toLocaleDateString('ru-RU');
-  let ctx = `\n== ДАННЫЕ В РЕАЛЬНОМ ВРЕМЕНИ (получено с aifc.kz · ${today}) ==\n`;
-  let count = 0;
-
+  let s = '', count = 0;
   if (news.length) {
-    ctx += `\nПоследние новости МФЦА:\n`;
-    news.forEach(n => { ctx += `- ${n.date ? `[${n.date}] ` : ''}${n.title} → ${n.url}\n`; count++; });
+    s += `\nПоследние новости МФЦА (${today}):\n`;
+    news.forEach(n => { s += `- ${n.date ? `[${n.date}] ` : ''}${n.title} → ${n.url}\n`; count++; });
   }
-
   if (notices.length) {
-    ctx += `\nУведомления AFSA (Notice Register):\n`;
-    notices.forEach(n => { ctx += `- ${n.title} → ${n.url}\n`; count++; });
+    s += `\nУведомления AFSA:\n`;
+    notices.forEach(n => { s += `- ${n.title} → ${n.url}\n`; count++; });
   }
+  return { ctx: count ? `\n== ДАННЫЕ В РЕАЛЬНОМ ВРЕМЕНИ ==\n${s}` : '', count };
+}
 
-  if (legalDocs.length) {
-    ctx += `\nАктуальные документы МФЦА по теме «${area}»:\n`;
-    legalDocs.forEach(d => { ctx += `- [${d.title}](${d.url})\n`; count++; });
-  }
+// ── System prompt ─────────────────────────────────────────────────────────────
+function buildSystemPrompt({ area, lang, liveCtx, ragCtx }) {
+  const langLine = lang === 'en' ? 'Respond in English.' : 'Отвечай строго на русском языке.';
+  return `Ты — специализированный юридический ассистент по законодательству МФЦА (Международного финансового центра «Астана») и Республики Казахстан. Область права: ${area || 'Общее'}.
+${ragCtx}${liveCtx}
+== ВСТРОЕННАЯ БАЗА АКТОВ МФЦА (название → URL) ==
+${ACTS_INDEX}
 
-  return { ctx: count > 0 ? ctx : '', count };
+== ПРАВИЛА ==
+- Всегда указывай полное название акта и прямую ссылку [Название](URL).
+- Приоритет: фрагменты RAG > живые данные > встроенная база. НИКОГДА не выдумывай URL.
+- Если в новостях есть изменения по теме — предупреди с ⚠️.
+- В периметре МФЦА действует английское общее право, оно приоритетнее права РК — указывай коллизии.
+
+== ДИАЛОГ ==
+- Если вопрос неполный — задай 1–2 уточняющих вопроса ПЕРЕД полным ответом.
+- В конце уточняющего вопроса ВСЕГДА добавляй отдельную последнюю строку с вариантами:
+ЧИПЫ: Вариант А | Вариант Б | Вариант В | Другое
+- Строку ЧИПЫ: добавляй ТОЛЬКО к уточняющим вопросам, не к полным консультациям.
+
+== СТРУКТУРА ПОЛНОГО ОТВЕТА ==
+## I. Краткий вывод
+## II. Применимое законодательство ([Название] — статья — [URL])
+## III. Детальный анализ
+## IV. Приоритет норм МФЦА vs РК (если применимо)
+## V. Практические рекомендации
+## VI. Актуальность источников
+## VII. Оговорка
+
+${langLine}`;
+}
+
+// ── Rate limiting (KV) ────────────────────────────────────────────────────────
+async function checkRateLimit(env, ip) {
+  if (!env.AIFC_KV || !ip) return true;
+  const key = `rl:${ip}:${Math.floor(Date.now() / 60000)}`;
+  const cur = parseInt(await env.AIFC_KV.get(key) || '0', 10);
+  if (cur >= RATE_LIMIT_PER_MIN) return false;
+  await env.AIFC_KV.put(key, String(cur + 1), { expirationTtl: 120 });
+  return true;
 }
 
 // ── Link verification ─────────────────────────────────────────────────────────
 function extractUrls(text) {
   const seen = new Set();
-  const matches = [...text.matchAll(/\]\((https?:\/\/[^)]+)\)/g),
-                   ...text.matchAll(/(?<!\()(https?:\/\/(?:aifc\.kz|adilet\.zan\.kz|afsa\.aifc\.kz|publicreg\.myafsa\.com)[^\s),>"]+)/g)];
-  return matches
-    .map(m => m[1] || m[0])
-    .filter(url => { if (seen.has(url)) return false; seen.add(url); return true; })
-    .slice(0, 20); // cap at 20 to stay within Worker CPU limits
+  const m = [
+    ...text.matchAll(/\]\((https?:\/\/[^)]+)\)/g),
+    ...text.matchAll(/(?<!\()(https?:\/\/(?:aifc\.kz|adilet\.zan\.kz|afsa\.aifc\.kz|publicreg\.myafsa\.com)[^\s),>"]+)/g),
+  ];
+  return m.map(x => x[1] || x[0]).filter(u => !seen.has(u) && seen.add(u)).slice(0, 20);
 }
-
 async function verifyUrl(url) {
   try {
-    const res = await fetch(url, {
-      method: 'HEAD',
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LegalBot/1.0)' },
-      cf: { cacheTtl: 3600 },
-      signal: AbortSignal.timeout(5000),
-    });
-    return { url, ok: res.ok, status: res.status };
-  } catch {
-    return { url, ok: false, status: 0 };
-  }
+    const res = await fetch(url, { method: 'HEAD', cf: { cacheTtl: 3600 }, signal: AbortSignal.timeout(5000) });
+    return [url, { ok: res.ok, status: res.status }];
+  } catch { return [url, { ok: false, status: 0 }]; }
 }
-
 async function verifyLinks(text) {
   const urls = extractUrls(text);
   if (!urls.length) return {};
-  const results = await Promise.all(urls.map(verifyUrl));
-  return Object.fromEntries(results.map(r => [r.url, { ok: r.ok, status: r.status }]));
+  return Object.fromEntries(await Promise.all(urls.map(verifyUrl)));
 }
 
-// ── Main handler ──────────────────────────────────────────────────────────────
-export default {
-  async fetch(request, env) {
-    if (request.method === 'OPTIONS') {
-      return new Response(null, {
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
-        },
-      });
-    }
-    if (request.method !== 'POST') {
-      return new Response('Method not allowed', { status: 405 });
-    }
+// ── Streaming chat handler ────────────────────────────────────────────────────
+async function handleChat(request, env, ctx) {
+  const ip = request.headers.get('cf-connecting-ip') || '';
+  if (!(await checkRateLimit(env, ip)))
+    return json({ error: 'Слишком много запросов. Подождите минуту.' }, 429);
 
-    let body;
-    try { body = await request.json(); }
-    catch { return new Response('Invalid JSON', { status: 400 }); }
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
+  const { messages = [], area, lang } = body;
+  const lastUser = [...messages].reverse().find(m => m.role === 'user')?.content || '';
 
-    const { messages, area, lang } = body;
-    const langInstruction = lang === 'en'
-      ? 'Respond in English.'
-      : 'Отвечай строго на русском языке.';
+  // Parallel: RAG retrieval + live data
+  const [ragChunks, news, notices] = await Promise.all([
+    ragRetrieve(env, `${area || ''} ${lastUser}`.trim()),
+    fetchAifcNews(),
+    fetchAfsaNotices(),
+  ]);
+  const { ctx: liveCtx, count: liveCount } = formatLive(news, notices);
+  const ragCtx = formatRag(ragChunks);
+  const systemPrompt = buildSystemPrompt({ area, lang, liveCtx, ragCtx });
 
-    // Fetch live data in parallel — all free, no API keys
-    const category = areaToCategory(area);
-    const [news, notices, legalDocs] = await Promise.all([
-      fetchAifcNews(),
-      fetchAfsaNotices(),
-      category ? fetchLegalFrameworkCategory(category) : Promise.resolve([]),
-    ]);
+  const aiStream = await env.AI.run(CHAT_MODEL, {
+    messages: [{ role: 'system', content: systemPrompt }, ...messages],
+    max_tokens: 2048, temperature: 0.2, stream: true,
+  });
 
-    const { ctx: liveContext, count: liveCount } = formatLiveContext(news, notices, legalDocs, area);
+  const msgId = crypto.randomUUID();
+  const ragSources = ragChunks.map(c => ({ act: c.act, url: c.url }));
 
-    const systemPrompt = `Ты — специализированный юридический ассистент по законодательству МФЦА (Международного финансового центра «Астана») и Республики Казахстан. Область права: ${area || 'Общее'}.
-${liveContext}
-== ВСТРОЕННАЯ БАЗА НОРМАТИВНЫХ АКТОВ МФЦА ==
-При ответе ОБЯЗАН ссылаться на конкретные акты с точными URL:
-${ACTS_INDEX}
+  // Transform Workers-AI SSE → our NDJSON protocol, accumulate full text for KV
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+  let buffer = '', fullText = '';
 
-== ПРАВИЛА ЦИТИРОВАНИЯ ==
-- Всегда указывай полное название акта и прямую URL-ссылку в формате [Название](URL)
-- Если живые данные выше содержат более актуальную версию — используй их URL
-- Если в новостях есть изменения по теме запроса — предупреди пользователя с ⚠️
-- НИКОГДА не выдумывай URL
+  const out = new ReadableStream({
+    async start(controller) {
+      controller.enqueue(encoder.encode(JSON.stringify({
+        type: 'meta', msgId, liveCount, ragCount: ragChunks.length, ragSources,
+      }) + '\n'));
 
-== ПРИОРИТЕТ НОРМ ==
-В периметре МФЦА право Центра (английское общее право) приоритетнее законодательства РК. Явно указывай на коллизии.
-
-== СТИЛЬ — ДИАЛОГОВЫЙ ==
-- Если вопрос неполный — задай 1-2 уточняющих вопроса ПЕРЕД полным ответом
-- Уточняй: тип организации, гражданство, вид деятельности, наличие лицензий
-- В продолжении диалога ссылайся на сказанное ранее
-
-== ФОРМАТ УТОЧНЯЮЩИХ ВОПРОСОВ (СТРОГО СОБЛЮДАТЬ) ==
-Когда задаёшь уточняющий вопрос, ВСЕГДА добавляй в конце строку с вариантами ответа:
-ЧИПЫ: Вариант А | Вариант Б | Вариант В | Другое
-
-Примеры:
-- Вопрос о типе организации → ЧИПЫ: ТОО | АО | LLP | Партнёрство | Филиал
-- Вопрос о гражданстве → ЧИПЫ: Гражданин РК | Иностранец | Юрлицо РК | Иностранное юрлицо
-- Вопрос о виде деятельности → ЧИПЫ: Управление активами | Банкинг | Страхование | FinTech | Брокераж
-- Вопрос о наличии лицензии → ЧИПЫ: Нет лицензии | Есть лицензия AFSA | Есть лицензия НБ РК | Не уверен
-- Вопрос о цели → ЧИПЫ: Открыть компанию | Получить лицензию | Проверить соответствие | Разрешить спор
-- Вопрос о масштабе → ЧИПЫ: Стартап | МСБ | Крупная компания | Иностранная группа
-Строка ЧИПЫ: должна быть отдельной последней строкой ответа. Не добавляй её в полных консультациях.
-
-== СТРУКТУРА ПОЛНОГО ОТВЕТА ==
-## I. Краткий вывод
-## II. Применимое законодательство
-[Название] — [статья/раздел] — [URL]
-## III. Детальный правовой анализ
-## IV. Приоритет норм МФЦА vs РК (если применимо)
-## V. Практические рекомендации
-## VI. Актуальность источников
-[Дата проверки · найденные изменения или их отсутствие]
-## VII. Оговорка
-
-${langInstruction}`;
-
-    try {
-      const response = await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
-        messages: [
-          { role: 'system', content: systemPrompt },
-          ...messages,
-        ],
-        max_tokens: 2048,
-        temperature: 0.2,
-      });
-
-      // Verify all links in the response in parallel
-      const linkStatus = await verifyLinks(response.response);
-      const brokenCount = Object.values(linkStatus).filter(v => !v.ok).length;
-
-      return new Response(
-        JSON.stringify({
-          text: response.response,
-          liveCount,
-          linkStatus,   // { url: { ok, status } }
-          brokenCount,
-          fetchDate: new Date().toISOString(),
-        }),
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-          },
+      const reader = aiStream.getReader();
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          let nl;
+          while ((nl = buffer.indexOf('\n')) !== -1) {
+            const line = buffer.slice(0, nl).trim(); buffer = buffer.slice(nl + 1);
+            if (!line.startsWith('data:')) continue;
+            const data = line.slice(5).trim();
+            if (data === '[DONE]') continue;
+            try {
+              const tok = JSON.parse(data).response || '';
+              if (tok) { fullText += tok; controller.enqueue(encoder.encode(JSON.stringify({ type: 'token', t: tok }) + '\n')); }
+            } catch {}
+          }
         }
-      );
-    } catch (err) {
-      return new Response(JSON.stringify({ error: err.message }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      });
+      } catch (e) {
+        controller.enqueue(encoder.encode(JSON.stringify({ type: 'error', error: String(e) }) + '\n'));
+      }
+
+      // Verify links after generation
+      const linkStatus = await verifyLinks(fullText);
+      const brokenCount = Object.values(linkStatus).filter(v => !v.ok).length;
+      controller.enqueue(encoder.encode(JSON.stringify({ type: 'done', linkStatus, brokenCount }) + '\n'));
+
+      // Persist Q/A for rating context (24h)
+      if (env.AIFC_KV) ctx.waitUntil(env.AIFC_KV.put(`msg:${msgId}`,
+        JSON.stringify({ q: lastUser, area, ts: Date.now() }), { expirationTtl: 86400 }));
+
+      controller.close();
+    },
+  });
+
+  return new Response(out, { headers: { 'Content-Type': 'application/x-ndjson; charset=utf-8', ...CORS } });
+}
+
+// ── Rating handler ────────────────────────────────────────────────────────────
+async function handleRate(request, env) {
+  let body; try { body = await request.json(); } catch { return json({ error: 'bad' }, 400); }
+  const { msgId, vote } = body;
+  if (!msgId || !['up', 'down'].includes(vote)) return json({ error: 'bad' }, 400);
+  if (env.AIFC_KV) {
+    const key = `rate:${vote}`;
+    const cur = parseInt(await env.AIFC_KV.get(key) || '0', 10);
+    await env.AIFC_KV.put(key, String(cur + 1));
+    await env.AIFC_KV.put(`vote:${msgId}`, vote, { expirationTtl: 2592000 });
+  }
+  return json({ ok: true });
+}
+
+// ── Changes (cron monitor) read handler ───────────────────────────────────────
+async function handleChanges(env) {
+  if (!env.AIFC_KV) return json({ changes: [] });
+  const raw = await env.AIFC_KV.get('changes');
+  return json({ changes: raw ? JSON.parse(raw) : [] });
+}
+
+// ── RAG ingestion handler ─────────────────────────────────────────────────────
+function chunkText(text, size = 1400, overlap = 200) {
+  const chunks = [];
+  for (let i = 0; i < text.length; i += (size - overlap)) {
+    chunks.push(text.slice(i, i + size));
+    if (i + size >= text.length) break;
+  }
+  return chunks;
+}
+
+async function handleIngest(request, env) {
+  const url = new URL(request.url);
+  if (url.searchParams.get('key') !== INGEST_SECRET) return json({ error: 'forbidden' }, 403);
+  const start = parseInt(url.searchParams.get('start') || '0', 10);
+  const count = parseInt(url.searchParams.get('count') || '2', 10);
+  const slice = ACTS.slice(start, start + count);
+  let totalChunks = 0;
+  const report = [];
+
+  for (let ai = 0; ai < slice.length; ai++) {
+    const [name, actUrl, cat] = slice[ai];
+    try {
+      const res = await fetch(actUrl, { cf: { cacheTtl: 86400 } });
+      if (!res.ok) { report.push({ name, ok: false, status: res.status }); continue; }
+      const text = stripTags(await res.text());
+      // Limit: keep first ~20k chars to bound CPU
+      const chunks = chunkText(text.slice(0, 20000)).filter(c => c.trim().length > 100);
+      const globalIdx = start + ai;
+      // Embed in sub-batches
+      for (let b = 0; b < chunks.length; b += 8) {
+        const batch = chunks.slice(b, b + 8);
+        const emb = await env.AI.run(EMBED_MODEL, { text: batch });
+        const vectors = emb.data.map((values, k) => ({
+          id: `act${globalIdx}-${b + k}`,
+          values,
+          metadata: { act: name, url: actUrl, cat, text: batch[k].slice(0, 1000) },
+        }));
+        await env.VECTORIZE.upsert(vectors);
+        totalChunks += vectors.length;
+      }
+      report.push({ name, ok: true, chunks: chunks.length });
+    } catch (e) {
+      report.push({ name, ok: false, error: String(e) });
     }
+  }
+
+  const nextStart = start + count;
+  return json({ processed: slice.length, totalChunks, nextStart, done: nextStart >= ACTS.length, report });
+}
+
+// ── Cron: monitor act category pages for changes ──────────────────────────────
+async function runMonitor(env) {
+  if (!env.AIFC_KV) return;
+  const changes = JSON.parse(await env.AIFC_KV.get('changes') || '[]');
+  for (const [name, actUrl] of ACTS.slice(0, 20)) {  // sample to bound CPU
+    try {
+      const res = await fetch(actUrl, { cf: { cacheTtl: 0 } });
+      if (!res.ok) continue;
+      const html = await res.text();
+      // hash the "last updated"-ish signature: length + first 2000 chars of stripped text
+      const sig = String(stripTags(html).slice(0, 3000).length);
+      const prevKey = `mon:${actUrl}`;
+      const prev = await env.AIFC_KV.get(prevKey);
+      if (prev && prev !== sig) {
+        changes.unshift({ act: name, url: actUrl, date: new Date().toISOString().slice(0, 10) });
+      }
+      await env.AIFC_KV.put(prevKey, sig);
+    } catch {}
+  }
+  await env.AIFC_KV.put('changes', JSON.stringify(changes.slice(0, 50)));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Router
+// ═══════════════════════════════════════════════════════════════════════════
+export default {
+  async fetch(request, env, ctx) {
+    if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });
+    const url = new URL(request.url);
+    const path = url.pathname;
+
+    if (request.method === 'GET' && path === '/changes') return handleChanges(env);
+    if (request.method === 'GET' && path === '/ingest') return handleIngest(request, env);
+    if (request.method !== 'POST' && path !== '/') return new Response('Not found', { status: 404 });
+
+    if (path === '/rate') return handleRate(request, env);
+    if (path === '/ingest') return handleIngest(request, env);
+    // default: chat (streaming)
+    try {
+      return await handleChat(request, env, ctx);
+    } catch (err) {
+      return json({ error: err.message }, 500);
+    }
+  },
+
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(runMonitor(env));
   },
 };

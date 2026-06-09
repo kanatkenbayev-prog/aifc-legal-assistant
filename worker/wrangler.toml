@@ -1,7 +1,20 @@
 name = "aifc-legal-proxy"
 main = "index.js"
-compatibility_date = "2024-01-01"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 
 [ai]
 binding = "AI"
+
+[[kv_namespaces]]
+binding = "AIFC_KV"
+id = "158cbdeedd144fe487699af26f1d9f9d"
+
+[[vectorize]]
+binding = "VECTORIZE"
+index_name = "aifc-acts"
+
+# Ежедневный мониторинг изменений в актах МФЦА (06:00 UTC)
+[triggers]
+crons = ["0 6 * * *"]
