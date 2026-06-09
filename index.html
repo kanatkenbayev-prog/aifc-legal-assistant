@@ -58,12 +58,19 @@
   .lang-toggle  { display: flex; background: rgba(255,255,255,.1); border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,.15); }
   .lang-btn { padding: 5px 11px; font-size: 11px; font-weight: 600; letter-spacing: .06em; cursor: pointer; border: none; background: transparent; color: rgba(255,255,255,.55); transition: all .2s; font-family: inherit; }
   .lang-btn.active { background: var(--gold); color: var(--navy); }
-  .new-chat-btn {
+  .header-btn {
     padding: 7px 16px; font-size: 12px; font-family: inherit; font-weight: 600;
     background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.2);
     border-radius: 6px; cursor: pointer; transition: all .2s; letter-spacing: .02em;
   }
-  .new-chat-btn:hover { background: rgba(255,255,255,.2); }
+  .header-btn:hover { background: rgba(255,255,255,.2); }
+  @media print {
+    header,.tabs-bar,.sidebar,.input-bar,.chips-row,.typing-wrap{display:none!important}
+    .chat-layout{grid-template-columns:1fr!important;padding:0!important}
+    .chat-area{box-shadow:none!important;border:none!important}
+    .messages{overflow:visible!important;max-height:none!important;padding:0!important}
+    .msg-bubble{box-shadow:none!important}
+  }
 
   /* ── TABS ────────────────────────────────── */
   .tabs-bar {
@@ -363,7 +370,8 @@
         <button class="lang-btn active" id="btn-ru" onclick="setLang('ru')">РУС</button>
         <button class="lang-btn"        id="btn-en" onclick="setLang('en')">ENG</button>
       </div>
-      <button class="new-chat-btn" onclick="newChat()">＋ Новый чат</button>
+      <button class="header-btn" onclick="exportPdf()" title="Сохранить консультацию как PDF">⬇ PDF</button>
+      <button class="header-btn" onclick="newChat()">＋ Новый чат</button>
     </div>
   </div>
 </header>
@@ -493,9 +501,55 @@ let chatHistory  = []; // [{role:'user'|'assistant', content:'...'}]
 let isLoading    = false;
 let activeDbCat  = 'Все';
 
+// ── localStorage persistence ──────────────────
+const LS_KEY = 'aifc_chat_v2';
+
+function saveHistory() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify({ chatHistory, currentArea, currentLang })); }
+  catch {}
+}
+
+function loadHistory() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+    if (!saved || !Array.isArray(saved.chatHistory)) return;
+    chatHistory  = saved.chatHistory;
+    currentArea  = saved.currentArea  || currentArea;
+    currentLang  = saved.currentLang  || currentLang;
+    // Restore language UI
+    document.getElementById('btn-ru').classList.toggle('active', currentLang === 'ru');
+    document.getElementById('btn-en').classList.toggle('active', currentLang === 'en');
+    // Restore area UI
+    document.querySelectorAll('.area-btn').forEach(b => {
+      b.classList.toggle('active', b.textContent.trim().startsWith(currentArea.split(' ')[0]));
+    });
+    document.getElementById('areaLabel').textContent = currentArea;
+    // Re-render messages
+    if (chatHistory.length > 0) {
+      const welcome = document.getElementById('welcome');
+      if (welcome) welcome.remove();
+      chatHistory.forEach(m => {
+        if (m.role === 'user') appendBubble('user', m.content);
+        else appendBubble('ai', m.content);
+      });
+    }
+  } catch {}
+}
+
+// ── PDF Export ────────────────────────────────
+function exportPdf() {
+  const hasMsgs = chatHistory.length > 0;
+  if (!hasMsgs) { alert('Нет консультации для экспорта. Задайте вопрос сначала.'); return; }
+  const title = document.title;
+  document.title = `МФЦА Консультация · ${new Date().toLocaleDateString('ru-RU')}`;
+  window.print();
+  document.title = title;
+}
+
 // ── Init ──────────────────────────────────────
 document.getElementById('currentDate').textContent =
   new Date().toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'});
+loadHistory();
 
 // ── Lang / Area ───────────────────────────────
 function setLang(lang) {
@@ -524,6 +578,7 @@ function showPage(id, btn) {
 // ── New Chat ──────────────────────────────────
 function newChat() {
   chatHistory = [];
+  saveHistory();
   const msgs = document.getElementById('messages');
   msgs.innerHTML = `<div class="welcome" id="welcome">
     <div class="welcome-icon">⚖️</div>
@@ -600,6 +655,7 @@ async function sendMessage() {
 
     const reply = data.text || '';
     chatHistory.push({ role: 'assistant', content: reply });
+    saveHistory();
 
     typingWrap.classList.remove('visible');
     appendBubble('ai', reply, false, data.liveCount || 0, data.linkStatus || {}, data.brokenCount || 0);
