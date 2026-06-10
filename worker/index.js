@@ -221,6 +221,44 @@ async function verifyLinks(text) {
   return Object.fromEntries(await Promise.all(urls.map(verifyUrl)));
 }
 
+// ── Response cache (KV) ───────────────────────────────────────────────────────
+const CACHE_TTL = 21600; // 6 часов
+
+function normalizeQuestion(q) {
+  return q.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim();
+}
+
+async function cacheKey(q, area, lang) {
+  const raw = `${lang}|${area}|${normalizeQuestion(q)}`;
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+  return 'qa:' + [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
+}
+
+// Поток из готового кэшированного ответа (мгновенно)
+function streamFromCache(cached) {
+  const enc = new TextEncoder();
+  const msgId = crypto.randomUUID();
+  const text = cached.text || '';
+  const out = new ReadableStream({
+    start(controller) {
+      controller.enqueue(enc.encode(JSON.stringify({
+        type: 'meta', msgId, liveCount: cached.liveCount || 0,
+        ragCount: (cached.ragSources || []).length, ragSources: cached.ragSources || [], cached: true,
+      }) + '\n'));
+      // Отдаём текст крупными кусками для эффекта печати, но почти мгновенно
+      const step = 24;
+      for (let i = 0; i < text.length; i += step) {
+        controller.enqueue(enc.encode(JSON.stringify({ type: 'token', t: text.slice(i, i + step) }) + '\n'));
+      }
+      controller.enqueue(enc.encode(JSON.stringify({
+        type: 'done', linkStatus: cached.linkStatus || {}, brokenCount: cached.brokenCount || 0,
+      }) + '\n'));
+      controller.close();
+    },
+  });
+  return new Response(out, { headers: { 'Content-Type': 'application/x-ndjson; charset=utf-8', ...CORS } });
+}
+
 // ── Streaming chat handler ────────────────────────────────────────────────────
 async function handleChat(request, env, ctx) {
   const ip = request.headers.get('cf-connecting-ip') || '';
@@ -231,6 +269,22 @@ async function handleChat(request, env, ctx) {
   try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
   const { messages = [], area, lang } = body;
   const lastUser = [...messages].reverse().find(m => m.role === 'user')?.content || '';
+
+  // Кэш: только для одиночных вопросов (без контекста диалога) длиной 8–400 симв.
+  const singleTurn = messages.filter(m => m.role === 'user').length === 1 && messages.length <= 2;
+  const cacheable = singleTurn && lastUser.length >= 8 && lastUser.length <= 400;
+  let ck = null;
+  if (cacheable && env.AIFC_KV) {
+    ck = await cacheKey(lastUser, area, lang);
+    const hit = await env.AIFC_KV.get(ck);
+    if (hit) {
+      try {
+        const cached = JSON.parse(hit);
+        // не кэшируем уточняющие вопросы (с чипами)
+        if (cached.text && !/^ЧИПЫ:/m.test(cached.text)) return streamFromCache(cached);
+      } catch {}
+    }
+  }
 
   // Parallel: RAG retrieval + live data
   const [ragChunks, news, notices] = await Promise.all([
@@ -291,6 +345,13 @@ async function handleChat(request, env, ctx) {
       // Persist Q/A for rating context (24h)
       if (env.AIFC_KV) ctx.waitUntil(env.AIFC_KV.put(`msg:${msgId}`,
         JSON.stringify({ q: lastUser, area, ts: Date.now() }), { expirationTtl: 86400 }));
+
+      // Сохраняем в кэш (только полные ответы, не уточняющие вопросы)
+      if (ck && env.AIFC_KV && fullText.length > 200 && !/^ЧИПЫ:/m.test(fullText)) {
+        ctx.waitUntil(env.AIFC_KV.put(ck, JSON.stringify({
+          text: fullText, linkStatus, brokenCount, liveCount, ragSources,
+        }), { expirationTtl: CACHE_TTL }));
+      }
 
       controller.close();
     },

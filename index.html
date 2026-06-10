@@ -252,6 +252,7 @@
   .verify-chip.ok     { background: rgba(26,122,74,.08); color: var(--success); border: 1px solid rgba(26,122,74,.2); }
   .verify-chip.broken { background: rgba(192,57,43,.08); color: var(--kz-red);  border: 1px solid rgba(192,57,43,.2); }
   .verify-chip.rag    { background: rgba(27,79,138,.10); color: var(--aifc-blue); border: 1px solid rgba(27,79,138,.25); cursor: help; }
+  .verify-chip.cache  { background: rgba(201,168,76,.15); color: #9B7B2E; border: 1px solid rgba(201,168,76,.35); cursor: help; }
 
   /* Rating row */
   .rate-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
@@ -384,6 +385,21 @@
   .calc-result { margin-top: 12px; font-size: 12.5px; line-height: 1.6; color: var(--text); }
   .calc-result strong { color: var(--navy); font-size: 15px; }
   @media (max-width: 700px) { .calc-grid { grid-template-columns: 1fr; } }
+
+  /* Document generator */
+  .doc-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .doc-tab { padding: 6px 13px; font-size: 11.5px; font-family: inherit; border: 1px solid var(--border); border-radius: 18px; background: #fff; cursor: pointer; color: var(--text-muted); transition: all .2s; }
+  .doc-tab.active, .doc-tab:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .doc-grid { display: grid; grid-template-columns: 320px 1fr; gap: 18px; align-items: start; }
+  .doc-form { display: flex; flex-direction: column; gap: 10px; }
+  .doc-form label { font-size: 11.5px; color: var(--text); display: flex; flex-direction: column; gap: 4px; }
+  .doc-form input, .doc-form textarea, .doc-form select { padding: 8px 10px; font-size: 12.5px; font-family: inherit; border: 1px solid var(--border); border-radius: 7px; background: #fff; outline: none; }
+  .doc-form input:focus, .doc-form textarea:focus, .doc-form select:focus { border-color: var(--gold); }
+  .doc-form textarea { resize: vertical; min-height: 56px; }
+  .doc-preview-wrap { display: flex; flex-direction: column; gap: 10px; }
+  .doc-preview { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; font-size: 12px; line-height: 1.65; white-space: pre-wrap; min-height: 280px; color: var(--text); font-family: 'Source Serif 4', Georgia, serif; box-shadow: inset 0 0 0 1px rgba(0,0,0,.01); }
+  .doc-actions { display: flex; gap: 8px; }
+  @media (max-width: 760px) { .doc-grid { grid-template-columns: 1fr; } }
 
   /* ══════════════════════════════════════════
      NEWS PAGE
@@ -602,6 +618,23 @@
             </label>
             <button class="calc-btn" onclick="calcTerm()">Рассчитать</button>
             <div class="calc-result" id="calcTermResult"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Document generator -->
+      <section class="tool-block">
+        <h2 class="tool-h">📝 Генератор документов</h2>
+        <p class="calc-note" style="margin-bottom:14px">Заполните поля — получите черновик документа. Это шаблон-заготовка, а не юридический документ: перед использованием проверьте у юриста.</p>
+        <div class="doc-tabs" id="docTabs"></div>
+        <div class="doc-grid">
+          <div class="doc-form" id="docForm"></div>
+          <div class="doc-preview-wrap">
+            <div class="doc-preview" id="docPreview"></div>
+            <div class="doc-actions">
+              <button class="calc-btn" style="width:auto;padding:9px 16px" onclick="copyDoc()">📋 Копировать</button>
+              <button class="calc-btn" style="width:auto;padding:9px 16px;background:var(--gold);color:var(--navy)" onclick="downloadDoc()">⬇ Скачать .txt</button>
+            </div>
           </div>
         </div>
       </section>
@@ -877,6 +910,7 @@ function finalizeAiBubble(ai, rawText, meta, linkStatus, brokenCount) {
   const okCount = Object.values(linkStatus).filter(v => v.ok).length;
   const today = new Date().toLocaleDateString('ru-RU');
   let html = '<div class="verify-summary">';
+  if (meta.cached)        html += `<span class="verify-chip cache" title="Ответ из кэша частых вопросов — мгновенно, без повторного запроса к ИИ">⚡ из кэша</span>`;
   if (meta.ragCount > 0)  html += `<span class="verify-chip rag" title="${meta.ragSources.map(s=>s.act).join(', ')}">📖 RAG: ${meta.ragCount} фрагмента</span>`;
   if (meta.liveCount > 0) html += `<span class="verify-chip ok">🔍 ${meta.liveCount} источников · ${today}</span>`;
   if (okCount > 0)        html += `<span class="verify-chip ok">✓ ${okCount} ссылок проверено</span>`;
@@ -1160,6 +1194,7 @@ function renderTools() {
   document.getElementById('checklistTabs').innerHTML = Object.keys(CHECKLISTS).map(name =>
     `<button class="cl-tab${name === activeChecklist ? ' active' : ''}" onclick="setChecklist('${name}')">${name}</button>`).join('');
   renderChecklist();
+  renderDocGen();
 }
 
 function setChecklist(name) {
@@ -1217,6 +1252,156 @@ function calcTerm() {
   document.getElementById('calcTermResult').innerHTML =
     `Ориентировочный срок: <strong>~${total} раб. дней</strong><br>
      <small style="color:var(--text-muted)">Без учёта времени на подготовку документов. Лицензируемая деятельность зависит от полноты заявки и решения AFSA.</small>`;
+}
+
+// ══════════════════════════════════════════════
+// DOCUMENT GENERATOR
+// ══════════════════════════════════════════════
+const DOC_TEMPLATES = {
+  'Письмо-запрос в AFSA': {
+    fields: [
+      {id:'company', label:'Наименование компании', ph:'ABC Capital Ltd'},
+      {id:'regnum', label:'Регистрационный номер (BIN/AIFC)', ph:'250140900123'},
+      {id:'applicant', label:'ФИО заявителя', ph:'Иванов Иван Иванович'},
+      {id:'position', label:'Должность', ph:'Директор'},
+      {id:'subject', label:'Тема обращения', ph:'Разъяснение по лицензированию'},
+      {id:'body', label:'Текст обращения', ph:'Просим разъяснить...', area:true},
+      {id:'date', label:'Дата', ph:'09.06.2026'},
+    ],
+    build: f => `Astana Financial Services Authority (AFSA)
+Astana International Financial Centre
+
+Исх. № ______ от ${f.date||'__.__.____'}
+
+Тема: ${f.subject||'__________'}
+
+Уважаемые господа,
+
+Настоящим компания ${f.company||'__________'} (регистрационный номер ${f.regnum||'__________'}) обращается в Astana Financial Services Authority со следующим запросом:
+
+${f.body||'__________'}
+
+Просим рассмотреть настоящее обращение и предоставить официальный ответ в установленный срок.
+
+С уважением,
+${f.applicant||'__________'}
+${f.position||'__________'}
+${f.company||'__________'}
+
+────────────────────────────────────────
+ЧЕРНОВИК. Подготовлено в МФЦА Правовом Ассистенте. Не является юридическим документом — проверьте у юриста перед подачей.`,
+  },
+
+  'Решение единственного участника': {
+    fields: [
+      {id:'company', label:'Наименование компании', ph:'ABC Capital Ltd'},
+      {id:'regnum', label:'Регистрационный номер', ph:'250140900123'},
+      {id:'member', label:'ФИО / наименование участника', ph:'Иванов Иван Иванович'},
+      {id:'resolution', label:'Существо решения', ph:'Назначить директором...', area:true},
+      {id:'city', label:'Город', ph:'Астана'},
+      {id:'date', label:'Дата', ph:'09.06.2026'},
+    ],
+    build: f => `РЕШЕНИЕ ЕДИНСТВЕННОГО УЧАСТНИКА
+${f.company||'__________'}
+(рег. № ${f.regnum||'__________'})
+
+г. ${f.city||'Астана'}                                       ${f.date||'__.__.____'}
+
+Я, ${f.member||'__________'}, являясь единственным участником компании ${f.company||'__________'}, учреждённой в соответствии с AIFC Companies Regulations, принял следующее решение:
+
+${f.resolution||'__________'}
+
+Настоящее решение вступает в силу с момента подписания.
+
+Единственный участник:
+_______________________  /${f.member||'__________'}/
+
+────────────────────────────────────────
+ЧЕРНОВИК. Подготовлено в МФЦА Правовом Ассистенте. Не является юридическим документом — проверьте у юриста.`,
+  },
+
+  'Соглашение о конфиденциальности (NDA)': {
+    fields: [
+      {id:'party1', label:'Сторона 1 (раскрывающая)', ph:'ABC Capital Ltd'},
+      {id:'party2', label:'Сторона 2 (получающая)', ph:'XYZ Partners Ltd'},
+      {id:'purpose', label:'Цель раскрытия', ph:'обсуждение возможной сделки'},
+      {id:'term', label:'Срок действия (лет)', ph:'3'},
+      {id:'city', label:'Город', ph:'Астана'},
+      {id:'date', label:'Дата', ph:'09.06.2026'},
+    ],
+    build: f => `СОГЛАШЕНИЕ О КОНФИДЕНЦИАЛЬНОСТИ (NDA)
+
+г. ${f.city||'Астана'}                                       ${f.date||'__.__.____'}
+
+${f.party1||'__________'} («Раскрывающая сторона») и ${f.party2||'__________'} («Получающая сторона») заключили настоящее Соглашение о нижеследующем:
+
+1. ПРЕДМЕТ. В целях «${f.purpose||'__________'}» Раскрывающая сторона передаёт Получающей конфиденциальную информацию.
+
+2. ОБЯЗАТЕЛЬСТВА. Получающая сторона обязуется не раскрывать конфиденциальную информацию третьим лицам и использовать её исключительно в указанной цели.
+
+3. СРОК. Обязательства о конфиденциальности действуют ${f.term||'__'} лет с даты подписания.
+
+4. ПРИМЕНИМОЕ ПРАВО. Настоящее Соглашение регулируется действующим правом МФЦА (Acting Law of the AIFC). Споры подлежат рассмотрению в Суде МФЦА / Международном арбитражном центре (IAC).
+
+ПОДПИСИ СТОРОН:
+${f.party1||'__________'}: _______________
+${f.party2||'__________'}: _______________
+
+────────────────────────────────────────
+ЧЕРНОВИК. Подготовлено в МФЦА Правовом Ассистенте. Не является юридическим документом — проверьте у юриста.`,
+  },
+};
+
+let activeDoc = Object.keys(DOC_TEMPLATES)[0];
+let docValues = {};
+
+function renderDocGen() {
+  document.getElementById('docTabs').innerHTML = Object.keys(DOC_TEMPLATES).map(name =>
+    `<button class="doc-tab${name === activeDoc ? ' active' : ''}" onclick="setDoc('${name.replace(/'/g,"\\'")}')">${name}</button>`).join('');
+  const tpl = DOC_TEMPLATES[activeDoc];
+  document.getElementById('docForm').innerHTML = tpl.fields.map(fl => {
+    const v = docValues[fl.id] || '';
+    const input = fl.area
+      ? `<textarea oninput="updateDoc('${fl.id}', this.value)" placeholder="${fl.ph}">${v}</textarea>`
+      : `<input type="text" oninput="updateDoc('${fl.id}', this.value)" placeholder="${fl.ph}" value="${v.replace(/"/g,'&quot;')}">`;
+    return `<label>${fl.label}${input}</label>`;
+  }).join('');
+  renderDocPreview();
+}
+
+function setDoc(name) {
+  activeDoc = name;
+  docValues = {};
+  renderDocGen();
+}
+
+function updateDoc(id, val) {
+  docValues[id] = val;
+  renderDocPreview();
+}
+
+function renderDocPreview() {
+  document.getElementById('docPreview').textContent = DOC_TEMPLATES[activeDoc].build(docValues);
+}
+
+function copyDoc() {
+  const text = DOC_TEMPLATES[activeDoc].build(docValues);
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    const orig = btn.textContent;
+    btn.textContent = '✓ Скопировано';
+    setTimeout(() => btn.textContent = orig, 1800);
+  }).catch(() => alert('Не удалось скопировать'));
+}
+
+function downloadDoc() {
+  const text = DOC_TEMPLATES[activeDoc].build(docValues);
+  const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = activeDoc.replace(/[^\wа-яА-Я]+/g,'_') + '.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 // ══════════════════════════════════════════════
