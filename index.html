@@ -386,6 +386,66 @@
   .calc-result strong { color: var(--navy); font-size: 15px; }
   @media (max-width: 700px) { .calc-grid { grid-template-columns: 1fr; } }
 
+  /* Substance Checker & Registration Wizard */
+  .wiz-steps { display: flex; gap: 0; margin-bottom: 20px; overflow-x: auto; }
+  .wiz-step { flex: 1; min-width: 0; padding: 8px 6px; font-size: 11px; text-align: center; color: var(--text-muted); border-bottom: 3px solid var(--border); transition: all .2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .wiz-step.active { color: var(--navy); border-color: var(--gold); font-weight: 600; }
+  .wiz-step.done { color: var(--success); border-color: var(--success); }
+  .wiz-panel { display: none; }
+  .wiz-panel.active { display: block; }
+  .wiz-q { font-size: 13px; font-weight: 600; color: var(--navy); margin: 14px 0 8px; }
+  .wiz-hint { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4; }
+  .wiz-opts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .wiz-opt { padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 20px; font-size: 12px; font-family: inherit; cursor: pointer; background: #fff; color: var(--text); transition: all .2s; white-space: nowrap; }
+  .wiz-opt:hover { border-color: var(--gold); }
+  .wiz-opt.selected { border-color: var(--navy); background: var(--navy); color: #fff; }
+  .wiz-nav { display: flex; gap: 10px; margin-top: 18px; }
+  .wiz-back { background: #fff; color: var(--navy); border: 1.5px solid var(--border); border-radius: 8px; padding: 9px 20px; font-size: 13px; font-family: inherit; font-weight: 600; cursor: pointer; }
+  .wiz-next { background: var(--navy); color: #fff; border: none; border-radius: 8px; padding: 9px 20px; font-size: 13px; font-family: inherit; font-weight: 600; cursor: pointer; }
+  .wiz-next:disabled { opacity: .4; cursor: not-allowed; }
+
+  .sub-score { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
+  .sub-crit { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; background: #fff; }
+  .sub-crit-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .sub-crit-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .sub-badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+  .sub-badge.green { background: #d4f0e0; color: #1a7a4a; }
+  .sub-badge.yellow { background: #fef3cd; color: #856404; }
+  .sub-badge.red { background: #fde8e8; color: #c0392b; }
+  .sub-crit-text { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .sub-crit-rec { margin-top: 7px; font-size: 11.5px; color: var(--text); padding: 6px 10px; background: rgba(201,168,76,.1); border-radius: 6px; border-left: 3px solid var(--gold); }
+  .sub-total { text-align: center; padding: 18px; border-radius: 12px; margin-top: 4px; }
+  .sub-total.green { background: #d4f0e0; border: 2px solid #1a7a4a; }
+  .sub-total.yellow { background: #fef3cd; border: 2px solid #b8860b; }
+  .sub-total.red { background: #fde8e8; border: 2px solid #c0392b; }
+  .sub-total-label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+  .sub-total-val { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin: 4px 0; }
+  .sub-total-hint { font-size: 11.5px; line-height: 1.5; }
+  .sub-cite { font-size: 10.5px; color: var(--text-muted); margin-top: 14px; line-height: 1.5; border-top: 1px solid var(--border); padding-top: 10px; }
+
+  .reg-result { display: flex; flex-direction: column; gap: 14px; }
+  .reg-block { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: #fff; }
+  .reg-block-head { background: var(--navy); color: #fff; padding: 10px 16px; font-size: 13px; font-weight: 600; }
+  .reg-block-body { padding: 14px 16px; }
+  .reg-row { display: flex; gap: 12px; align-items: baseline; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+  .reg-row:last-child { border-bottom: none; }
+  .reg-row-label { flex: 0 0 180px; color: var(--text-muted); font-size: 11.5px; }
+  .reg-row-val { color: var(--text); font-weight: 500; }
+  .reg-steps { counter-reset: reg-c; list-style: none; padding: 0; margin: 0; }
+  .reg-step { counter-increment: reg-c; display: flex; gap: 12px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+  .reg-step:last-child { border-bottom: none; }
+  .reg-step::before { content: counter(reg-c); flex-shrink: 0; width: 22px; height: 22px; background: var(--gold); color: var(--navy); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+  .reg-step-content { flex: 1; }
+  .reg-step-title { font-weight: 600; color: var(--navy); }
+  .reg-step-detail { color: var(--text-muted); font-size: 11.5px; margin-top: 2px; line-height: 1.4; }
+  .reg-step-days { font-size: 11px; font-weight: 600; color: var(--gold); margin-top: 2px; }
+  .reg-docs { list-style: none; padding: 0; margin: 0; }
+  .reg-docs li { padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text); display: flex; gap: 8px; }
+  .reg-docs li:last-child { border-bottom: none; }
+  .reg-docs li::before { content: "📄"; flex-shrink: 0; }
+  .reg-timeline-bar { display: flex; gap: 0; margin: 8px 0; border-radius: 6px; overflow: hidden; height: 20px; }
+  .reg-tl-seg { display: flex; align-items: center; justify-content: center; font-size: 9.5px; font-weight: 700; color: #fff; transition: flex .3s; }
+
   /* Document generator */
   .doc-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
   .doc-tab { padding: 6px 13px; font-size: 11.5px; font-family: inherit; border: 1px solid var(--border); border-radius: 18px; background: #fff; cursor: pointer; color: var(--text-muted); transition: all .2s; }
@@ -658,9 +718,10 @@
             <p class="calc-note">Ориентировочные сроки по данным AFSA (рабочие дни).</p>
             <label>Тип организации
               <select id="calcOrg">
-                <option value="5">Private Company (Ltd) — без лицензии</option>
-                <option value="7">Partnership / LLP</option>
-                <option value="20">Лицензируемая финансовая фирма (AFSA)</option>
+                <option value="13">Private Company (Ltd) — без лицензии (~10–15 р.дн.)</option>
+                <option value="13">Partnership / LLP (~10–15 р.дн.)</option>
+                <option value="17">Branch иностранной компании (~15–20 р.дн.)</option>
+                <option value="45">Лицензируемая финансовая фирма AFSA (~30–60 р.дн.)</option>
               </select>
             </label>
             <label>Нужна виза/разрешение на работу?
@@ -670,6 +731,26 @@
             <div class="calc-result" id="calcTermResult"></div>
           </div>
         </div>
+      </section>
+
+      <!-- Substance Checker -->
+      <section class="tool-block" id="substanceSection">
+        <h2 class="tool-h">🔬 Substance Checker — проверка критериев реального присутствия</h2>
+        <p class="calc-note" style="margin-bottom:14px">Оцените, соответствует ли ваша компания требованиям <a href="https://orderly.myafsa.com/articles/rules-on-the-substantial-presence-of-the-aifc-participants-applying-tax-exemptions-for-the-payment-of-cit-vat" target="_blank">Rules on Substantial Presence</a> для получения льгот по КПН (0%) и НДС (0%). Результат — справочный, не юридическое заключение.</p>
+        <div class="wiz-steps" id="subSteps"></div>
+        <div id="subPanels"></div>
+        <div class="wiz-nav" id="subNav"></div>
+        <div id="subResult" style="display:none"></div>
+      </section>
+
+      <!-- Registration Wizard -->
+      <section class="tool-block" id="regSection">
+        <h2 class="tool-h">🏗️ Registration Wizard — регистрация компании в МФЦА</h2>
+        <p class="calc-note" style="margin-bottom:14px">Ответьте на 4 вопроса — получите персональный план регистрации с точными сроками, документами и ссылками на нормы. Источник: <a href="https://orderly.myafsa.com/articles/general-legislation" target="_blank">AIFC Companies Regulations</a> + данные AFSA.</p>
+        <div class="wiz-steps" id="regSteps"></div>
+        <div id="regPanels"></div>
+        <div class="wiz-nav" id="regNav"></div>
+        <div id="regResult" style="display:none"></div>
       </section>
 
       <!-- Document generator -->
@@ -1293,6 +1374,9 @@ function renderTools() {
     `<button class="cl-tab${name === activeChecklist ? ' active' : ''}" onclick="setChecklist('${name}')">${name}</button>`).join('');
   renderChecklist();
   renderDocGen();
+  // Init wizards only if not already running
+  if (!document.querySelector('#subSteps .wiz-step')) initSubstanceChecker();
+  if (!document.querySelector('#regSteps .wiz-step')) initRegWizard();
 }
 
 function setChecklist(name) {
@@ -1326,6 +1410,405 @@ function toggleChecklistItem(i) {
   state[activeChecklist][i] = !state[activeChecklist][i];
   clSave(state);
   renderChecklist();
+}
+
+// ══════════════════════════════════════════════
+// SUBSTANCE CHECKER
+// ══════════════════════════════════════════════
+const SUB_QUESTIONS = [
+  {
+    step: 'Деятельность',
+    q: 'Какой вид деятельности осуществляет ваша компания в МФЦА?',
+    hint: 'Выберите основной вид. От него зависят требования к CIGA (Core Income Generating Activities).',
+    opts: [
+      { v: 'financial', label: 'Финансовые услуги / управление активами' },
+      { v: 'holding', label: 'Холдинговая компания' },
+      { v: 'hq', label: 'Штаб-квартира / сервисный центр' },
+      { v: 'ip', label: 'Интеллектуальная собственность / R&D' },
+      { v: 'distribution', label: 'Дистрибуция / торговля' },
+    ]
+  },
+  {
+    step: 'Сотрудники',
+    q: 'Сколько квалифицированных сотрудников работают полный день непосредственно в периметре МФЦА?',
+    hint: 'Учитываются только сотрудники, физически работающие в AIFC (Nur-Sultan/Astana Hub). Удалённые и аутсорс не считаются.',
+    opts: [
+      { v: '0', label: '0 — нет сотрудников в МФЦА' },
+      { v: '1', label: '1 сотрудник' },
+      { v: '2', label: '2–4 сотрудника' },
+      { v: '5', label: '5+ сотрудников' },
+    ]
+  },
+  {
+    step: 'Расходы',
+    q: 'Какова доля операционных расходов компании, которые несутся непосредственно в МФЦА?',
+    hint: 'Аренда офиса в AIFC Hub, зарплаты сотрудников МФЦА, местные операционные расходы. Платежи за рубеж / в РК не учитываются.',
+    opts: [
+      { v: '0', label: 'Менее 10% всех расходов — или нет расходов в МФЦА' },
+      { v: '1', label: '10–30% — небольшой офис, минимальная команда' },
+      { v: '2', label: '30–60% — значительная часть деятельности в МФЦА' },
+      { v: '3', label: 'Более 60% — основная деятельность ведётся в МФЦА' },
+    ]
+  },
+  {
+    step: 'CIGA',
+    q: 'Где фактически принимаются ключевые управленческие решения и осуществляется основная деятельность компании?',
+    hint: 'CIGA (Core Income Generating Activities) — те операции, которые напрямую порождают доход. Например: управление активами, андеррайтинг, R&D, заключение ключевых сделок.',
+    opts: [
+      { v: '0', label: 'В основном за пределами МФЦА (другие страны / РК)' },
+      { v: '1', label: 'Частично в МФЦА, частично за рубежом' },
+      { v: '2', label: 'Преимущественно в МФЦА, часть — удалённо' },
+      { v: '3', label: 'Полностью в МФЦА: офис, управление, операции' },
+    ]
+  },
+];
+
+const CIGA_BY_TYPE = {
+  financial: 'Принятие инвестиционных решений, управление рисками, надзор за активами, клиентские операции',
+  holding: 'Управление дочерними компаниями, надзор за инвестициями, решения о распределении капитала',
+  hq: 'Управленческие функции, координация дочерних структур, ключевые функции поддержки группы',
+  ip: 'Создание и управление ИС, R&D, лицензирование, технологическая поддержка',
+  distribution: 'Приобретение и продажа товаров/услуг, маркетинг, управление клиентскими отношениями',
+};
+
+let subState = { step: 0, answers: {} };
+
+function initSubstanceChecker() {
+  subState = { step: 0, answers: {} };
+  renderSubSteps();
+  renderSubPanels();
+  renderSubNav();
+  document.getElementById('subResult').style.display = 'none';
+  document.getElementById('subPanels').style.display = '';
+  document.getElementById('subSteps').style.display = '';
+  document.getElementById('subNav').style.display = '';
+}
+
+function renderSubSteps() {
+  document.getElementById('subSteps').innerHTML = SUB_QUESTIONS.map((q, i) => {
+    const cls = i === subState.step ? 'active' : (subState.answers[i] !== undefined ? 'done' : '');
+    return `<div class="wiz-step ${cls}">${q.step}</div>`;
+  }).join('');
+}
+
+function renderSubPanels() {
+  const q = SUB_QUESTIONS[subState.step];
+  document.getElementById('subPanels').innerHTML = `
+    <div class="wiz-panel active">
+      <div class="wiz-q">${q.q}</div>
+      <div class="wiz-hint">${q.hint}</div>
+      <div class="wiz-opts">${q.opts.map(o =>
+        `<button class="wiz-opt${subState.answers[subState.step] === o.v ? ' selected' : ''}"
+          onclick="selectSubOpt('${o.v}')">${o.label}</button>`).join('')}
+      </div>
+    </div>`;
+}
+
+function renderSubNav() {
+  const last = subState.step === SUB_QUESTIONS.length - 1;
+  const hasAnswer = subState.answers[subState.step] !== undefined;
+  document.getElementById('subNav').innerHTML = `
+    ${subState.step > 0 ? `<button class="wiz-back" onclick="subBack()">← Назад</button>` : ''}
+    <button class="wiz-next" ${hasAnswer ? '' : 'disabled'} onclick="${last ? 'calcSubstance()' : 'subNext()'}">
+      ${last ? '🔬 Проверить соответствие' : 'Далее →'}
+    </button>`;
+}
+
+function selectSubOpt(v) {
+  subState.answers[subState.step] = v;
+  renderSubPanels();
+  renderSubNav();
+}
+
+function subNext() {
+  if (subState.step < SUB_QUESTIONS.length - 1) { subState.step++; renderSubSteps(); renderSubPanels(); renderSubNav(); }
+}
+function subBack() {
+  if (subState.step > 0) { subState.step--; renderSubSteps(); renderSubPanels(); renderSubNav(); }
+}
+
+function calcSubstance() {
+  const a = subState.answers;
+  const actType = a[0];
+  const empScore = { '0': 0, '1': 1, '2': 2, '5': 3 }[a[1]] ?? 0;
+  const expScore = parseInt(a[2]) || 0;
+  const cigaScore = parseInt(a[3]) || 0;
+
+  // Criterion 1: Qualified Employees
+  const empStatus = empScore === 0 ? 'red' : empScore === 1 ? 'yellow' : 'green';
+  const empLabel = empScore === 0 ? '⛔ Не выполнен' : empScore === 1 ? '⚠️ Пограничный' : '✅ Выполнен';
+  const empRec = empScore < 2
+    ? 'Необходимо нанять минимум 1–2 квалифицированных сотрудников на полную ставку с физическим нахождением в МФЦА. Удалённые сотрудники и консультанты не учитываются. (Substance Rules, п. 3.1)'
+    : 'Требование по сотрудникам, вероятно, выполнено. Убедитесь, что их квалификация соответствует виду деятельности компании.';
+
+  // Criterion 2: Operating Expenditure
+  const expStatus = expScore < 1 ? 'red' : expScore === 1 ? 'yellow' : 'green';
+  const expLabel = expScore < 1 ? '⛔ Не выполнен' : expScore === 1 ? '⚠️ Пограничный' : '✅ Выполнен';
+  const expRec = expScore < 2
+    ? 'Операционные расходы в МФЦА должны быть адекватны уровню деятельности. Рекомендуется увеличить долю расходов: аренда офиса в AIFC Hub, зарплаты, местные услуги. (Substance Rules, п. 3.2)'
+    : 'Расходная составляющая соответствует требованиям. Ведите учёт с разбивкой «расходы в МФЦА» vs «расходы вне МФЦА».';
+
+  // Criterion 3: CIGA
+  const cigaStatus = cigaScore < 1 ? 'red' : cigaScore === 1 ? 'yellow' : 'green';
+  const cigaLabel = cigaScore < 1 ? '⛔ Не выполнен' : cigaScore === 1 ? '⚠️ Пограничный' : '✅ Выполнен';
+  const cigaDef = CIGA_BY_TYPE[actType] || 'Ключевые операции, порождающие доход компании';
+  const cigaRec = cigaScore < 2
+    ? `CIGA для вашего типа деятельности: ${cigaDef}. Эти функции должны выполняться в МФЦА, а не делегироваться материнской структуре или сторонним лицам за рубежом. (Substance Rules, Приложение, таблица CIGA)`
+    : `CIGA вероятно выполнены. Зафиксируйте документально: протоколы заседаний совета директоров в МФЦА, контракты, отчёты об операциях — всё должно подтверждать реальную деятельность.`;
+
+  const totalScore = empScore + expScore + cigaScore;
+  const maxScore = 3 + 3 + 3;
+  const totalStatus = totalScore <= 3 ? 'red' : totalScore <= 6 ? 'yellow' : 'green';
+  const totalLabel = totalScore <= 3 ? '🔴 Высокий риск несоответствия'
+    : totalScore <= 6 ? '🟡 Частичное соответствие — требуются улучшения'
+    : '🟢 Высокая вероятность соответствия';
+  const totalHint = totalScore <= 3
+    ? 'Серьёзный риск: налоговые льготы (КПН 0%, НДС 0%) могут быть оспорены. Потенциальные последствия: доначисление КПН по ставке 20%, штрафы, аннулирование статуса участника МФЦА.'
+    : totalScore <= 6
+    ? 'Есть прогресс, но отдельные критерии не выполнены. Налоговая проверка может выявить несоответствие. Рекомендуется проконсультироваться с юристом МФЦА.'
+    : 'Профиль компании соответствует основным критериям. Обеспечьте полную документацию (трудовые договоры, счета, протоколы) для подтверждения при аудите.';
+
+  document.getElementById('subPanels').style.display = 'none';
+  document.getElementById('subSteps').style.display = 'none';
+  document.getElementById('subNav').style.display = 'none';
+  document.getElementById('subResult').style.display = 'block';
+  document.getElementById('subResult').innerHTML = `
+    <div class="sub-total ${totalStatus}">
+      <div class="sub-total-label">Итоговая оценка</div>
+      <div class="sub-total-val">${totalLabel}</div>
+      <div class="sub-total-hint">${totalHint}</div>
+    </div>
+    <div class="sub-score">
+      ${subCrit('Критерий 1: Qualified Employees', empLabel, empStatus,
+        `Наличие квалифицированных сотрудников с полной занятостью, физически работающих в периметре МФЦА.`, empRec)}
+      ${subCrit('Критерий 2: Operating Expenditure', expLabel, expStatus,
+        `Адекватный уровень операционных расходов, понесённых непосредственно в МФЦА (аренда, зарплаты, услуги).`, expRec)}
+      ${subCrit('Критерий 3: CIGA в МФЦА', cigaLabel, cigaStatus,
+        `Core Income Generating Activities для «${actType}»: ${cigaDef}.`, cigaRec)}
+    </div>
+    <div class="sub-cite">
+      📚 Источник: <a href="https://orderly.myafsa.com/articles/rules-on-the-substantial-presence-of-the-aifc-participants-applying-tax-exemptions-for-the-payment-of-cit-vat" target="_blank">Rules on Substantial Presence of AIFC Participants (CIT/VAT)</a>,
+      AIFC. Три обязательных критерия: п. 3.1 (Qualified Employees), п. 3.2 (Operating Expenditure), Приложение (CIGA по видам деятельности).
+      <br>Риски несоответствия: доначисление КПН по ставке 20%, штрафы, исключение из реестра участников МФЦА.
+      <br><br><button class="wiz-back" onclick="initSubstanceChecker()">← Начать заново</button>
+    </div>`;
+}
+
+function subCrit(name, label, status, desc, rec) {
+  return `<div class="sub-crit">
+    <div class="sub-crit-head">
+      <div class="sub-crit-name">${name}</div>
+      <span class="sub-badge ${status}">${label}</span>
+    </div>
+    <div class="sub-crit-text">${desc}</div>
+    <div class="sub-crit-rec">${rec}</div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════
+// REGISTRATION WIZARD
+// ══════════════════════════════════════════════
+const REG_QUESTIONS = [
+  {
+    step: 'Тип юрлица',
+    q: 'Какой тип юридического лица вы планируете зарегистрировать?',
+    hint: 'Выбор влияет на документы, сроки, минимальный капитал и требования к управлению.',
+    opts: [
+      { v: 'private', label: 'Private Company (Частная компания с огр. ответственностью)' },
+      { v: 'public', label: 'Public Company (Публичная компания)' },
+      { v: 'llp', label: 'LLP (Партнёрство с ограниченной ответственностью)' },
+      { v: 'branch', label: 'Branch (Филиал иностранной компании)' },
+    ]
+  },
+  {
+    step: 'Деятельность',
+    q: 'Планируете ли вы осуществлять лицензируемую деятельность под надзором AFSA?',
+    hint: 'Лицензия AFSA обязательна для: управления активами, брокерской деятельности, банковских услуг, страхования, управления фондами. Консалтинг, IT, торговля — обычно не требуют лицензии AFSA.',
+    opts: [
+      { v: 'nolic', label: 'Нет — обычная деловая деятельность (торговля, IT, консалтинг, холдинг)' },
+      { v: 'lic', label: 'Да — финансовые услуги, требующие лицензии AFSA' },
+    ]
+  },
+  {
+    step: 'Акционеры',
+    q: 'Кто будет выступать акционерами / участниками компании?',
+    hint: 'На иностранных акционеров требуется апостилированная документация с нотариально заверенным переводом.',
+    opts: [
+      { v: 'resident', label: 'Только резиденты Казахстана' },
+      { v: 'foreign', label: 'Иностранные лица (физ. и/или юр. лица)' },
+      { v: 'mixed', label: 'Смешанный состав (резиденты + иностранцы)' },
+    ]
+  },
+  {
+    step: 'Директор',
+    q: 'Где будет находиться директор (CEO / sole director) компании?',
+    hint: 'Директор не обязан быть резидентом Казахстана. Однако для Substance Rules рекомендуется, чтобы ключевые решения принимались в МФЦА.',
+    opts: [
+      { v: 'local', label: 'В Казахстане / МФЦА' },
+      { v: 'abroad', label: 'За рубежом' },
+    ]
+  },
+];
+
+let regState = { step: 0, answers: {} };
+
+function initRegWizard() {
+  regState = { step: 0, answers: {} };
+  renderRegSteps();
+  renderRegPanels();
+  renderRegNav();
+  document.getElementById('regResult').style.display = 'none';
+  document.getElementById('regPanels').style.display = '';
+  document.getElementById('regSteps').style.display = '';
+  document.getElementById('regNav').style.display = '';
+}
+
+function renderRegSteps() {
+  document.getElementById('regSteps').innerHTML = REG_QUESTIONS.map((q, i) => {
+    const cls = i === regState.step ? 'active' : (regState.answers[i] !== undefined ? 'done' : '');
+    return `<div class="wiz-step ${cls}">${q.step}</div>`;
+  }).join('');
+}
+
+function renderRegPanels() {
+  const q = REG_QUESTIONS[regState.step];
+  document.getElementById('regPanels').innerHTML = `
+    <div class="wiz-panel active">
+      <div class="wiz-q">${q.q}</div>
+      <div class="wiz-hint">${q.hint}</div>
+      <div class="wiz-opts">${q.opts.map(o =>
+        `<button class="wiz-opt${regState.answers[regState.step] === o.v ? ' selected' : ''}"
+          onclick="selectRegOpt('${o.v}')">${o.label}</button>`).join('')}
+      </div>
+    </div>`;
+}
+
+function renderRegNav() {
+  const last = regState.step === REG_QUESTIONS.length - 1;
+  const hasAnswer = regState.answers[regState.step] !== undefined;
+  document.getElementById('regNav').innerHTML = `
+    ${regState.step > 0 ? `<button class="wiz-back" onclick="regBack()">← Назад</button>` : ''}
+    <button class="wiz-next" ${hasAnswer ? '' : 'disabled'} onclick="${last ? 'buildRegPlan()' : 'regNext()'}">
+      ${last ? '🏗️ Создать план регистрации' : 'Далее →'}
+    </button>`;
+}
+
+function selectRegOpt(v) {
+  regState.answers[regState.step] = v;
+  renderRegPanels();
+  renderRegNav();
+}
+function regNext() {
+  if (regState.step < REG_QUESTIONS.length - 1) { regState.step++; renderRegSteps(); renderRegPanels(); renderRegNav(); }
+}
+function regBack() {
+  if (regState.step > 0) { regState.step--; renderRegSteps(); renderRegPanels(); renderRegNav(); }
+}
+
+function buildRegPlan() {
+  const a = regState.answers;
+  const entityType = a[0]; // private/public/llp/branch
+  const licensed = a[1] === 'lic';
+  const foreignShareholders = a[2] !== 'resident';
+  const abroadDirector = a[3] === 'abroad';
+
+  const entityInfo = {
+    private: { name: 'Private Company (Ltd)', cap: 'Нет минимума (0 USD)', reg: 'AIFC Companies Regulations, Part 5, Rule 28', docs: 'Articles of Association, Application Form CF01, директорский consent, список акционеров' },
+    public:  { name: 'Public Company', cap: 'Минимум 25 000 USD (оплачен до регистрации)', reg: 'AIFC Companies Regulations, Rule 28', docs: 'Articles of Association, Prospectus (если публичное размещение), CF01, список акционеров' },
+    llp:     { name: 'Limited Liability Partnership (LLP)', cap: 'Нет минимума', reg: 'AIFC Partnership Rules', docs: 'LLP Agreement, Application Form, партнёрский consent' },
+    branch:  { name: 'Branch of Foreign Company', cap: 'Не применимо', reg: 'AIFC Companies Regulations, Part 18', docs: 'Certificate of Incorporation головной компании, устав, решение о создании филиала, доверенность на представителя' },
+  };
+  const ei = entityInfo[entityType];
+
+  // Timeline
+  const baseDays = entityType === 'branch' ? '15–20' : licensed ? '30–60' : '10–15';
+  const foreignExtra = foreignShareholders ? '+3–5 рабочих дней (апостиль + перевод документов)' : '';
+  const abroadExtra = abroadDirector ? '+5–10 дней (апостилированная доверенность / notarisation)' : '';
+
+  // Steps
+  const steps = [];
+  steps.push({ title: 'Выбор и проверка названия', detail: 'Проверьте уникальность названия в реестре МФЦА через AFSA Name Check. Название не должно вводить в заблуждение и не может содержать слов «Bank», «Insurance» без соответствующей лицензии.', days: '1–2 дня' });
+  if (foreignShareholders) {
+    steps.push({ title: 'Апостиль и нотариальный перевод документов акционеров', detail: 'Все иностранные корпоративные документы и документы физических лиц требуют апостилирования и нотариально заверенного перевода на английский язык.', days: '3–10 дней (в зависимости от страны)' });
+  }
+  steps.push({ title: 'Подготовка учредительных документов', detail: `Разработка ${ei.docs}. Официальные шаблоны доступны на afsa.aifc.kz. Документы составляются на английском языке.`, days: '2–5 дней' });
+  steps.push({ title: 'Подача заявки через портал AFSA', detail: 'Регистрация на портале AFSA (afsa.aifc.kz), заполнение формы, загрузка всех документов, оплата государственной пошлины ($' + (entityType === 'public' ? '1 000' : '300') + ').', days: '1 день' });
+  if (licensed) {
+    steps.push({ title: 'Регуляторная проверка AFSA (для лицензируемой деятельности)', detail: 'AFSA проводит расширенную проверку: AML/KYC на директоров и акционеров, оценку бизнес-плана, проверку квалификации. Могут потребоваться дополнительные запросы. Источник: AIFC Financial Services Framework Regulations (FSFR 2017), Part 3.', days: '20–45 рабочих дней' });
+  }
+  steps.push({ title: 'Рассмотрение заявки AFSA', detail: 'AFSA изучает документы, при необходимости направляет запросы. Срок отсчитывается с момента предоставления полного комплекта документов.', days: licensed ? '— включено выше' : '10–15 рабочих дней' });
+  steps.push({ title: 'Получение Certificate of Incorporation', detail: 'После одобрения AFSA выдаёт сертификат о регистрации и присваивает регистрационный номер AIFC.', days: '1–2 дня' });
+  steps.push({ title: 'Пост-регистрационные действия', detail: 'Открытие корпоративного банковского счёта в уполномоченном банке (Freedom Bank, Halyk, HSBC и др.), регистрация в налоговых органах РК при необходимости, получение МФЦА-пропуска для сотрудников.', days: '5–15 дней' });
+
+  // Documents list
+  const docs = [
+    'Заявление о регистрации (Form CF01 или аналог)',
+    entityType === 'llp' ? 'LLP Agreement (Partnership Agreement)' : 'Articles of Association (Устав)',
+    'Consent to act as Director / Officer — для каждого директора',
+    'Register of Shareholders / Members — реестр акционеров с долями',
+    'Копии паспортов всех директоров и бенефициаров (UBO)',
+  ];
+  if (foreignShareholders) {
+    docs.push('Certificate of Incorporation / учредительные документы иностранного акционера (с апостилем)');
+    docs.push('Нотариально заверенный перевод на английский язык');
+  }
+  if (entityType === 'branch') {
+    docs.push('Решение головной компании об открытии филиала');
+    docs.push('Нотариальная доверенность на представителя филиала');
+  }
+  if (licensed) {
+    docs.push('Бизнес-план (описание деятельности, AML/KYC политика, структура управления рисками)');
+    docs.push('Сведения об опыте и квалификации ключевых лиц (CV, дипломы, лицензии)');
+  }
+  docs.push('Подтверждение оплаты регистрационного сбора AFSA');
+
+  document.getElementById('regPanels').style.display = 'none';
+  document.getElementById('regSteps').style.display = 'none';
+  document.getElementById('regNav').style.display = 'none';
+  document.getElementById('regResult').style.display = 'block';
+
+  const allExtra = [foreignExtra, abroadExtra].filter(Boolean);
+
+  document.getElementById('regResult').innerHTML = `<div class="reg-result">
+    <div class="reg-block">
+      <div class="reg-block-head">📋 Параметры регистрации</div>
+      <div class="reg-block-body">
+        <div class="reg-row"><span class="reg-row-label">Тип юрлица</span><span class="reg-row-val">${ei.name}</span></div>
+        <div class="reg-row"><span class="reg-row-label">Мин. уставный капитал</span><span class="reg-row-val">${ei.cap}</span></div>
+        <div class="reg-row"><span class="reg-row-label">Нормативная база</span><span class="reg-row-val">${ei.reg}</span></div>
+        <div class="reg-row"><span class="reg-row-label">Лицензия AFSA</span><span class="reg-row-val">${licensed ? '⚠️ Требуется (FSFR 2017, Part 3)' : '✅ Не требуется'}</span></div>
+        <div class="reg-row"><span class="reg-row-label">Ориентировочный срок</span><span class="reg-row-val"><strong>${baseDays} рабочих дней</strong>${allExtra.length ? '<br><small style="color:var(--text-muted)">' + allExtra.join('; ') + '</small>' : ''}</span></div>
+      </div>
+    </div>
+    <div class="reg-block">
+      <div class="reg-block-head">🗂️ Пошаговый план</div>
+      <div class="reg-block-body">
+        <ol class="reg-steps">${steps.map(s => `<li class="reg-step">
+          <div class="reg-step-content">
+            <div class="reg-step-title">${s.title}</div>
+            <div class="reg-step-detail">${s.detail}</div>
+            <div class="reg-step-days">⏱ ${s.days}</div>
+          </div></li>`).join('')}</ol>
+      </div>
+    </div>
+    <div class="reg-block">
+      <div class="reg-block-head">📄 Необходимые документы</div>
+      <div class="reg-block-body">
+        <ul class="reg-docs">${docs.map(d => `<li>${d}</li>`).join('')}</ul>
+      </div>
+    </div>
+    <div class="reg-block">
+      <div class="reg-block-head">🔗 Источники и ссылки</div>
+      <div class="reg-block-body" style="font-size:12px;line-height:1.7">
+        • <a href="https://afsa.aifc.kz" target="_blank">Портал AFSA</a> — подача заявки на регистрацию<br>
+        • <a href="https://orderly.myafsa.com/articles/general-legislation" target="_blank">AIFC Companies Regulations</a> — нормативная база регистрации<br>
+        • <a href="https://afsa.aifc.kz/registration/" target="_blank">AFSA Registration Guide</a> — официальный гайд<br>
+        ${licensed ? '• <a href="https://orderly.myafsa.com/articles/financial-services-legislation" target="_blank">AIFC FSFR 2017</a> — требования для лицензируемой деятельности<br>' : ''}
+        • <a href="https://aifc.kz/business/registration/" target="_blank">AIFC Business Registration Info</a><br>
+        <br><button class="wiz-back" onclick="initRegWizard()">← Начать заново</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 function calcCit() {
