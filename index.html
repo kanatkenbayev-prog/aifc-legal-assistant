@@ -1553,7 +1553,7 @@ async function renderDocs() {
       return;
     }
   }
-  // Editable template cards
+  // Editable template cards + custom document card
   document.getElementById('docsCatalog').innerHTML = docsManifest.editable.map(t => `
     <div class="tmpl-card">
       <span class="tmpl-badge">${t.entity}</span>
@@ -1563,7 +1563,15 @@ async function renderDocs() {
         <button class="tmpl-btn primary" onclick="openTemplate('${t.id}')">✎ Открыть в редакторе</button>
         <a class="tmpl-btn ghost" href="${t.source}" target="_blank" rel="noopener">⬇ Оригинал .docx</a>
       </div>
-    </div>`).join('');
+    </div>`).join('') + `
+    <div class="tmpl-card" style="border-style:dashed;border-color:var(--gold)">
+      <span class="tmpl-badge" style="background:rgba(201,168,76,.18);color:#9B7B2E">Свой документ</span>
+      <div class="tmpl-name">📄 Проверить свой документ</div>
+      <div class="tmpl-reg">Вставьте любой документ (устав, соглашение, политику) — ИИ сверит его с нормами МФЦА по выбранной области права.</div>
+      <div class="tmpl-actions">
+        <button class="tmpl-btn primary" onclick="openCustomDoc()">＋ Вставить и проверить</button>
+      </div>
+    </div>`;
   // Other official forms catalog
   document.getElementById('otherForms').innerHTML = docsManifest.catalog.map(c => `
     <a class="catalog-item" href="${c.url}" target="_blank" rel="noopener">
@@ -1595,7 +1603,52 @@ async function openTemplate(id) {
   }
 }
 
+// Области права для проверки произвольного документа
+const CUSTOM_AREAS = {
+  'Корпоративное право': { regulation: 'AIFC Companies Regulations & Companies Rules', url: 'https://aifc.kz/legal-framework/aifc-companies-regulations/' },
+  'Финансовые услуги':   { regulation: 'AIFC Financial Services Framework Regulations & General Rules', url: 'https://aifc.kz/legal-framework/aifc-financial-services-framework-regulations/' },
+  'Налоговое право':     { regulation: 'AIFC Tax Rules incl. Rules on Substantial Presence (CIT/VAT)', url: 'https://aifc.kz/legal-framework/rules-on-the-substantial-presence-of-the-aifc-participants-applying-tax-exemptions-for-the-payment-of-cit-vat/' },
+  'AML/KYC':             { regulation: 'AIFC AML/CTF Rules', url: 'https://aifc.kz/legal-framework/anti-money-laundering-and-counter-terrorist-financing-rules-full-text/' },
+  'Трудовое право':      { regulation: 'AIFC Employment Regulations', url: 'https://aifc.kz/legal-framework/aifc-employment-regulations/' },
+  'Разрешение споров':   { regulation: 'AIFC Court Regulations & Arbitration Regulations', url: 'https://aifc.kz/legal-framework/aifc-court-regulations-2017/' },
+};
+
+function openCustomDoc() {
+  activeTemplate = {
+    id: 'custom_doc', custom: true,
+    title: 'Пользовательский документ',
+    regulation: CUSTOM_AREAS['Корпоративное право'].regulation,
+    ragArea: 'Корпоративное право',
+  };
+  templateOriginal = '';
+  const wrap = document.getElementById('editorWrap');
+  document.getElementById('editorTitle').textContent = '📄 Проверка своего документа';
+  document.getElementById('editorSub').innerHTML =
+    `Область права: <select id="customArea" onchange="setCustomArea(this.value)" style="margin-left:4px;padding:4px 8px;font-size:11.5px;font-family:inherit;border:1px solid var(--border);border-radius:6px;background:#fff">` +
+    Object.keys(CUSTOM_AREAS).map(a => `<option value="${a}">${a}</option>`).join('') +
+    `</select> · <span id="customReg">${CUSTOM_AREAS['Корпоративное право'].regulation}</span>`;
+  const editor = document.getElementById('templateEditor');
+  editor.value = '';
+  editor.placeholder = 'Вставьте сюда текст вашего документа (устав, соглашение, политику)...';
+  wrap.style.display = 'block';
+  document.getElementById('compliancePanel').innerHTML =
+    '<div class="compliance-empty">Вставьте текст документа слева, выберите область права и нажмите «Проверить на соответствие».</div>';
+  wrap.scrollIntoView({ behavior: 'smooth' });
+  editor.focus();
+}
+
+function setCustomArea(area) {
+  if (!activeTemplate || !activeTemplate.custom) return;
+  activeTemplate.ragArea = area;
+  activeTemplate.regulation = CUSTOM_AREAS[area].regulation;
+  document.getElementById('customReg').textContent = CUSTOM_AREAS[area].regulation;
+}
+
 function resetTemplate() {
+  if (activeTemplate && activeTemplate.custom) {
+    if (confirm('Очистить текст документа?')) document.getElementById('templateEditor').value = '';
+    return;
+  }
   if (!templateOriginal) return;
   if (confirm('Вернуть оригинальный текст шаблона? Ваши изменения будут потеряны.')) {
     document.getElementById('templateEditor').value = templateOriginal;
