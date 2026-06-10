@@ -127,6 +127,102 @@ const CITATION_DB = `
 • Оспаривание арбитражного решения: AIFC Arbitration Regulations, Rule 34 — основания для отмены; срок — 3 месяца с даты решения.
 `;
 
+// ── Helicone AI proxy layer ────────────────────────────────────────────────────
+// Если HELICONE_KEY + CF_ACCOUNT_ID + CF_AI_TOKEN заданы как secrets →
+// все чат-запросы идут через Helicone для логирования и аналитики.
+// Embeddings остаются на нативном биндинге (Vectorize не требует Helicone).
+//
+// Настройка (однократно в терминале):
+//   wrangler secret put HELICONE_KEY      ← API ключ с helicone.ai
+//   wrangler secret put CF_ACCOUNT_ID     ← Cloudflare Account ID (дашборд → справа)
+//   wrangler secret put CF_AI_TOKEN       ← Cloudflare API Token (AI:Run permission)
+
+async function aiChat(env, messages, { maxTokens = 2048, temperature = 0.2, stream = false, props = {} } = {}) {
+  const useHelicone = !!(env.HELICONE_KEY && env.CF_ACCOUNT_ID && env.CF_AI_TOKEN);
+
+  if (!useHelicone) {
+    // Нативный Cloudflare AI binding (без Helicone)
+    return env.AI.run(CHAT_MODEL, { messages, max_tokens: maxTokens, temperature, stream });
+  }
+
+  // Через Helicone → Cloudflare AI OpenAI-compatible endpoint
+  const heliconeHeaders = {
+    'Authorization':                 `Bearer ${env.CF_AI_TOKEN}`,
+    'Content-Type':                  'application/json',
+    'Helicone-Auth':                 `Bearer ${env.HELICONE_KEY}`,
+    'Helicone-Target-Url':           `https://api.cloudflare.ai/client/v4/accounts/${env.CF_ACCOUNT_ID}/ai/v1`,
+    'Helicone-Property-App':         'aifc-legal-assistant',
+    ...Object.fromEntries(
+      Object.entries(props)
+        .filter(([, v]) => v !== undefined && v !== '')
+        .map(([k, v]) => [`Helicone-Property-${k}`, String(v)])
+    ),
+  };
+
+  const resp = await fetch(
+    'https://gateway.helicone.ai/chat/completions',
+    {
+      method: 'POST',
+      headers: heliconeHeaders,
+      body: JSON.stringify({ model: CHAT_MODEL, messages, max_tokens: maxTokens, temperature, stream }),
+    }
+  );
+
+  if (!resp.ok) {
+    const err = await resp.text().catch(() => resp.statusText);
+    throw new Error(`Helicone/AI error ${resp.status}: ${err}`);
+  }
+
+  if (!stream) {
+    const data = await resp.json();
+    // Normalise to Workers AI format: { response: "..." }
+    return { response: data?.choices?.[0]?.message?.content || '' };
+  }
+
+  // Streaming: wrap OpenAI SSE → Workers AI-style ReadableStream
+  // Workers AI emits: data: {"response":"tok"}\n
+  // OpenAI/Helicone emits: data: {"choices":[{"delta":{"content":"tok"}}]}\n
+  // We re-emit in Workers AI format so existing stream parser works unchanged.
+  const encoder = new TextEncoder();
+  const { readable, writable } = new TransformStream();
+  const writer = writable.getWriter();
+
+  (async () => {
+    const reader = resp.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '';
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        let nl;
+        while ((nl = buf.indexOf('\n')) !== -1) {
+          const line = buf.slice(0, nl).trim(); buf = buf.slice(nl + 1);
+          if (!line.startsWith('data:')) continue;
+          const raw = line.slice(5).trim();
+          if (raw === '[DONE]') {
+            await writer.write(encoder.encode('data: [DONE]\n\n'));
+            continue;
+          }
+          try {
+            const parsed = JSON.parse(raw);
+            const tok = parsed?.choices?.[0]?.delta?.content;
+            if (tok) {
+              // Re-emit in Workers AI format so existing parser is unchanged
+              await writer.write(encoder.encode(`data: ${JSON.stringify({ response: tok })}\n\n`));
+            }
+          } catch {}
+        }
+      }
+    } finally {
+      writer.close().catch(() => {});
+    }
+  })();
+
+  return readable;
+}
+
 // ── CORS ──────────────────────────────────────────────────────────────────────
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -468,10 +564,13 @@ async function handleChat(request, env, ctx) {
   const ragCtx = formatRag(ragChunks);
   const systemPrompt = buildSystemPrompt({ area, lang, liveCtx, ragCtx, isFundQuery, isLawyerMode });
 
-  const aiStream = await env.AI.run(CHAT_MODEL, {
-    messages: [{ role: 'system', content: systemPrompt }, ...messages],
-    max_tokens: 2048, temperature: 0.2, stream: true,
-  });
+  const aiStream = await aiChat(env,
+    [{ role: 'system', content: systemPrompt }, ...messages],
+    {
+      maxTokens: 2048, temperature: 0.2, stream: true,
+      props: { Area: area || 'general', Lang: lang, LawyerMode: isLawyerMode, FundQuery: isFundQuery },
+    }
+  );
 
   const msgId = crypto.randomUUID();
   const ragSources = ragChunks.map(c => ({ act: c.act, url: c.url }));
@@ -599,13 +698,10 @@ ${ragCtx}
 Опирайся на фрагменты RAG и встроенную базу актов. Не выдумывай нормы и URL. Будь конкретным, ссылайся на статьи/разделы, где возможно.`;
 
   try {
-    const response = await env.AI.run(CHAT_MODEL, {
-      messages: [
+    const response = await aiChat(env, [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Проверь следующий документ:\n\n${doc}` },
-      ],
-      max_tokens: 1500, temperature: 0.1,
-    });
+      ], { maxTokens: 1500, temperature: 0.1, props: { Feature: 'doc-analyze' } });
     const analysis = sanitizeText(response.response || '');
     const linkStatus = await verifyLinks(analysis);
     track(env, ctx, { type: 'compliance', area: autoMode ? 'Все области' : area, neurons: NEURON_COST.compliance });
@@ -751,13 +847,10 @@ async function handleAnalyze(request, env) {
 Будь конкретным и опирайся ТОЛЬКО на предоставленные цифры. Если данных мало — честно скажи об этом и предложи, что отслеживать. Не выдумывай метрики.`;
 
   try {
-    const response = await env.AI.run(CHAT_MODEL, {
-      messages: [
+    const response = await aiChat(env, [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Метрики использования сервиса (последние 14 дней):\n\n${JSON.stringify(brief, null, 2)}` },
-      ],
-      max_tokens: 1800, temperature: 0.3,
-    });
+      ], { maxTokens: 1800, temperature: 0.3, props: { Feature: 'admin-insights' } });
     return json({ analysis: sanitizeText(response.response || ''), brief });
   } catch (err) {
     return json({ error: err.message }, 500);
