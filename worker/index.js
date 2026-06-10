@@ -133,6 +133,19 @@ async function ragRetrieve(env, query) {
   } catch { return []; }
 }
 
+// Английские ключевые термины по области права (для кросс-языкового RAG)
+function areaKeywordsEn(area) {
+  const map = {
+    'Налоговое право': 'tax exemption corporate income tax CIT VAT substantial presence core income generating activities CIGA qualified employees operating expenses',
+    'Корпоративное право': 'company incorporation shares shareholders directors articles of association partnership',
+    'Финансовые услуги': 'financial services regulated activity licence prudential conduct of business AFSA',
+    'AML/KYC': 'anti money laundering counter terrorist financing customer due diligence KYC MLRO',
+    'Трудовое право': 'employment contract employee working hours leave termination',
+    'Разрешение споров': 'AIFC court arbitration mediation dispute resolution claim',
+  };
+  return map[area] || '';
+}
+
 function formatRag(chunks) {
   if (!chunks.length) return '';
   let s = `\n== РЕЛЕВАНТНЫЕ ФРАГМЕНТЫ ИЗ ПОЛНЫХ ТЕКСТОВ АКТОВ (RAG) ==\n`;
@@ -287,8 +300,11 @@ async function handleChat(request, env, ctx) {
   }
 
   // Parallel: RAG retrieval + live data
+  // Английские якорные термины по области права — улучшают кросс-языковой поиск
+  // (тексты актов на английском, вопросы часто на русском)
+  const ragQuery = `${area || ''} ${lastUser} ${areaKeywordsEn(area)}`.trim();
   const [ragChunks, news, notices] = await Promise.all([
-    ragRetrieve(env, `${area || ''} ${lastUser}`.trim()),
+    ragRetrieve(env, ragQuery),
     fetchAifcNews(),
     fetchAfsaNotices(),
   ]);
