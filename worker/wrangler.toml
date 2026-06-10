@@ -19,8 +19,3 @@ index_name = "aifc-acts"
 [triggers]
 crons = ["0 6 * * *"]
 
-# Опциональные секреты для Helicone аналитики (задать через wrangler secret put):
-#   wrangler secret put HELICONE_KEY      ← API ключ с app.helicone.ai
-#   wrangler secret put CF_ACCOUNT_ID     ← Cloudflare Account ID (дашборд → правая панель)
-#   wrangler secret put CF_AI_TOKEN       ← Cloudflare API Token с разрешением Workers AI:Run
-# Без них воркер работает в обычном режиме (native AI binding, без логирования).

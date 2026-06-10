@@ -127,100 +127,9 @@ const CITATION_DB = `
 • Оспаривание арбитражного решения: AIFC Arbitration Regulations, Rule 34 — основания для отмены; срок — 3 месяца с даты решения.
 `;
 
-// ── Helicone AI proxy layer ────────────────────────────────────────────────────
-// Если HELICONE_KEY + CF_ACCOUNT_ID + CF_AI_TOKEN заданы как secrets →
-// все чат-запросы идут через Helicone для логирования и аналитики.
-// Embeddings остаются на нативном биндинге (Vectorize не требует Helicone).
-//
-// Настройка (однократно в терминале):
-//   wrangler secret put HELICONE_KEY      ← API ключ с helicone.ai
-//   wrangler secret put CF_ACCOUNT_ID     ← Cloudflare Account ID (дашборд → справа)
-//   wrangler secret put CF_AI_TOKEN       ← Cloudflare API Token (AI:Run permission)
-
-async function aiChat(env, messages, { maxTokens = 2048, temperature = 0.2, stream = false, props = {} } = {}) {
-  const useHelicone = !!(env.HELICONE_KEY && env.CF_ACCOUNT_ID && env.CF_AI_TOKEN);
-
-  if (!useHelicone) {
-    // Нативный Cloudflare AI binding (без Helicone)
-    return env.AI.run(CHAT_MODEL, { messages, max_tokens: maxTokens, temperature, stream });
-  }
-
-  // Через Helicone → Cloudflare AI OpenAI-compatible endpoint
-  const heliconeHeaders = {
-    'Authorization':                 `Bearer ${env.CF_AI_TOKEN}`,
-    'Content-Type':                  'application/json',
-    'Helicone-Auth':                 `Bearer ${env.HELICONE_KEY}`,
-    'Helicone-Target-Url':           `https://api.cloudflare.ai/client/v4/accounts/${env.CF_ACCOUNT_ID}/ai/v1`,
-    'Helicone-Property-App':         'aifc-legal-assistant',
-    ...Object.fromEntries(
-      Object.entries(props)
-        .filter(([, v]) => v !== undefined && v !== '')
-        .map(([k, v]) => [`Helicone-Property-${k}`, String(v)])
-    ),
-  };
-
-  const resp = await fetch(
-    'https://gateway.helicone.ai/chat/completions',
-    {
-      method: 'POST',
-      headers: heliconeHeaders,
-      body: JSON.stringify({ model: CHAT_MODEL, messages, max_tokens: maxTokens, temperature, stream }),
-    }
-  );
-
-  if (!resp.ok) {
-    const err = await resp.text().catch(() => resp.statusText);
-    throw new Error(`Helicone/AI error ${resp.status}: ${err}`);
-  }
-
-  if (!stream) {
-    const data = await resp.json();
-    // Normalise to Workers AI format: { response: "..." }
-    return { response: data?.choices?.[0]?.message?.content || '' };
-  }
-
-  // Streaming: wrap OpenAI SSE → Workers AI-style ReadableStream
-  // Workers AI emits: data: {"response":"tok"}\n
-  // OpenAI/Helicone emits: data: {"choices":[{"delta":{"content":"tok"}}]}\n
-  // We re-emit in Workers AI format so existing stream parser works unchanged.
-  const encoder = new TextEncoder();
-  const { readable, writable } = new TransformStream();
-  const writer = writable.getWriter();
-
-  (async () => {
-    const reader = resp.body.getReader();
-    const dec = new TextDecoder();
-    let buf = '';
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += dec.decode(value, { stream: true });
-        let nl;
-        while ((nl = buf.indexOf('\n')) !== -1) {
-          const line = buf.slice(0, nl).trim(); buf = buf.slice(nl + 1);
-          if (!line.startsWith('data:')) continue;
-          const raw = line.slice(5).trim();
-          if (raw === '[DONE]') {
-            await writer.write(encoder.encode('data: [DONE]\n\n'));
-            continue;
-          }
-          try {
-            const parsed = JSON.parse(raw);
-            const tok = parsed?.choices?.[0]?.delta?.content;
-            if (tok) {
-              // Re-emit in Workers AI format so existing parser is unchanged
-              await writer.write(encoder.encode(`data: ${JSON.stringify({ response: tok })}\n\n`));
-            }
-          } catch {}
-        }
-      }
-    } finally {
-      writer.close().catch(() => {});
-    }
-  })();
-
-  return readable;
+// Обёртка над нативным AI binding — упрощает вызовы и позволит добавить провайдер позднее.
+function aiChat(env, messages, { maxTokens = 2048, temperature = 0.2, stream = false } = {}) {
+  return env.AI.run(CHAT_MODEL, { messages, max_tokens: maxTokens, temperature, stream });
 }
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
@@ -246,7 +155,9 @@ async function bumpDaily(env, patch) {
   try { cur = JSON.parse(await env.AIFC_KV.get(key) || '{}'); } catch {}
   for (const [k, v] of Object.entries(patch)) {
     if (typeof v === 'number') cur[k] = (cur[k] || 0) + v;
-    else if (k === 'area' && v) { cur.areas = cur.areas || {}; cur.areas[v] = (cur.areas[v] || 0) + 1; }
+    else if (k === 'area' && v)   { cur.areas = cur.areas || {}; cur.areas[v] = (cur.areas[v] || 0) + 1; }
+    else if (k === 'lang' && v)   { cur.langs = cur.langs || {}; cur.langs[v] = (cur.langs[v] || 0) + 1; }
+    else if (k === 'country' && v){ cur.countries = cur.countries || {}; cur.countries[v] = (cur.countries[v] || 0) + 1; }
   }
   cur.neurons = cur.neurons || 0;
   await env.AIFC_KV.put(key, JSON.stringify(cur), { expirationTtl: 60 * 60 * 24 * 60 }); // 60 дней
@@ -266,11 +177,30 @@ function track(env, ctx, ev) {
   if (!env.AIFC_KV || !ctx) return;
   const tasks = [];
   const patch = { [ev.type]: 1, neurons: ev.neurons || 0 };
-  if (ev.cache_hit) patch.cache_hit = ev.cache_hit;
-  if (ev.area) patch.area = ev.area;
+  if (ev.cache_hit)   patch.cache_hit = ev.cache_hit;
+  if (ev.area)        patch.area = ev.area;
+  if (ev.lang)        patch.lang = ev.lang;
+  if (ev.country)     patch.country = ev.country;
+  if (ev.latencyMs)   patch.latency_total = ev.latencyMs;
+  if (ev.isFundQuery) patch.fund_query = 1;
+  if (ev.isLawyerMode)patch.lawyer_mode = 1;
+  if (ev.ragCount)    patch.rag_hits = ev.ragCount;
   tasks.push(bumpDaily(env, patch));
+
+  // Уникальные IP за день (храним в Set-like строке, max 500 записей)
+  if (ev.ip) tasks.push((async () => {
+    const dk = `stat:ips:${dayKey()}`;
+    let ips = []; try { ips = JSON.parse(await env.AIFC_KV.get(dk) || '[]'); } catch {}
+    if (!ips.includes(ev.ip)) {
+      ips.push(ev.ip);
+      if (ips.length > 500) ips = ips.slice(-500);
+      await env.AIFC_KV.put(dk, JSON.stringify(ips), { expirationTtl: 60 * 60 * 24 * 60 });
+    }
+  })());
+
   if (ev.question) tasks.push(pushList(env, 'stat:recent_q',
-    { q: ev.question.slice(0, 200), area: ev.area || '', ts: Date.now(), cached: !!ev.cached }, 100));
+    { q: ev.question.slice(0, 200), area: ev.area || '', lang: ev.lang || '', ts: Date.now(), cached: !!ev.cached,
+      latencyMs: ev.latencyMs || 0, ragCount: ev.ragCount || 0 }, 100));
   if (ev.negative) tasks.push(pushList(env, 'stat:negative_q', ev.negative, 50));
   ctx.waitUntil(Promise.all(tasks).catch(() => {}));
 }
@@ -519,7 +449,9 @@ function streamFromCache(cached) {
 
 // ── Streaming chat handler ────────────────────────────────────────────────────
 async function handleChat(request, env, ctx) {
+  const chatStart = Date.now();
   const ip = request.headers.get('cf-connecting-ip') || '';
+  const country = request.headers.get('cf-ipcountry') || '';
   if (!(await checkRateLimit(env, ip)))
     return json({ error: 'Слишком много запросов. Подождите минуту.' }, 429);
 
@@ -566,10 +498,7 @@ async function handleChat(request, env, ctx) {
 
   const aiStream = await aiChat(env,
     [{ role: 'system', content: systemPrompt }, ...messages],
-    {
-      maxTokens: 2048, temperature: 0.2, stream: true,
-      props: { Area: area || 'general', Lang: lang, LawyerMode: isLawyerMode, FundQuery: isFundQuery },
-    }
+    { maxTokens: 2048, temperature: 0.2, stream: true }
   );
 
   const msgId = crypto.randomUUID();
@@ -625,7 +554,11 @@ async function handleChat(request, env, ctx) {
       }
 
       // Метрика: сгенерированный ответ (не из кэша)
-      track(env, ctx, { type: 'chat', area, question: lastUser, neurons: NEURON_COST.chat });
+      track(env, ctx, {
+        type: 'chat', area, lang, question: lastUser, neurons: NEURON_COST.chat,
+        ip, country, latencyMs: Date.now() - chatStart,
+        isFundQuery, isLawyerMode, ragCount: ragChunks.length,
+      });
 
       controller.close();
     },
@@ -701,7 +634,7 @@ ${ragCtx}
     const response = await aiChat(env, [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Проверь следующий документ:\n\n${doc}` },
-      ], { maxTokens: 1500, temperature: 0.1, props: { Feature: 'doc-analyze' } });
+      ], { maxTokens: 1500, temperature: 0.1 });
     const analysis = sanitizeText(response.response || '');
     const linkStatus = await verifyLinks(analysis);
     track(env, ctx, { type: 'compliance', area: autoMode ? 'Все области' : area, neurons: NEURON_COST.compliance });
@@ -778,20 +711,32 @@ async function handleStats(request, env) {
     let v = {}; try { v = JSON.parse(await env.AIFC_KV.get(key) || '{}'); } catch {}
     days.push({ date: dayKey(d), ...v });
   }
-  const [recentQ, negativeQ, geo, upTotal, downTotal] = await Promise.all([
+  // Уникальные IP за каждый день
+  const ipCounts = await Promise.all(
+    days.map(d => env.AIFC_KV.get(`stat:ips:${d.date}`)
+      .then(x => { try { return JSON.parse(x || '[]').length; } catch { return 0; } }))
+  );
+  days.forEach((d, i) => { d.unique_users = ipCounts[i]; });
+
+  const [recentQ, negativeQ, upTotal, downTotal] = await Promise.all([
     env.AIFC_KV.get('stat:recent_q').then(x => { try { return JSON.parse(x || '[]'); } catch { return []; } }),
     env.AIFC_KV.get('stat:negative_q').then(x => { try { return JSON.parse(x || '[]'); } catch { return []; } }),
-    env.AIFC_KV.get('stat:geo').then(x => { try { return JSON.parse(x || '{}'); } catch { return {}; } }),
     env.AIFC_KV.get('rate:up').then(x => parseInt(x || '0', 10)),
     env.AIFC_KV.get('rate:down').then(x => parseInt(x || '0', 10)),
   ]);
 
-  // агрегаты областей за период
-  const areas = {};
-  days.forEach(d => { if (d.areas) for (const [k, v] of Object.entries(d.areas)) areas[k] = (areas[k] || 0) + v; });
+  // агрегаты за период
+  const areas = {}, langs = {}, countries = {};
+  days.forEach(d => {
+    if (d.areas)     for (const [k, v] of Object.entries(d.areas))     areas[k]     = (areas[k] || 0) + v;
+    if (d.langs)     for (const [k, v] of Object.entries(d.langs))     langs[k]     = (langs[k] || 0) + v;
+    if (d.countries) for (const [k, v] of Object.entries(d.countries)) countries[k] = (countries[k] || 0) + v;
+  });
 
   const sum = (f) => days.reduce((s, d) => s + (d[f] || 0), 0);
   const todayNeurons = days[days.length - 1].neurons || 0;
+  const totalChats = sum('chat') || 1;
+  const avgLatencyMs = Math.round(sum('latency_total') / totalChats);
 
   return json({
     period: '14d',
@@ -799,11 +744,14 @@ async function handleStats(request, env) {
     totals: {
       chat: sum('chat'), compliance: sum('compliance'), cache_hit: sum('cache_hit'),
       pageview: sum('pageview'), vote_up: sum('vote_up'), vote_down: sum('vote_down'),
-      neurons: sum('neurons'),
+      neurons: sum('neurons'), unique_users: sum('unique_users'),
+      fund_queries: sum('fund_query'), lawyer_mode: sum('lawyer_mode'),
+      rag_hits: sum('rag_hits'),
     },
+    avgLatencyMs,
     ratingsAllTime: { up: upTotal, down: downTotal },
     today: { neurons: todayNeurons, budget: DAILY_NEURON_BUDGET, remaining: Math.max(0, DAILY_NEURON_BUDGET - todayNeurons) },
-    areas, geo, recentQ, negativeQ,
+    areas, langs, countries, recentQ, negativeQ,
   });
 }
 
@@ -850,7 +798,7 @@ async function handleAnalyze(request, env) {
     const response = await aiChat(env, [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Метрики использования сервиса (последние 14 дней):\n\n${JSON.stringify(brief, null, 2)}` },
-      ], { maxTokens: 1800, temperature: 0.3, props: { Feature: 'admin-insights' } });
+      ], { maxTokens: 1800, temperature: 0.3 });
     return json({ analysis: sanitizeText(response.response || ''), brief });
   } catch (err) {
     return json({ error: err.message }, 500);
