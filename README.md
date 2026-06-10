@@ -6,40 +6,78 @@
 
 ## Возможности
 
+### Чат и консультации
 - **Диалоговый чат** с историей — задавайте уточнения, ассистент помнит контекст
-- **Быстрые чипы** — когда AI задаёт вопрос, автоматически появляются кнопки с вариантами ответа
+- **Быстрые чипы** — когда AI задаёт уточняющий вопрос, появляются кнопки с вариантами ответа
+- **Язык интерфейса** — русский / English (ответ на языке вопроса)
+- **Область права** — корпоративное, финансовые услуги, налоговое, трудовое, споры, AML/KYC
 - **Живые данные** — каждый запрос получает свежие новости с aifc.kz и уведомления AFSA
 - **Верификация ссылок** — все URL проверяются в реальном времени (✓ зелёные / ⚠️ битые)
-- **База нормативных актов** — 55+ актов МФЦА с прямыми ссылками на aifc.kz
-- **Учредительные документы МФЦА** — реальные официальные шаблоны AFSA (Articles of Association, LP/LLP Partnership Agreements) с встроенным редактором и AI-проверкой правок на соответствие Companies Regulations/Rules
 - **Кэш частых вопросов** — повторные вопросы отдаются мгновенно из KV (⚡ из кэша)
-- **Генератор документов** — двуязычные шаблоны (EN|RU, запрос в AFSA, решение участника, NDA) с предпросмотром и экспортом
 - **Сохранение истории** — чат автоматически сохраняется в браузере (localStorage)
 - **Экспорт в PDF** — кнопка ⬇ PDF в шапке сайта
-- **Область права** — корпоративное, финансовое, налоговое, трудовое, споры, AML/KYC
-- **Язык интерфейса** — русский / English
-- **Без API-ключей** — пользователи ничего не вводят, ключей нет
+
+### База знаний (RAG)
+- **55+ актов МФЦА** — Companies Regulations, FSMR, Employment Regulations, AML Rules и др.
+- **CIS Rules** — полная база по коллективным инвестиционным схемам (orderly.myafsa.com)
+- **Substance Rules** — правила налогового присутствия (CIGA, Qualified Employees, OpEx)
+- **Решения Суда МФЦА** — 6 знаковых дел (CFI и Court of Appeal, 2023–2026) в векторной базе
+- **Citation DB** — 30+ точных ссылок на конкретные нормы (Rule/Section), инжектируются в каждый промпт
+
+### Инструменты (вкладка 🧰)
+- **Substance Checker** — пошаговая оценка соответствия требованиям налогового присутствия МФЦА (CIGA, сотрудники, расходы, офис, директора), итоговый risk score
+- **Registration Wizard** — интерактивный мастер выбора структуры юрлица МФЦА с планом регистрации, сроками и чек-листом документов
+- **Генератор документов** — двуязычные шаблоны (EN + RU глоссарий): запрос в AFSA, решение участника, NDA
+- **Учредительные документы** — официальные шаблоны AFSA (Articles of Association, LP/LLP Partnership Agreements) с AI-проверкой правок
+
+### Качество ответов (AIFC Legal Assistant Pro v2)
+- **Strict Citations** — каждое юридическое утверждение заканчивается точной ссылкой [Акт, Rule X]
+- **Разделение юрисдикций** — AIFC и РК всегда явно маркированы в ответе
+- **Анализ рисков** — на темах substance/лицензирование/AML/холдинги: красные флаги + уровень риска
+- **Режим юриста** — расширенный технический анализ по профессиональным запросам
+- **Честность** — если нормы нет в базе, ассистент говорит об этом прямо
+
+### Аналитика (встроенная, без внешних сервисов)
+- Дневные счётчики: запросы, кэш-хиты, уникальные пользователи (по IP), нейроны
+- Breakdown по: языку запроса, стране, области права
+- Latency, ragCount, fund/lawyer mode rate
+- Топ-100 последних вопросов, негативные оценки
+- Доступно через `/stats?key=...` и панель `admin.html`
 
 ## Стек
 
 | Компонент | Технология |
 |---|---|
-| Frontend | HTML5 / CSS3 / Vanilla JS (Single Page App) |
+| Frontend | HTML5 / CSS3 / Vanilla JS (Single Page App, без фреймворков) |
 | Хостинг | GitHub Pages |
-| AI-модель | Llama 3.3 70B (Cloudflare Workers AI) |
-| Бэкенд | Cloudflare Workers (бесплатный тариф) |
+| AI-модель | Llama 3.3 70B (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`) |
+| Бэкенд | Cloudflare Workers (serverless, бесплатный тариф) |
+| Векторная база | Cloudflare Vectorize (`aifc-acts`, 768d cosine, ~1000+ векторов) |
+| Embeddings | `@cf/baai/bge-base-en-v1.5` |
+| KV-хранилище | Cloudflare KV — кэш, рейтинги, rate-limit, аналитика |
 | Живые данные | Прямой скрапинг aifc.kz, afsa.aifc.kz |
 | Верификация | HEAD-запросы через Cloudflare Worker |
+| CI/CD | GitHub Actions → Cloudflare Workers Builds (auto-deploy on push) |
 
 ## Архитектура
 
 ```
 Браузер (GitHub Pages)
-  └─► POST https://aifc-legal-proxy.aifclegal.workers.dev
-         ├─ Параллельный скрапинг aifc.kz (новости)
-         ├─ Параллельный скрапинг afsa.aifc.kz (уведомления)
-         ├─ Cloudflare AI → Llama 3.3 70B (бесплатно)
-         └─ Верификация ссылок (HEAD-запросы)
+  └─► POST https://aifc-legal-proxy.aifclegal.workers.dev/chat
+         ├─ Rate limiting (KV, 25 req/min per IP)
+         ├─ Cache check (KV SHA-256 key, 2h TTL)
+         ├─ Parallel:
+         │    ├─ RAG retrieval (Vectorize, topK=5, score>0.45)
+         │    │    └─ Cross-lingual boost (English anchor terms for RU queries)
+         │    ├─ Live scraping: aifc.kz news
+         │    └─ Live scraping: afsa.aifc.kz notices
+         ├─ buildSystemPrompt (lang, area, RAG ctx, Citation DB, ACTS_INDEX)
+         │    ├─ isFundQuery → CIS Rules boost
+         │    └─ isLawyerMode → technical response style
+         ├─ Llama 3.3 70B streaming (NDJSON protocol)
+         ├─ Link verification (HEAD requests, parallel)
+         ├─ Cache write + Analytics track (waitUntil)
+         └─ NDJSON stream → frontend (meta / token / done events)
 ```
 
 ## Деплой
@@ -47,23 +85,51 @@
 ### Frontend (GitHub Pages)
 ```bash
 git push origin main
-# Сайт обновляется автоматически через GitHub Actions / Pages
+# Автодеплой через GitHub Actions
 ```
 
 ### Worker (Cloudflare)
 ```bash
 cd worker
 npx wrangler deploy
+# Или автоматически через Cloudflare Workers Builds (GitHub push)
 ```
 
-## Источники права
+### Загрузка в RAG
+```bash
+# Акты МФЦА
+python3 scripts/ingest_acts.py
+
+# Решения Суда МФЦА
+python3 scripts/load_court_judgments.py
+```
+
+## Источники права в базе знаний
 
 1. Нормативные акты МФЦА — https://aifc.kz/legal-framework/
-2. Конституционный закон РК «О МФЦА» № 438-V от 7 декабря 2015 года
-3. Законодательство РК — https://adilet.zan.kz
-4. Реестр лицензий AFSA — https://publicreg.myafsa.com/
-5. Уведомления AFSA — https://afsa.aifc.kz/notice-register/
+2. CIS Rules (коллективные инвестиционные схемы) — https://orderly.myafsa.com/articles/collectiveinvestmentschemerules
+3. Конституционный закон РК «О МФЦА» № 438-V от 7 декабря 2015 года
+4. Substance Rules (CIGA/налоговое присутствие) — https://aifc.kz/legal-framework/
+5. Реестр лицензий AFSA — https://publicreg.myafsa.com/
+6. Уведомления AFSA — https://afsa.aifc.kz/notice-register/
+7. Решения Суда МФЦА — https://court.aifc.kz/
+
+## Статус разработки
+
+| Функция | Статус |
+|---|---|
+| Чат + RAG + Streaming | ✅ Готово |
+| CIS Rules в базе знаний | ✅ Готово |
+| Судебные решения (6 дел) | ✅ Готово |
+| Substance Checker | ✅ Готово |
+| Registration Wizard | ✅ Готово |
+| Встроенная аналитика (KV) | ✅ Готово |
+| System Prompt Pro v2 | ✅ Готово |
+| Accounts + quota система | 🔜 После запуска |
+| ioka payments | 🔜 После запуска |
+| ToS / Privacy Policy | 🔜 После запуска |
+| Claude API (вместо Llama) | 🔜 После запуска |
 
 ---
 
-*Версия 2.0 · Июнь 2026 · AI-powered, no API keys required*
+*Версия 3.0 · Июнь 2026 · AI-powered, no API keys required*
