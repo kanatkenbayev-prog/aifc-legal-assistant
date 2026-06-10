@@ -1324,7 +1324,8 @@ function calcCit() {
   let html;
   if (type === 'exempt') {
     html = `Доход от финансовых услуг из перечня МФЦА.<br>КПН: <strong>0 ₸</strong><br>
-      <small style="color:var(--text-muted)">Освобождение действует до 1 января 2066 г. согласно Конституционному закону «О МФЦА». <a href="https://aifc.kz/legal-framework/the-list-of-financial-services-provided-by-the-aifc-participants-income-from-which-is-exempt-from-cit-and-vat/" target="_blank">Перечень услуг</a></small>`;
+      <small style="color:var(--text-muted)">Освобождение действует до 1 января 2066 г. согласно Конституционному закону «О МФЦА». <a href="https://aifc.kz/legal-framework/the-list-of-financial-services-provided-by-the-aifc-participants-income-from-which-is-exempt-from-cit-and-vat/" target="_blank">Перечень услуг</a></small>
+      <div style="margin-top:8px;padding:8px 10px;background:rgba(184,134,11,.1);border:1px solid rgba(184,134,11,.3);border-radius:7px;font-size:11.5px;color:var(--text)">⚠️ <strong>Обязательное условие:</strong> освобождение применяется только при подтверждённом «substantial presence» (реальное присутствие): профильная деятельность (CIGA) ведётся в периметре МФЦА, адекватные операционные расходы и достаточный штат квалифицированных сотрудников. Без этого льгота не действует. <a href="https://aifc.kz/legal-framework/rules-on-the-substantial-presence-of-the-aifc-participants-applying-tax-exemptions-for-the-payment-of-cit-vat/" target="_blank">Substance Rules</a></div>`;
   } else {
     const cit = income * 0.20;
     html = `Прочий доход (общий режим РК, КПН 20%).<br>КПН: <strong>${cit.toLocaleString('ru-RU')} ₸</strong><br>

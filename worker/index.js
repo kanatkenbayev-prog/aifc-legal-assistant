@@ -493,6 +493,29 @@ async function handleIngest(request, env) {
   return json({ processed: slice.length, totalChunks, nextStart, done: nextStart >= ACTS.length, report });
 }
 
+// ── Ingest arbitrary provided text into Vectorize (manual knowledge additions) ─
+async function handleIngestText(request, env) {
+  let body; try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
+  const { key, id, act, url, cat = 'Налоговое право', text = '' } = body;
+  if (key !== INGEST_SECRET) return json({ error: 'forbidden' }, 403);
+  if (!id || !act || !text || text.length < 50) return json({ error: 'id, act, text required' }, 400);
+
+  const chunks = chunkText(text.slice(0, 40000)).filter(c => c.trim().length > 80);
+  let total = 0;
+  for (let b = 0; b < chunks.length; b += 8) {
+    const batch = chunks.slice(b, b + 8);
+    const emb = await env.AI.run(EMBED_MODEL, { text: batch });
+    const vectors = emb.data.map((values, k) => ({
+      id: `${id}-${b + k}`,
+      values,
+      metadata: { act, url: url || '', cat, text: batch[k].slice(0, 1000) },
+    }));
+    await env.VECTORIZE.upsert(vectors);
+    total += vectors.length;
+  }
+  return json({ ok: true, id, act, chunks: chunks.length, upserted: total });
+}
+
 // ── Cron: monitor act category pages for changes ──────────────────────────────
 async function runMonitor(env) {
   if (!env.AIFC_KV) return;
@@ -531,6 +554,7 @@ export default {
     if (path === '/rate') return handleRate(request, env);
     if (path === '/compliance') return handleCompliance(request, env);
     if (path === '/ingest') return handleIngest(request, env);
+    if (path === '/ingest-text') return handleIngestText(request, env);
     // default: chat (streaming)
     try {
       return await handleChat(request, env, ctx);
