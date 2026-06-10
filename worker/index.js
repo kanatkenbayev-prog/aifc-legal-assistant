@@ -34,7 +34,7 @@ const ACTS = [
   ['Islamic Banking Business Prudential Rules','https://aifc.kz/legal-framework/islamic-banking-business-prudential-rules/','Финансовые услуги'],
   ['Prudential Rules For Investment Firms','https://aifc.kz/legal-framework/prudential-rules-for-investment-firms/','Финансовые услуги'],
   ['Insurance And Reinsurance Prudential Rules','https://aifc.kz/legal-framework/insurance-and-reinsurance-prudential-rules/','Финансовые услуги'],
-  ['Collective Investment Scheme Rules','https://aifc.kz/legal-framework/collective-investment-scheme-rules/','Финансовые услуги'],
+  ['Collective Investment Scheme Rules (CIS Rules)','https://orderly.myafsa.com/articles/collectiveinvestmentschemerules','Финансовые услуги'],
   ['AIFC Financial Technology Rules','https://aifc.kz/legal-framework/aifc-financial-technology-rules/','Финансовые услуги'],
   ['AIFC Rules on Digital Asset Activities','https://aifc.kz/legal-framework/aifc-rules-on-digital-asset-activities/','Финансовые услуги'],
   ['Multilateral And Organised Trading Facilities Rules','https://aifc.kz/legal-framework/multilateral-and-organised-trading-facilities-rules/','Финансовые услуги'],
@@ -189,7 +189,7 @@ function areaKeywordsEn(area) {
   const map = {
     'Налоговое право': 'tax exemption corporate income tax CIT VAT substantial presence core income generating activities CIGA qualified employees operating expenses',
     'Корпоративное право': 'company incorporation shares shareholders directors articles of association partnership',
-    'Финансовые услуги': 'financial services regulated activity licence prudential conduct of business AFSA',
+    'Финансовые услуги': 'financial services regulated activity licence prudential conduct of business AFSA collective investment scheme fund manager CIS Rules domestic fund foreign fund exempt fund specialist fund unit prospectus',
     'AML/KYC': 'anti money laundering counter terrorist financing customer due diligence KYC MLRO',
     'Трудовое право': 'employment contract employee working hours leave termination',
     'Разрешение споров': 'AIFC court arbitration mediation dispute resolution claim',
@@ -223,7 +223,7 @@ function formatLive(news, notices) {
 }
 
 // ── System prompt ─────────────────────────────────────────────────────────────
-function buildSystemPrompt({ area, lang, liveCtx, ragCtx }) {
+function buildSystemPrompt({ area, lang, liveCtx, ragCtx, isFundQuery }) {
   const langHeader = lang === 'en'
     ? '🌐 LANGUAGE: Respond ONLY in English regardless of the language of source documents.'
     : '🌐 ЯЗЫК ОТВЕТА: Отвечай ИСКЛЮЧИТЕЛЬНО на русском языке — НЕЗАВИСИМО от того, на каком языке написаны источники, акты и документы в контексте. Источники на английском — только основа для анализа; сам ответ всегда на русском. Латиницу используй только для названий актов, терминов и URL.';
@@ -241,7 +241,8 @@ ${ACTS_INDEX}
 - Всегда указывай полное название акта и прямую ссылку [Название](URL).
 - Приоритет: фрагменты RAG > живые данные > встроенная база. НИКОГДА не выдумывай URL.
 - Если в новостях есть изменения по теме — предупреди с ⚠️.
-- В периметре МФЦА действует английское общее право, оно приоритетнее права РК — указывай коллизии.
+- В периметре МФЦА действует английское общее право, оно приоритетнее права РК — указывай коллизии.${isFundQuery ? `
+- ⚠️ ПРИОРИТЕТ ФОНДОВ: Этот вопрос касается инвестиционных фондов. ПЕРВЫМ делом обращайся к AIFC Collective Investment Scheme Rules (CIS Rules) — https://orderly.myafsa.com/articles/collectiveinvestmentschemerules. CIS Rules — основной нормативный акт по всем вопросам создания, регистрации, управления и маркетинга фондов в МФЦА.` : ''}
 
 == ДИАЛОГ ==
 - Если вопрос неполный — задай 1–2 уточняющих вопроса ПЕРЕД полным ответом.
@@ -362,8 +363,9 @@ async function handleChat(request, env, ctx) {
 
   // Parallel: RAG retrieval + live data
   // Английские якорные термины по области права — улучшают кросс-языковой поиск
-  // (тексты актов на английском, вопросы часто на русском)
-  const ragQuery = `${area || ''} ${lastUser} ${areaKeywordsEn(area)}`.trim();
+  const isFundQuery = /фонд|фонда|фондов|фондам|фонде|инвестфонд|cis rules|коллективн|паевой|fund manager|domestic fund|foreign fund|exempt fund|specialist fund|unit|паи|пай|управляющ.*компан/i.test(lastUser);
+  const cisBoost = isFundQuery ? 'CIS Rules collective investment scheme fund manager domestic fund foreign fund exempt specialist fund registration prospectus unit dealing' : '';
+  const ragQuery = `${area || ''} ${lastUser} ${areaKeywordsEn(area)} ${cisBoost}`.trim();
   const [ragChunks, news, notices] = await Promise.all([
     ragRetrieve(env, ragQuery),
     fetchAifcNews(),
@@ -371,7 +373,7 @@ async function handleChat(request, env, ctx) {
   ]);
   const { ctx: liveCtx, count: liveCount } = formatLive(news, notices);
   const ragCtx = formatRag(ragChunks);
-  const systemPrompt = buildSystemPrompt({ area, lang, liveCtx, ragCtx });
+  const systemPrompt = buildSystemPrompt({ area, lang, liveCtx, ragCtx, isFundQuery });
 
   const aiStream = await env.AI.run(CHAT_MODEL, {
     messages: [{ role: 'system', content: systemPrompt }, ...messages],
