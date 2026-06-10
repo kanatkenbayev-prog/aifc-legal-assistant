@@ -133,6 +133,12 @@ async function ragRetrieve(env, query) {
   } catch { return []; }
 }
 
+// Удаляет иероглифы/нелатинские письменности (CJK, кана, хангыль) — артефакт Llama
+const CJK_RE = /[⺀-⻿　-〿぀-ヿ㄀-ㄯ㄰-㆏㐀-䶿一-鿿ꀀ-꓏가-힯豈-﫿＀-￯]/g;
+function sanitizeText(s) {
+  return (s || '').replace(CJK_RE, '');
+}
+
 // Английские ключевые термины по области права (для кросс-языкового RAG)
 function areaKeywordsEn(area) {
   const map = {
@@ -173,7 +179,9 @@ function formatLive(news, notices) {
 
 // ── System prompt ─────────────────────────────────────────────────────────────
 function buildSystemPrompt({ area, lang, liveCtx, ragCtx }) {
-  const langLine = lang === 'en' ? 'Respond in English.' : 'Отвечай строго на русском языке.';
+  const langLine = lang === 'en'
+    ? 'Respond ONLY in English. Use only the Latin alphabet (and Cyrillic for proper names if needed). NEVER output Chinese, Japanese, Korean or any other non-Latin/Cyrillic characters.'
+    : 'Отвечай ИСКЛЮЧИТЕЛЬНО на русском языке кириллицей. Латиницу используй только для англоязычных терминов, названий актов и URL. КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО использовать иероглифы и любые символы китайского, японского, корейского или иных нелатинских/некириллических письменностей. Каждое слово должно быть целиком на русском или английском, без вставки иноязычных символов внутри слова.';
   return `Ты — специализированный юридический ассистент по законодательству МФЦА (Международного финансового центра «Астана») и Республики Казахстан. Область права: ${area || 'Общее'}.
 ${ragCtx}${liveCtx}
 == ВСТРОЕННАЯ БАЗА АКТОВ МФЦА (название → URL) ==
@@ -251,7 +259,7 @@ async function cacheKey(q, area, lang) {
 function streamFromCache(cached) {
   const enc = new TextEncoder();
   const msgId = crypto.randomUUID();
-  const text = cached.text || '';
+  const text = sanitizeText(cached.text || '');
   const out = new ReadableStream({
     start(controller) {
       controller.enqueue(enc.encode(JSON.stringify({
@@ -344,7 +352,7 @@ async function handleChat(request, env, ctx) {
             const data = line.slice(5).trim();
             if (data === '[DONE]') continue;
             try {
-              const tok = JSON.parse(data).response || '';
+              const tok = sanitizeText(JSON.parse(data).response || '');
               if (tok) { fullText += tok; controller.enqueue(encoder.encode(JSON.stringify({ type: 'token', t: tok }) + '\n')); }
             } catch {}
           }
@@ -425,7 +433,7 @@ ${ragCtx}
       ],
       max_tokens: 1500, temperature: 0.1,
     });
-    const analysis = response.response || '';
+    const analysis = sanitizeText(response.response || '');
     const linkStatus = await verifyLinks(analysis);
     return json({
       analysis, truncated,
