@@ -1617,16 +1617,17 @@ function openCustomDoc() {
   activeTemplate = {
     id: 'custom_doc', custom: true,
     title: 'Пользовательский документ',
-    regulation: CUSTOM_AREAS['Корпоративное право'].regulation,
-    ragArea: 'Корпоративное право',
+    regulation: '',
+    ragArea: 'auto',
   };
   templateOriginal = '';
   const wrap = document.getElementById('editorWrap');
   document.getElementById('editorTitle').textContent = '📄 Проверка своего документа';
   document.getElementById('editorSub').innerHTML =
     `Область права: <select id="customArea" onchange="setCustomArea(this.value)" style="margin-left:4px;padding:4px 8px;font-size:11.5px;font-family:inherit;border:1px solid var(--border);border-radius:6px;background:#fff">` +
+    `<option value="auto" selected>🔍 Все области (авто)</option>` +
     Object.keys(CUSTOM_AREAS).map(a => `<option value="${a}">${a}</option>`).join('') +
-    `</select> · <span id="customReg">${CUSTOM_AREAS['Корпоративное право'].regulation}</span>`;
+    `</select> · <span id="customReg">ИИ сам определит применимые нормы по тексту документа</span>`;
   const editor = document.getElementById('templateEditor');
   editor.value = '';
   editor.placeholder = 'Вставьте сюда текст вашего документа (устав, соглашение, политику)...';
@@ -1639,9 +1640,15 @@ function openCustomDoc() {
 
 function setCustomArea(area) {
   if (!activeTemplate || !activeTemplate.custom) return;
-  activeTemplate.ragArea = area;
-  activeTemplate.regulation = CUSTOM_AREAS[area].regulation;
-  document.getElementById('customReg').textContent = CUSTOM_AREAS[area].regulation;
+  if (area === 'auto') {
+    activeTemplate.ragArea = 'auto';
+    activeTemplate.regulation = '';
+    document.getElementById('customReg').textContent = 'ИИ сам определит применимые нормы по тексту документа';
+  } else {
+    activeTemplate.ragArea = area;
+    activeTemplate.regulation = CUSTOM_AREAS[area].regulation;
+    document.getElementById('customReg').textContent = CUSTOM_AREAS[area].regulation;
+  }
 }
 
 function resetTemplate() {

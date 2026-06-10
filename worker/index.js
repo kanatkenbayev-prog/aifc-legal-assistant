@@ -398,14 +398,36 @@ async function handleCompliance(request, env) {
   const doc = text.slice(0, 18000);
   const truncated = text.length > 18000;
 
-  // RAG по релевантным нормам
-  const ragChunks = await ragRetrieve(env, `${title} ${regulation} mandatory requirements obligations`.trim());
+  // RAG по релевантным нормам.
+  // Режим «все области»: ищем нормы по содержанию самого документа,
+  // двумя запросами (начало и середина текста) для более широкого покрытия.
+  const autoMode = area === 'auto' || !regulation;
+  let ragChunks;
+  if (autoMode) {
+    const head = doc.slice(0, 1200);
+    const mid = doc.length > 3000 ? doc.slice(Math.floor(doc.length / 2), Math.floor(doc.length / 2) + 1200) : '';
+    const [r1, r2] = await Promise.all([
+      ragRetrieve(env, `${head} mandatory requirements obligations`),
+      mid ? ragRetrieve(env, `${mid} mandatory requirements obligations`) : Promise.resolve([]),
+    ]);
+    const seen = new Set();
+    ragChunks = [...r1, ...r2].filter(c => {
+      const k = c.act + '|' + c.text.slice(0, 80);
+      if (seen.has(k)) return false; seen.add(k); return true;
+    }).slice(0, 7);
+  } else {
+    ragChunks = await ragRetrieve(env, `${title} ${regulation} mandatory requirements obligations`.trim());
+  }
   const ragCtx = ragChunks.length
     ? '\n== ФРАГМЕНТЫ ПРИМЕНИМЫХ АКТОВ (RAG) ==\n' + ragChunks.map((c, i) =>
         `[${i + 1}] из «${c.act}» (${c.url}):\n«${c.text.slice(0, 700)}»`).join('\n\n')
     : '';
 
-  const systemPrompt = `Ты — комплаенс-ревьюер по праву МФЦА (Международного финансового центра «Астана»). Пользователь модифицировал официальный шаблон «${title}», который должен соответствовать: ${regulation}.
+  const scopeLine = autoMode
+    ? `Пользователь предоставил документ «${title || 'Пользовательский документ'}». Проверь его по ВСЕМ применимым областям права МФЦА (корпоративное, финансовые услуги, налоговое в т.ч. substantial presence, AML/CTF, трудовое, споры) — сам определи, какие нормы применимы к этому документу.`
+    : `Пользователь модифицировал официальный шаблон «${title}», который должен соответствовать: ${regulation}.`;
+
+  const systemPrompt = `Ты — комплаенс-ревьюер по праву МФЦА (Международного финансового центра «Астана»). ${scopeLine}
 ${ragCtx}
 
 ЗАДАЧА: проверить, остаётся ли модифицированный документ В РАМКАХ обязательных требований МФЦА.
