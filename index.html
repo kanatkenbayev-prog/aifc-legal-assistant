@@ -739,6 +739,16 @@
 <script>
 const WORKER_URL = 'https://aifc-legal-proxy.aifclegal.workers.dev';
 
+// ── Маячок посещения (приватно: без cookie и персональных данных) ──
+(function trackVisit(){
+  try {
+    const k = 'aifc_visit_day', today = new Date().toISOString().slice(0,10);
+    if (localStorage.getItem(k) === today) return; // 1 визит в день с устройства
+    localStorage.setItem(k, today);
+    fetch(WORKER_URL + '/track', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}', keepalive:true }).catch(()=>{});
+  } catch {}
+})();
+
 // ── State ─────────────────────────────────────
 let currentLang = 'ru';
 let currentArea = 'Корпоративное право';

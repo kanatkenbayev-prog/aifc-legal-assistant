@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Мониторинг · МФЦА Правовой Ассистент</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Serif+4:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--gold:#C9A84C;--navy:#0D1B3E;--navy-light:#1A2D5A;--cream:#FAF7F2;--text:#1A1A2E;--muted:#5A5A72;--blue:#1B4F8A;--border:#DDD5C8;--green:#1A7A4A;--red:#C0392B;--warn:#B8860B;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Source Serif 4',Georgia,serif;background:var(--cream);color:var(--text);}
+  header{background:linear-gradient(135deg,var(--navy),var(--navy-light));color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+  header h1{font-family:'Playfair Display',serif;font-size:17px;}
+  header a{color:var(--gold);text-decoration:none;font-size:12.5px;}
+  main{max-width:1080px;margin:0 auto;padding:24px;}
+  .gate{max-width:380px;margin:60px auto;background:#fff;border:1px solid var(--border);border-radius:12px;padding:28px;text-align:center;}
+  .gate h2{font-family:'Playfair Display',serif;color:var(--navy);font-size:18px;margin-bottom:8px;}
+  .gate p{font-size:12.5px;color:var(--muted);margin-bottom:16px;}
+  input[type=password]{width:100%;padding:11px;font-size:14px;font-family:inherit;border:1px solid var(--border);border-radius:8px;outline:none;margin-bottom:12px;}
+  input:focus{border-color:var(--gold);}
+  .btn{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:11px 18px;font-size:13px;font-family:inherit;font-weight:600;cursor:pointer;transition:all .2s;}
+  .btn:hover{background:var(--navy-light);}
+  .btn.gold{background:var(--gold);color:var(--navy);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .err{color:var(--red);font-size:12px;margin-top:8px;}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+  .toolbar .t-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:22px;}
+  .card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;box-shadow:0 2px 10px rgba(13,27,62,.05);}
+  .card .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+  .card .val{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--navy);}
+  .card .sub{font-size:11px;color:var(--muted);margin-top:3px;}
+  .card.quota .val{color:var(--green);}
+  .card.warnq .val{color:var(--warn);}
+  .panel{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;}
+  .panel h2{font-family:'Playfair Display',serif;font-size:15px;color:var(--navy);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--gold);}
+  .bars{display:flex;align-items:flex-end;gap:5px;height:120px;}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;}
+  .bar{width:70%;background:linear-gradient(180deg,var(--blue),var(--navy));border-radius:3px 3px 0 0;min-height:2px;transition:height .3s;position:relative;}
+  .bar.dl{width:35%;background:linear-gradient(180deg,#E8C97A,var(--gold));}
+  .bar-wrap{flex:1;display:flex;align-items:flex-end;gap:2px;width:100%;justify-content:center;height:100%;}
+  .bar-date{font-size:8.5px;color:var(--muted);transform:rotate(-45deg);white-space:nowrap;margin-top:4px;}
+  .legend{display:flex;gap:14px;font-size:11px;color:var(--muted);margin-bottom:10px;}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .dot{width:9px;height:9px;border-radius:2px;display:inline-block;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:720px){.row2{grid-template-columns:1fr;}}
+  .dist-item{display:flex;align-items:center;gap:8px;font-size:12.5px;margin-bottom:7px;}
+  .dist-bar{height:8px;background:var(--blue);border-radius:4px;}
+  .dist-name{min-width:130px;color:var(--text);}
+  .dist-val{color:var(--muted);font-size:11px;}
+  ul.qlist{list-style:none;font-size:12.5px;max-height:240px;overflow-y:auto;}
+  ul.qlist li{padding:7px 0;border-bottom:1px solid var(--border);line-height:1.4;}
+  ul.qlist li .meta{font-size:10px;color:var(--muted);}
+  .neg li{color:var(--text);}
+  .ai-panel{background:linear-gradient(135deg,#fff,#fffdf8);border:1px solid var(--gold);}
+  .ai-body{font-size:13px;line-height:1.65;}
+  .ai-body h2{font-family:'Playfair Display',serif;font-size:14px;color:var(--navy);margin:16px 0 6px;padding:0;border:none;}
+  .ai-body h2:first-child{margin-top:0;}
+  .ai-body ul{padding-left:20px;margin-bottom:8px;}
+  .ai-body li{margin-bottom:4px;}
+  .ai-body p{margin-bottom:8px;}
+  .ai-body strong{color:var(--navy);}
+  .loading{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;}
+  .pulse{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:p 1s infinite;}
+  @keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+  .muted{color:var(--muted);font-size:12px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>📊 Мониторинг — МФЦА Правовой Ассистент</h1>
+  <a href="index.html">← К ассистенту</a>
+</header>
+<main>
+
+  <div id="gate" class="gate">
+    <h2>🔒 Панель мониторинга</h2>
+    <p>Введите код доступа администратора. Он сохранится в этом браузере.</p>
+    <input type="password" id="token" placeholder="Код доступа" onkeydown="if(event.key==='Enter')enter()">
+    <button class="btn" onclick="enter()">Войти</button>
+    <div class="err" id="gateErr"></div>
+  </div>
+
+  <div id="dash" style="display:none">
+    <div class="toolbar">
+      <span class="muted" id="updated"></span>
+      <div class="t-actions">
+        <button class="btn" onclick="loadStats()">↻ Обновить</button>
+        <button class="btn gold" onclick="runAnalysis()">🤖 Анализ и рекомендации ИИ</button>
+        <button class="btn" style="background:#fff;color:var(--navy);border:1px solid var(--border)" onclick="logout()">Выйти</button>
+      </div>
+    </div>
+
+    <div class="cards" id="cards"></div>
+
+    <div class="panel">
+      <h2>📈 Активность за 14 дней</h2>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--navy)"></i> Запросы к ИИ</span>
+        <span><i class="dot" style="background:var(--gold)"></i> Посещения</span>
+      </div>
+      <div class="bars" id="chart"></div>
+    </div>
+
+    <div class="row2">
+      <div class="panel">
+        <h2>⚖️ По областям права</h2>
+        <div id="areas"></div>
+      </div>
+      <div class="panel">
+        <h2>🌍 География</h2>
+        <div id="geo"></div>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="panel">
+        <h2>💬 Последние вопросы</h2>
+        <ul class="qlist" id="recentQ"></ul>
+      </div>
+      <div class="panel">
+        <h2>👎 Вопросы с негативной оценкой</h2>
+        <ul class="qlist neg" id="negativeQ"></ul>
+      </div>
+    </div>
+
+    <div class="panel ai-panel" id="aiPanel" style="display:none">
+      <h2>🤖 Анализ и рекомендации ИИ-аналитика</h2>
+      <div class="ai-body" id="aiBody"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const WORKER_URL = 'https://aifc-legal-proxy.aifclegal.workers.dev';
+const LS = 'aifc_admin_token';
+let token = localStorage.getItem(LS) || '';
+
+if (token) { document.getElementById('gate').style.display='none'; document.getElementById('dash').style.display='block'; loadStats(); }
+
+function enter(){
+  const t = document.getElementById('token').value.trim();
+  if(!t){return;}
+  token = t;
+  loadStats(true);
+}
+function logout(){ localStorage.removeItem(LS); location.reload(); }
+
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+async function loadStats(fromGate){
+  try{
+    const res = await fetch(`${WORKER_URL}/stats?key=${encodeURIComponent(token)}`);
+    if(res.status===403){
+      if(fromGate) document.getElementById('gateErr').textContent='Неверный код доступа';
+      else { localStorage.removeItem(LS); location.reload(); }
+      return;
+    }
+    const d = await res.json();
+    if(d.error) throw new Error(d.error);
+    localStorage.setItem(LS, token);
+    document.getElementById('gate').style.display='none';
+    document.getElementById('dash').style.display='block';
+    render(d);
+  }catch(e){
+    document.getElementById('gateErr').textContent='Ошибка: '+e.message;
+  }
+}
+
+function render(d){
+  document.getElementById('updated').textContent = 'Обновлено: '+new Date().toLocaleString('ru-RU')+' · период 14 дней';
+  const t=d.totals, q=d.today;
+  const r=d.ratingsAllTime;
+  const ratePct = (r.up+r.down)>0 ? Math.round(r.up/(r.up+r.down)*100) : '—';
+  const quotaWarn = q.remaining < 2000;
+  document.getElementById('cards').innerHTML = `
+    ${card('Запросы к ИИ (14д)', t.chat, 'сгенерировано')}
+    ${card('Из кэша', t.cache_hit, 'бесплатно, без ИИ')}
+    ${card('Проверки документов', t.compliance, '')}
+    ${card('Посещения (14д)', t.pageview, '')}
+    ${card('Оценки 👍/👎', r.up+' / '+r.down, ratePct==='—'?'нет оценок':ratePct+'% положительных')}
+    ${card('Квота ИИ сегодня', q.remaining.toLocaleString('ru-RU'), 'из '+q.budget.toLocaleString('ru-RU')+' нейронов', quotaWarn?'warnq':'quota')}
+  `;
+  renderChart(d.days);
+  renderDist('areas', d.areas, 'вопросов');
+  renderDist('geo', d.geo, 'визитов');
+  renderQ('recentQ', d.recentQ, true);
+  renderQ('negativeQ', d.negativeQ, false);
+}
+
+function card(lbl,val,sub,cls){
+  return `<div class="card ${cls||''}"><div class="lbl">${lbl}</div><div class="val">${typeof val==='number'?val.toLocaleString('ru-RU'):val}</div>${sub?`<div class="sub">${sub}</div>`:''}</div>`;
+}
+
+function renderChart(days){
+  const max = Math.max(1, ...days.map(d=>Math.max(d.chat||0, d.pageview||0)));
+  document.getElementById('chart').innerHTML = days.map(d=>{
+    const ch=Math.round((d.chat||0)/max*100), pv=Math.round((d.pageview||0)/max*100);
+    return `<div class="bar-col">
+      <div class="bar-wrap">
+        <div class="bar" style="height:${ch}%" title="Запросы: ${d.chat||0}"></div>
+        <div class="bar dl" style="height:${pv}%" title="Визиты: ${d.pageview||0}"></div>
+      </div>
+      <div class="bar-date">${d.date.slice(5)}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderDist(id, obj, unit){
+  const entries=Object.entries(obj||{}).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(!entries.length){document.getElementById(id).innerHTML='<span class="muted">Нет данных</span>';return;}
+  const max=Math.max(...entries.map(e=>e[1]));
+  document.getElementById(id).innerHTML = entries.map(([k,v])=>`
+    <div class="dist-item">
+      <span class="dist-name">${esc(k)}</span>
+      <span class="dist-bar" style="width:${Math.round(v/max*120)}px"></span>
+      <span class="dist-val">${v} ${unit}</span>
+    </div>`).join('');
+}
+
+function renderQ(id, arr, showCache){
+  if(!arr||!arr.length){document.getElementById(id).innerHTML='<li class="muted">Пока нет данных</li>';return;}
+  document.getElementById(id).innerHTML = arr.slice(0,25).map(x=>`
+    <li>${esc(x.q)}<div class="meta">${x.area?esc(x.area)+' · ':''}${new Date(x.ts).toLocaleString('ru-RU')}${showCache&&x.cached?' · 💾 из кэша':''}</div></li>`).join('');
+}
+
+// Markdown → HTML (упрощённо)
+function md(t){
+  let h=esc(t)
+    .replace(/^### (.+)$/gm,'<h2>$1</h2>')
+    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/^\s*[-*•] (.+)$/gm,'<li>$1</li>');
+  h=h.replace(/(<li>.*?<\/li>\n?)+/gs,m=>`<ul>${m}</ul>`);
+  h=h.split('\n').map(l=>{const s=l.trim();if(!s)return'';if(/^<(h2|ul|li)/.test(s))return s;return`<p>${s}</p>`;}).filter(Boolean).join('\n');
+  return h;
+}
+
+async function runAnalysis(){
+  const panel=document.getElementById('aiPanel'), body=document.getElementById('aiBody');
+  panel.style.display='block';
+  body.innerHTML='<div class="loading"><div class="pulse"></div> ИИ анализирует метрики и готовит рекомендации...</div>';
+  panel.scrollIntoView({behavior:'smooth'});
+  try{
+    const res=await fetch(`${WORKER_URL}/analyze?key=${encodeURIComponent(token)}`);
+    const d=await res.json();
+    if(d.error) throw new Error(d.error);
+    body.innerHTML=md(d.analysis||'Пустой ответ');
+  }catch(e){
+    body.innerHTML='<span style="color:var(--red)">Ошибка анализа: '+esc(e.message)+'</span>';
+  }
+}
+</script>
+</body>
+</html>

@@ -5,7 +5,9 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 const INGEST_SECRET = 'aifc-rag-2026';      // защита эндпоинта загрузки RAG
+const ADMIN_SECRET = 'aifc-admin-2026';     // защита /stats и /analyze (мониторинг)
 const RATE_LIMIT_PER_MIN = 25;              // запросов в минуту с одного IP
+const DAILY_NEURON_BUDGET = 10000;          // бесплатная дневная квота Cloudflare AI (для оценки остатка)
 const EMBED_MODEL = '@cf/baai/bge-base-en-v1.5';
 const CHAT_MODEL  = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 
@@ -89,6 +91,49 @@ const CORS = {
 };
 const json = (obj, status = 200) =>
   new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json', ...CORS } });
+
+// ── Analytics / usage tracking (KV) ───────────────────────────────────────────
+const dayKey = (d = new Date()) => d.toISOString().slice(0, 10);
+
+// Примерная стоимость операций в «нейронах» Cloudflare AI (для оценки расхода)
+const NEURON_COST = { chat: 250, compliance: 350, embed: 2 };
+
+// Объединяет дневной агрегат stat:YYYY-MM-DD (read-modify-write).
+async function bumpDaily(env, patch) {
+  if (!env.AIFC_KV) return;
+  const key = `stat:${dayKey()}`;
+  let cur = {};
+  try { cur = JSON.parse(await env.AIFC_KV.get(key) || '{}'); } catch {}
+  for (const [k, v] of Object.entries(patch)) {
+    if (typeof v === 'number') cur[k] = (cur[k] || 0) + v;
+    else if (k === 'area' && v) { cur.areas = cur.areas || {}; cur.areas[v] = (cur.areas[v] || 0) + 1; }
+  }
+  cur.neurons = cur.neurons || 0;
+  await env.AIFC_KV.put(key, JSON.stringify(cur), { expirationTtl: 60 * 60 * 24 * 60 }); // 60 дней
+}
+
+// Добавляет элемент в ограниченный список (последние N).
+async function pushList(env, key, item, max = 80) {
+  if (!env.AIFC_KV) return;
+  let arr = [];
+  try { arr = JSON.parse(await env.AIFC_KV.get(key) || '[]'); } catch {}
+  arr.unshift(item);
+  await env.AIFC_KV.put(key, JSON.stringify(arr.slice(0, max)), { expirationTtl: 60 * 60 * 24 * 60 });
+}
+
+// Трекинг события — вызывать через ctx.waitUntil, не блокирует ответ.
+function track(env, ctx, ev) {
+  if (!env.AIFC_KV || !ctx) return;
+  const tasks = [];
+  const patch = { [ev.type]: 1, neurons: ev.neurons || 0 };
+  if (ev.cache_hit) patch.cache_hit = ev.cache_hit;
+  if (ev.area) patch.area = ev.area;
+  tasks.push(bumpDaily(env, patch));
+  if (ev.question) tasks.push(pushList(env, 'stat:recent_q',
+    { q: ev.question.slice(0, 200), area: ev.area || '', ts: Date.now(), cached: !!ev.cached }, 100));
+  if (ev.negative) tasks.push(pushList(env, 'stat:negative_q', ev.negative, 50));
+  ctx.waitUntil(Promise.all(tasks).catch(() => {}));
+}
 
 // ── Live data fetchers (free scraping) ────────────────────────────────────────
 async function fetchAifcNews() {
@@ -302,7 +347,10 @@ async function handleChat(request, env, ctx) {
       try {
         const cached = JSON.parse(hit);
         // не кэшируем уточняющие вопросы (с чипами)
-        if (cached.text && !/^ЧИПЫ:/m.test(cached.text)) return streamFromCache(cached);
+        if (cached.text && !/^ЧИПЫ:/m.test(cached.text)) {
+          track(env, ctx, { type: 'chat', cache_hit: 1, area, question: lastUser, cached: true });
+          return streamFromCache(cached);
+        }
       } catch {}
     }
   }
@@ -377,6 +425,9 @@ async function handleChat(request, env, ctx) {
         }), { expirationTtl: CACHE_TTL }));
       }
 
+      // Метрика: сгенерированный ответ (не из кэша)
+      track(env, ctx, { type: 'chat', area, question: lastUser, neurons: NEURON_COST.chat });
+
       controller.close();
     },
   });
@@ -385,7 +436,7 @@ async function handleChat(request, env, ctx) {
 }
 
 // ── Compliance check handler (AI + RAG over AIFC rules) ───────────────────────
-async function handleCompliance(request, env) {
+async function handleCompliance(request, env, ctx) {
   const ip = request.headers.get('cf-connecting-ip') || '';
   if (!(await checkRateLimit(env, ip)))
     return json({ error: 'Слишком много запросов. Подождите минуту.' }, 429);
@@ -457,6 +508,7 @@ ${ragCtx}
     });
     const analysis = sanitizeText(response.response || '');
     const linkStatus = await verifyLinks(analysis);
+    track(env, ctx, { type: 'compliance', area: autoMode ? 'Все области' : area, neurons: NEURON_COST.compliance });
     return json({
       analysis, truncated,
       ragCount: ragChunks.length,
@@ -469,7 +521,7 @@ ${ragCtx}
 }
 
 // ── Rating handler ────────────────────────────────────────────────────────────
-async function handleRate(request, env) {
+async function handleRate(request, env, ctx) {
   let body; try { body = await request.json(); } catch { return json({ error: 'bad' }, 400); }
   const { msgId, vote } = body;
   if (!msgId || !['up', 'down'].includes(vote)) return json({ error: 'bad' }, 400);
@@ -478,6 +530,15 @@ async function handleRate(request, env) {
     const cur = parseInt(await env.AIFC_KV.get(key) || '0', 10);
     await env.AIFC_KV.put(key, String(cur + 1));
     await env.AIFC_KV.put(`vote:${msgId}`, vote, { expirationTtl: 2592000 });
+    // Дневная метрика + сбор вопросов с негативной оценкой для анализа
+    let negative = null;
+    if (vote === 'down') {
+      try {
+        const ctxData = JSON.parse(await env.AIFC_KV.get(`msg:${msgId}`) || 'null');
+        if (ctxData?.q) negative = { q: ctxData.q.slice(0, 200), area: ctxData.area || '', ts: Date.now() };
+      } catch {}
+    }
+    track(env, ctx, { type: vote === 'up' ? 'vote_up' : 'vote_down', negative });
   }
   return json({ ok: true });
 }
@@ -487,6 +548,120 @@ async function handleChanges(env) {
   if (!env.AIFC_KV) return json({ changes: [] });
   const raw = await env.AIFC_KV.get('changes');
   return json({ changes: raw ? JSON.parse(raw) : [] });
+}
+
+// ── Pageview beacon (public, lightweight) ─────────────────────────────────────
+async function handleTrack(request, env, ctx) {
+  let body = {}; try { body = await request.json(); } catch {}
+  const country = request.cf?.country || '??';
+  const patch = { pageview: 1 };
+  // считаем страну
+  if (env.AIFC_KV && ctx) {
+    ctx.waitUntil((async () => {
+      await bumpDaily(env, patch);
+      const key = `stat:geo`;
+      let geo = {}; try { geo = JSON.parse(await env.AIFC_KV.get(key) || '{}'); } catch {}
+      geo[country] = (geo[country] || 0) + 1;
+      await env.AIFC_KV.put(key, JSON.stringify(geo), { expirationTtl: 60 * 60 * 24 * 60 });
+    })().catch(() => {}));
+  }
+  return json({ ok: true });
+}
+
+// ── Stats aggregate (protected) ───────────────────────────────────────────────
+async function handleStats(request, env) {
+  const url = new URL(request.url);
+  if (url.searchParams.get('key') !== ADMIN_SECRET) return json({ error: 'forbidden' }, 403);
+  if (!env.AIFC_KV) return json({ error: 'no storage' }, 500);
+
+  // последние 14 дней
+  const days = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 86400000);
+    const key = `stat:${dayKey(d)}`;
+    let v = {}; try { v = JSON.parse(await env.AIFC_KV.get(key) || '{}'); } catch {}
+    days.push({ date: dayKey(d), ...v });
+  }
+  const [recentQ, negativeQ, geo, upTotal, downTotal] = await Promise.all([
+    env.AIFC_KV.get('stat:recent_q').then(x => { try { return JSON.parse(x || '[]'); } catch { return []; } }),
+    env.AIFC_KV.get('stat:negative_q').then(x => { try { return JSON.parse(x || '[]'); } catch { return []; } }),
+    env.AIFC_KV.get('stat:geo').then(x => { try { return JSON.parse(x || '{}'); } catch { return {}; } }),
+    env.AIFC_KV.get('rate:up').then(x => parseInt(x || '0', 10)),
+    env.AIFC_KV.get('rate:down').then(x => parseInt(x || '0', 10)),
+  ]);
+
+  // агрегаты областей за период
+  const areas = {};
+  days.forEach(d => { if (d.areas) for (const [k, v] of Object.entries(d.areas)) areas[k] = (areas[k] || 0) + v; });
+
+  const sum = (f) => days.reduce((s, d) => s + (d[f] || 0), 0);
+  const todayNeurons = days[days.length - 1].neurons || 0;
+
+  return json({
+    period: '14d',
+    days,
+    totals: {
+      chat: sum('chat'), compliance: sum('compliance'), cache_hit: sum('cache_hit'),
+      pageview: sum('pageview'), vote_up: sum('vote_up'), vote_down: sum('vote_down'),
+      neurons: sum('neurons'),
+    },
+    ratingsAllTime: { up: upTotal, down: downTotal },
+    today: { neurons: todayNeurons, budget: DAILY_NEURON_BUDGET, remaining: Math.max(0, DAILY_NEURON_BUDGET - todayNeurons) },
+    areas, geo, recentQ, negativeQ,
+  });
+}
+
+// ── AI analyst: analyse metrics, suggest improvements & monetization ──────────
+async function handleAnalyze(request, env) {
+  const url = new URL(request.url);
+  if (url.searchParams.get('key') !== ADMIN_SECRET) return json({ error: 'forbidden' }, 403);
+
+  // собираем те же агрегаты, что и /stats
+  const statsRes = await handleStats(request, env);
+  const stats = await statsRes.json();
+  if (stats.error) return json(stats, 403);
+
+  const brief = {
+    totals: stats.totals,
+    ratingsAllTime: stats.ratingsAllTime,
+    todayQuota: stats.today,
+    areas: stats.areas,
+    topCountries: Object.entries(stats.geo).sort((a, b) => b[1] - a[1]).slice(0, 6),
+    last14days: stats.days.map(d => ({ date: d.date, chat: d.chat || 0, pageview: d.pageview || 0, down: d.vote_down || 0 })),
+    recentQuestions: (stats.recentQ || []).slice(0, 30).map(q => q.q),
+    negativeQuestions: (stats.negativeQ || []).slice(0, 15).map(q => q.q),
+  };
+
+  const systemPrompt = `Ты — продуктовый и growth-аналитик SaaS-сервиса «МФЦА Правовой Ассистент» (ИИ-консультант по праву МФЦА для юристов и бизнеса в Казахстане). Сервис готовится к платному запуску (тариф ~5000₸/мес, провайдер ioka, фикс-расходы ~45000₸/мес как ИП, точка безубыточности ~15 подписчиков).
+
+Тебе дают реальные метрики использования. Проанализируй их и дай КОНКРЕТНЫЕ, практичные выводы на русском языке в формате Markdown:
+
+## 📊 Ключевые наблюдения
+[Что говорят цифры: тренды трафика, активность, соотношение генераций и кэша, оценки]
+
+## ⚠️ Проблемы и риски
+[Где проблемы: негативные оценки и их темы, расход квоты ИИ, провалы вовлечённости]
+
+## 🎯 Улучшения сервиса
+[Что доработать в продукте/контенте, исходя из популярных и проблемных вопросов]
+
+## 💰 Монетизация и рост
+[Конкретные идеи по тарифам, удержанию, привлечению, исходя из данных и контекста запуска]
+
+Будь конкретным и опирайся ТОЛЬКО на предоставленные цифры. Если данных мало — честно скажи об этом и предложи, что отслеживать. Не выдумывай метрики.`;
+
+  try {
+    const response = await env.AI.run(CHAT_MODEL, {
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Метрики использования сервиса (последние 14 дней):\n\n${JSON.stringify(brief, null, 2)}` },
+      ],
+      max_tokens: 1800, temperature: 0.3,
+    });
+    return json({ analysis: sanitizeText(response.response || ''), brief });
+  } catch (err) {
+    return json({ error: err.message }, 500);
+  }
 }
 
 // ── RAG ingestion handler ─────────────────────────────────────────────────────
@@ -595,10 +770,13 @@ export default {
 
     if (request.method === 'GET' && path === '/changes') return handleChanges(env);
     if (request.method === 'GET' && path === '/ingest') return handleIngest(request, env);
+    if (request.method === 'GET' && path === '/stats') return handleStats(request, env);
+    if (request.method === 'GET' && path === '/analyze') return handleAnalyze(request, env);
     if (request.method !== 'POST' && path !== '/') return new Response('Not found', { status: 404 });
 
-    if (path === '/rate') return handleRate(request, env);
-    if (path === '/compliance') return handleCompliance(request, env);
+    if (path === '/track') return handleTrack(request, env, ctx);
+    if (path === '/rate') return handleRate(request, env, ctx);
+    if (path === '/compliance') return handleCompliance(request, env, ctx);
     if (path === '/ingest') return handleIngest(request, env);
     if (path === '/ingest-text') return handleIngestText(request, env);
     // default: chat (streaming)
