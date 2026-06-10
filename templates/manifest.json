@@ -1,0 +1,51 @@
+{
+  "editable": [
+    {
+      "id": "articles_private",
+      "title": "Standard Articles of Association — Private Company",
+      "titleRu": "Устав частной компании (модельный)",
+      "entity": "Private Company",
+      "file": "templates/articles_private.txt",
+      "source": "https://afsa.aifc.kz/wp-content/uploads/2025/02/Standard-Articles-of-Association-for-Private-Companies.docx",
+      "regulation": "AIFC Companies Regulations & Companies Rules",
+      "regulationUrl": "https://aifc.kz/legal-framework/aifc-companies-regulations/",
+      "ragArea": "Корпоративное право"
+    },
+    {
+      "id": "spa_lp",
+      "title": "Standard Partnership Agreement — Limited Partnership",
+      "titleRu": "Стандартное соглашение о партнёрстве — LP",
+      "entity": "Limited Partnership",
+      "file": "templates/spa_lp.txt",
+      "source": "https://afsa.aifc.kz/wp-content/uploads/2024/11/standard-partnership-agreement-for-limited-partnership-lp.docx",
+      "regulation": "AIFC Limited Partnership Regulations & Rules",
+      "regulationUrl": "https://aifc.kz/legal-framework/aifc-limited-partnership-regulations/",
+      "ragArea": "Корпоративное право"
+    },
+    {
+      "id": "spa_llp",
+      "title": "Standard Partnership Agreement — Limited Liability Partnership",
+      "titleRu": "Стандартное соглашение о партнёрстве — LLP",
+      "entity": "Limited Liability Partnership",
+      "file": "templates/spa_llp.txt",
+      "source": "https://afsa.aifc.kz/wp-content/uploads/2024/11/standard-partnership-agreement-for-limited-liablity-partnership-llp.docx",
+      "regulation": "AIFC Limited Liability Partnership Regulations & Rules",
+      "regulationUrl": "https://aifc.kz/legal-framework/aifc-limited-liability-partnership-regulations/",
+      "ragArea": "Корпоративное право"
+    }
+  ],
+  "catalog": [
+    { "title": "Application to Register Private Company", "entity": "Private Company", "url": "https://afsa.aifc.kz/wp-content/uploads/2025/02/Application-for-Private-Company-Form.docx" },
+    { "title": "Resolution of Incorporating Shareholder", "entity": "Private Company", "url": "https://afsa.aifc.kz/wp-content/uploads/2025/02/RESOLUTION-OF-INCORPORATING-SHAREHOLDER-1-Shareholder-1-individual.docx" },
+    { "title": "Resolution by Board of Directors", "entity": "Private Company", "url": "https://afsa.aifc.kz/wp-content/uploads/2025/02/Resolution-by-Board-of-Directors-2-Shareholders-2-body-corporate.docx" },
+    { "title": "Application to Register Limited Partnership", "entity": "Limited Partnership", "url": "https://afsa.aifc.kz/wp-content/uploads/2024/11/application_to_register_limited-partnership.docx" },
+    { "title": "Application LLP", "entity": "LLP", "url": "https://afsa.aifc.kz/wp-content/uploads/2024/11/Application-LLP.docx" },
+    { "title": "Template Resolution on Incorporation by Partners", "entity": "Partnership", "url": "https://afsa.aifc.kz/wp-content/uploads/2024/11/template-resolution-on-incorporation-by-partners-1.docx" },
+    { "title": "Details on Beneficial Ownership", "entity": "All", "url": "https://afsa.aifc.kz/wp-content/uploads/2024/11/details-on-beneficial-ownership.docx" },
+    { "title": "Application for Business Identification Number (BIN)", "entity": "All", "url": "https://afsa.aifc.kz/wp-content/uploads/2024/11/application-form-for-obtaining-a-business-identification-number-1.docx" },
+    { "title": "Notice on Amendment of Articles of Association", "entity": "Company", "url": "https://afsa.aifc.kz/wp-content/uploads/2024/11/AIFC-Notice-on-Amendment-of-Articles-of-Association_VER3-FEB23.docx" },
+    { "title": "Special Resolution on Amendment of Articles of Association", "entity": "Company", "url": "https://afsa.aifc.kz/wp-content/uploads/2024/11/special-resolution-of-shareholders-on-ammendment-of-articles-of-association.docx" },
+    { "title": "Notice of Transfer of Shares", "entity": "Company", "url": "https://afsa.aifc.kz/wp-content/uploads/2024/11/AIFC-Notice-of-Transfer-of-Shares_VER3-FEB23.docx" },
+    { "title": "Register of Shareholders (xlsx)", "entity": "Company", "url": "https://afsa.aifc.kz/wp-content/uploads/2024/11/template_register-of-shareholders.xlsx" }
+  ]
+}

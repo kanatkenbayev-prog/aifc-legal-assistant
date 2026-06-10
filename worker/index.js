@@ -360,6 +360,68 @@ async function handleChat(request, env, ctx) {
   return new Response(out, { headers: { 'Content-Type': 'application/x-ndjson; charset=utf-8', ...CORS } });
 }
 
+// ── Compliance check handler (AI + RAG over AIFC rules) ───────────────────────
+async function handleCompliance(request, env) {
+  const ip = request.headers.get('cf-connecting-ip') || '';
+  if (!(await checkRateLimit(env, ip)))
+    return json({ error: 'Слишком много запросов. Подождите минуту.' }, 429);
+
+  let body; try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
+  const { text = '', title = '', regulation = '', area = 'Корпоративное право' } = body;
+  if (text.trim().length < 50) return json({ error: 'Текст слишком короткий для проверки.' }, 400);
+
+  // Ограничиваем объём для контекста модели
+  const doc = text.slice(0, 18000);
+  const truncated = text.length > 18000;
+
+  // RAG по релевантным нормам
+  const ragChunks = await ragRetrieve(env, `${title} ${regulation} mandatory requirements obligations`.trim());
+  const ragCtx = ragChunks.length
+    ? '\n== ФРАГМЕНТЫ ПРИМЕНИМЫХ АКТОВ (RAG) ==\n' + ragChunks.map((c, i) =>
+        `[${i + 1}] из «${c.act}» (${c.url}):\n«${c.text.slice(0, 700)}»`).join('\n\n')
+    : '';
+
+  const systemPrompt = `Ты — комплаенс-ревьюер по праву МФЦА (Международного финансового центра «Астана»). Пользователь модифицировал официальный шаблон «${title}», который должен соответствовать: ${regulation}.
+${ragCtx}
+
+ЗАДАЧА: проверить, остаётся ли модифицированный документ В РАМКАХ обязательных требований МФЦА.
+Проанализируй текст и верни структурированный ответ строго в формате Markdown на русском языке:
+
+## ⚖️ Итог проверки
+[Одно предложение: соответствует / есть замечания / есть нарушения]
+
+## ❌ Нарушения обязательных норм
+[Список положений, противоречащих императивным требованиям МФЦА, или «Не выявлено». Для каждого — что нарушено и ссылка на норму [Название](URL).]
+
+## ⚠️ Риски и замечания
+[Спорные или рискованные изменения, которые стоит проверить у юриста, или «Не выявлено».]
+
+## ✅ Рекомендации
+[Конкретные правки, чтобы привести документ в соответствие.]
+
+Опирайся на фрагменты RAG и встроенную базу актов. Не выдумывай нормы и URL. Будь конкретным, ссылайся на статьи/разделы, где возможно.`;
+
+  try {
+    const response = await env.AI.run(CHAT_MODEL, {
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Проверь следующий документ:\n\n${doc}` },
+      ],
+      max_tokens: 1500, temperature: 0.1,
+    });
+    const analysis = response.response || '';
+    const linkStatus = await verifyLinks(analysis);
+    return json({
+      analysis, truncated,
+      ragCount: ragChunks.length,
+      ragSources: ragChunks.map(c => ({ act: c.act, url: c.url })),
+      linkStatus,
+    });
+  } catch (err) {
+    return json({ error: err.message }, 500);
+  }
+}
+
 // ── Rating handler ────────────────────────────────────────────────────────────
 async function handleRate(request, env) {
   let body; try { body = await request.json(); } catch { return json({ error: 'bad' }, 400); }
@@ -467,6 +529,7 @@ export default {
     if (request.method !== 'POST' && path !== '/') return new Response('Not found', { status: 404 });
 
     if (path === '/rate') return handleRate(request, env);
+    if (path === '/compliance') return handleCompliance(request, env);
     if (path === '/ingest') return handleIngest(request, env);
     // default: chat (streaming)
     try {
