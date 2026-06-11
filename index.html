@@ -230,6 +230,31 @@
   }
   @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
   @keyframes fadein { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+
+  /* «Думающий» индикатор в стиле Claude: вращающееся кольцо + шиммер-текст */
+  .think-icon {
+    width: 15px; height: 15px; border-radius: 50%; flex: 0 0 auto;
+    background: conic-gradient(from 0deg, var(--gold), rgba(198,160,74,.12) 65%, transparent 80%);
+    -webkit-mask: radial-gradient(circle 4.5px at center, transparent 96%, #000 100%);
+            mask: radial-gradient(circle 4.5px at center, transparent 96%, #000 100%);
+    animation: think-spin 1s linear infinite;
+  }
+  @keyframes think-spin { to { transform: rotate(360deg); } }
+  .think-text {
+    background: linear-gradient(90deg, var(--text-muted) 20%, var(--gold) 50%, var(--text-muted) 80%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    animation: think-shimmer 1.9s linear infinite; font-weight: 600;
+  }
+  @keyframes think-shimmer { to { background-position: -220% 0; } }
+  /* Каретка «печатной машинки» */
+  .tw-caret {
+    display: inline-block; width: 2px; height: 1em; background: var(--gold);
+    margin-left: 1px; vertical-align: text-bottom; border-radius: 1px;
+    animation: caret-blink .85s steps(1) infinite;
+  }
+  @keyframes caret-blink { 0%,50%{opacity:1} 50.01%,100%{opacity:0} }
   .search-badge {
     display: inline-flex; align-items: center; gap: 4px;
     font-size: 11px; color: var(--success); font-weight: 600;
@@ -632,8 +657,8 @@
 
         <div class="typing-wrap" id="typingWrap">
           <div class="search-status" id="searchStatus">
-            <div class="pulse"></div>
-            <span id="searchStatusText">Поиск актуальных норм на aifc.kz и adilet.zan.kz...</span>
+            <div class="think-icon"></div>
+            <span class="think-text" id="searchStatusText">Размышляю над вашим вопросом…</span>
           </div>
           <div class="typing-indicator">
             <div class="typing-dot"></div>
@@ -959,10 +984,11 @@ async function sendMessage() {
   scrollToBottom();
 
   const searchPhrases = [
-    'Семантический поиск по текстам актов (RAG)...',
-    'Получение свежих данных с aifc.kz...',
-    'Проверка уведомлений AFSA...',
-    'Формирование консультации...',
+    'Размышляю над вашим вопросом…',
+    'Семантический поиск по текстам актов (RAG)…',
+    'Получение свежих данных с aifc.kz…',
+    'Проверка уведомлений AFSA…',
+    'Формирую консультацию…',
   ];
   let phraseIdx = 0;
   const phraseTimer = setInterval(() => {
@@ -974,18 +1000,22 @@ async function sendMessage() {
   let ai = null;
   let rawText = '';
   let meta = { msgId: '', liveCount: 0, ragCount: 0, ragSources: [] };
-  let renderScheduled = false;
+  // ── Typewriter: плавная «печать» с мигающей кареткой (как у Claude) ──
+  let shownLen = 0, twActive = false, finalized = false;
+  const CARET = '<span class="tw-caret"></span>';
+  const typeTick = () => {
+    if (finalized || !ai) { twActive = false; return; }
+    const remaining = rawText.length - shownLen;
+    // Реже отстаём: чем больше backlog, тем быстрее раскрываем (мин. 2 симв./кадр)
+    if (remaining > 0) shownLen = Math.min(rawText.length, shownLen + Math.max(2, Math.ceil(remaining / 10)));
+    const { text: clean } = extractChips(rawText.slice(0, shownLen));
+    ai.bubble.innerHTML = mdToHtml(clean, {}) + CARET;
+    scrollToBottom();
+    if (shownLen < rawText.length) requestAnimationFrame(typeTick);
+    else twActive = false; // догнали поток — ждём новые токены, каретку анимирует CSS
+  };
   const scheduleRender = () => {
-    if (renderScheduled) return;
-    renderScheduled = true;
-    requestAnimationFrame(() => {
-      renderScheduled = false;
-      if (ai) {
-        const { text: clean } = extractChips(rawText);
-        ai.bubble.innerHTML = mdToHtml(clean, {});
-        scrollToBottom();
-      }
-    });
+    if (!twActive && !finalized) { twActive = true; requestAnimationFrame(typeTick); }
   };
 
   try {
@@ -1027,6 +1057,8 @@ async function sendMessage() {
         } else if (evt.type === 'done') {
           // Пост-валидация структуры: воркер мог прислать исправленный ответ
           if (evt.replaceText && evt.replaceText.length > 0) rawText = evt.replaceText;
+          finalized = true;          // останавливаем typewriter, убираем каретку
+          shownLen = rawText.length;
           finalizeAiBubble(ai, rawText, meta, evt.linkStatus || {}, evt.brokenCount || 0);
         }
       }
@@ -1036,6 +1068,7 @@ async function sendMessage() {
     saveHistory();
 
   } catch (err) {
+    finalized = true;          // останавливаем typewriter, чтобы каретка не перезаписала ошибку
     clearInterval(phraseTimer);
     typingWrap.classList.remove('visible');
     if (ai && ai.bubble) ai.bubble.innerHTML = `⚠️ Ошибка: ${escHtml(err.message)}`;
