@@ -18,7 +18,7 @@
 - **Экспорт в PDF** — кнопка ⬇ PDF в шапке сайта
 
 ### База знаний (RAG)
-- **56 актов МФЦА** — Companies Regulations, FSMR, Employment Regulations, AML Rules, валютное регулирование, несостоятельность/ликвидация, миграция, договорное право, иерархия актов и др.
+- **60 актов МФЦА** — Companies Regulations, FSMR, Employment Regulations, AML Rules, валютное регулирование, несостоятельность/ликвидация, миграция, договорное право, иерархия актов, трасты, интеллектуальная собственность, сборы, платёжные системы и др.
 - **Глубокая PDF-загрузка** — полные тексты ключевых актов (Companies Regs V8 / Part 8 Directors, Market Rules V13 / Market Abuse, FSMR V12, Insolvency, Currency, Contract Regs) для точных постатейных цитат
 - **CIS Rules** — полная база по коллективным инвестиционным схемам (orderly.myafsa.com)
 - **Substance Rules** — правила налогового присутствия (CIGA, Qualified Employees, OpEx)
