@@ -235,9 +235,9 @@ async function ragRetrieve(env, query) {
   try {
     const emb = await env.AI.run(EMBED_MODEL, { text: [query] });
     const vector = emb.data[0];
-    const matches = await env.VECTORIZE.query(vector, { topK: 5, returnMetadata: 'all' });
+    const matches = await env.VECTORIZE.query(vector, { topK: 7, returnMetadata: 'all' });
     return (matches.matches || [])
-      .filter(m => m.score > 0.45)
+      .filter(m => m.score > 0.42)
       .map(m => ({
         score: m.score,
         text: m.metadata?.text || '',
@@ -271,7 +271,7 @@ function formatRag(chunks) {
   if (!chunks.length) return '';
   let s = `\n== РЕЛЕВАНТНЫЕ ФРАГМЕНТЫ ИЗ ПОЛНЫХ ТЕКСТОВ АКТОВ (RAG) ==\n`;
   chunks.forEach((c, i) => {
-    s += `\n[Фрагмент ${i + 1}] из «${c.act}» (${c.url}):\n«${c.text.slice(0, 700)}»\n`;
+    s += `\n[Фрагмент ${i + 1}] из «${c.act}» (${c.url}):\n«${c.text.slice(0, 1200)}»\n`;
   });
   s += `\nИспользуй эти фрагменты как первоисточник. Цитируй конкретные положения дословно, когда уместно.\n`;
   return s;
@@ -817,11 +817,24 @@ async function handleAnalyze(request, env) {
 }
 
 // ── RAG ingestion handler ─────────────────────────────────────────────────────
-function chunkText(text, size = 1400, overlap = 200) {
+function chunkText(text, size = 1200, overlap = 300) {
+  // Нарезка с перекрытием + выравнивание по границам абзацев/правил.
+  // Overlap 300 симв. гарантирует, что норма, разрезанная на стыке чанков,
+  // попадёт целиком хотя бы в один из них.
+  const step = size - overlap;
   const chunks = [];
-  for (let i = 0; i < text.length; i += (size - overlap)) {
-    chunks.push(text.slice(i, i + size));
-    if (i + size >= text.length) break;
+  let i = 0;
+  while (i < text.length) {
+    let end = i + size;
+    if (end < text.length) {
+      // Сдвигаем конец вперёд до ближайшего переноса строки (макс +200 симв.)
+      // чтобы не рвать правило посередине предложения
+      const nl = text.indexOf('\n', end);
+      if (nl !== -1 && nl - end <= 200) end = nl + 1;
+    }
+    chunks.push(text.slice(i, end));
+    if (end >= text.length) break;
+    i += step;
   }
   return chunks;
 }
