@@ -2,7 +2,7 @@
 
 Интерактивный AI-ассистент для юридических консультаций по законодательству МФЦА (Международного финансового центра «Астана») и Республики Казахстан.
 
-🌐 **Живой сайт:** https://kanat-kenbayev.github.io/aifc-legal-assistant/
+🌐 **Живой сайт:** https://kanatkenbayev-prog.github.io/aifc-legal-assistant/
 
 ## Возможности
 
