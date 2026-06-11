@@ -59,6 +59,16 @@ const ACTS = [
   ['Rules on Substantial Presence of AIFC Participants (CIT, VAT)','https://aifc.kz/legal-framework/rules-on-the-substantial-presence-of-the-aifc-participants-applying-tax-exemptions-for-the-payment-of-cit-vat/','Налоговое право'],
   ['Rules on Tax Administration','https://aifc.kz/legal-framework/tax-administration-rules-of-aifc-bodies-and-participants/','Налоговое право'],
   ['List of Financial Services Exempt from CIT and VAT','https://aifc.kz/legal-framework/the-list-of-financial-services-provided-by-the-aifc-participants-income-from-which-is-exempt-from-cit-and-vat/','Налоговое право'],
+  // ── Расширение базы: валюта, ликвидация, миграция, контракты, иерархия норм ──
+  ['AIFC Rules on Currency Regulation and Provision of Information','https://aifc.kz/legal-framework/aifc-rules-on-currency-regulation-and-provision-of-information-in-the-aifc/','Валютное регулирование'],
+  ['AIFC Insolvency Regulations','https://aifc.kz/legal-framework/aifc-insolvency-regulations/','Несостоятельность и ликвидация'],
+  ['Insolvency Rules','https://aifc.kz/legal-framework/insolvency-rules/','Несостоятельность и ликвидация'],
+  ['Terms and Procedures for Entry into RK for Foreign Nationals (AIFC)','https://aifc.kz/legal-framework/the-terms-of-and-procedures-for-entry-into-the-republic-of-kazakhstan-and-leaving-the-republic-of-kazakhstan-for-foreign-nationals-and-stateless-persons-coming-to-kazakhstan-to-conduct-activities-i/','Миграция'],
+  ['AIFC Contract Regulations','https://aifc.kz/legal-framework/aifc-contract-regulations/','Договорное право'],
+  ['AIFC Regulations on Obligations','https://aifc.kz/legal-framework/aifc-regulations-on-obligations/','Договорное право'],
+  ['AIFC Regulations on Damages and Remedies','https://aifc.kz/legal-framework/aifc-regulations-on-damages-and-remedies/','Договорное право'],
+  ['AIFC Personal Property Regulations','https://aifc.kz/legal-framework/aifc-personal-property-regulations/','Договорное право'],
+  ['AIFC Regulations on AIFC Acts','https://aifc.kz/legal-framework/aifc-regulations-on-aifc-acts/','Иерархия актов МФЦА'],
 ];
 
 const ACTS_INDEX = ACTS.map(([n,u,c]) => `- ${n} (${c}): ${u}`).join('\n');
@@ -125,6 +135,26 @@ const CITATION_DB = `
 • Юрисдикция AIFC Court: AIFC Court Regulations 2017, Rule 5 — исключительная юрисдикция по спорам между участниками МФЦА.
 • IAC (арбитраж): AIFC Arbitration Regulations 2017 — IAC Rules применяются при наличии арбитражной оговорки.
 • Оспаривание арбитражного решения: AIFC Arbitration Regulations, Rule 34 — основания для отмены; срок — 3 месяца с даты решения.
+
+ОБЯЗАННОСТИ ДИРЕКТОРОВ И СДЕЛКИ С ЗАИНТЕРЕСОВАННОСТЬЮ:
+• Обязанности директоров (добросовестность, продвижение интересов компании, должная осмотрительность и навык, избежание конфликта интересов, декларирование заинтересованности) закреплены в AIFC Companies Regulations, Part 8 «Directors» (по модели UK Companies Act 2006). ⚠ НЕ указывай конкретный номер Section, если он не получен из RAG — ссылайся на «Part 8 (Directors' Duties)».
+• Беспроцентный заём директору / сделка с заинтересованностью требует соблюдения процедуры одобрения и декларирования интереса. Заём директору на личные нужды без одобрения = нарушение duty to avoid conflict of interest [AIFC Companies Regulations, Part 8 (Directors' Duties)].
+
+МАНИПУЛИРОВАНИЕ РЫНКОМ (MARKET ABUSE):
+• Запрет манипулирования рынком и злоупотреблений установлен в AIFC Financial Services and Markets Regulations (FSMR), раздел Market Abuse, и детализирован в AIFC Market Rules (MAR). ⚠ НЕ приводи «дословную» цитату нормы и точный номер Section/Rule, если текст не получен из RAG — назови акт и раздел, рекомендуй сверку с первоисточником.
+
+ИЕРАРХИЯ АКТОВ МФЦА (при коллизии норм):
+• Верховенство: Конституция РК → Конституционный закон РК «О МФЦА» № 438-V от 07.12.2015 → Акты МФЦА (Regulations) → Правила МФЦА (Rules). При прямом противоречии приоритет у акта более высокого уровня; Конституционный закон имеет приоритет над любыми Regulations и Rules МФЦА.
+• Порядок принятия и иерархия актов: AIFC Regulations on AIFC Acts.
+
+ВАЛЮТНОЕ РЕГУЛИРОВАНИЕ И КАПИТАЛ:
+• Уставный капитал компании МФЦА может быть выражен в любой валюте (как правило USD). Требование формировать капитал в тенге по валютному законодательству РК на участников МФЦА в этой части НЕ распространяется [AIFC Companies Regulations, Part 5; AIFC Rules on Currency Regulation].
+
+НЕСОСТОЯТЕЛЬНОСТЬ И ЛИКВИДАЦИЯ:
+• Банкротство и ликвидация участников МФЦА регулируются AIFC Insolvency Regulations и Insolvency Rules; процедуру ведёт AFSA / назначенный ликвидатор, а не государственный суд РК.
+
+МИГРАЦИЯ И ВИЗЫ:
+• Въезд и пребывание иностранных работников участников МФЦА регулируются специальной процедурой [Terms and Procedures for Entry into RK for Foreign Nationals coming to conduct activities in AIFC]. Директор-нерезидент, работающий из-за рубежа, формально не обязан получать РВП/ВНЖ РК — но фактическая работа извне создаёт риск по Substance Rules.
 `;
 
 // Обёртка над нативным AI binding — упрощает вызовы и позволит добавить провайдер позднее.
@@ -386,6 +416,10 @@ ${ACTS_INDEX}
    - НИКОГДА не придумывай нормы, номера правил, сроки, суммы или требования — даже если очень похожи на реальные.
    - Лучше сказать «информация недостаточна» или «рекомендую уточнить», чем дать приблизительный или предполагаемый ответ.
    - Если источник не найден в RAG, Citation DB или ACTS_INDEX — это значит его там нет, а не повод придумать похожий.
+   - ⚠ ЗАПРОС «ПРОЦИТИРУЙ ДОСЛОВНО»: приводи точную цитату нормы ТОЛЬКО если её текст присутствует в RAG-фрагментах. Если дословного текста нет — НЕ сочиняй цитату и номер. Ответь: «Дословный текст нормы в доступной базе отсутствует. Норма содержится в [акт, раздел по названию]; для точной цитаты сверьтесь с первоисточником: [URL]».
+   - ⚠ ЗАПРОС «ТОЧНЫЙ НОМЕР Section/Rule»: если конкретный номер не подтверждён RAG или Citation DB — НЕ указывай номер наугад (это критическая ошибка). Сошлись на акт и Part/раздел по названию и добавь «точную нумерацию уточните в актуальной редакции».
+   - ⚠ ЗАПРЕЩЕНО использовать плейсхолдеры в ссылках: «Article X», «Part X, Rule Y», «Rule …». Если номер неизвестен — пиши название раздела словами, без подстановочных символов.
+   - ⚠ «ЕСТЬ ЛИ В РЕЕСТРЕ КОМПАНИЯ X» / «ПЕРЕЧИСЛИ ИЗМЕНЕНИЯ ЗА ПОСЛЕДНИЕ N МЕСЯЦЕВ»: у тебя нет live-доступа к реестру AFSA и истории поправок в реальном времени. Честно скажи это и направь к первоисточнику (publicreg.myafsa.com, afsa.aifc.kz/notice-register). НЕ выдумывай статусы лицензий и списки изменений.
 
 5. ОБЯЗАТЕЛЬНЫЙ АНАЛИЗ РИСКОВ
    На вопросах про substance, лицензирование, «матрёшку», холдинги, AML/KYC, дивиденды, налоговые льготы, фонды, санкции, офшоры — ОБЯЗАТЕЛЬНО указывай:
@@ -941,7 +975,7 @@ async function handleIngestText(request, env) {
     const vectors = emb.data.map((values, k) => ({
       id: `${id}-${b + k}`,
       values,
-      metadata: { act, url: url || '', cat, text: batch[k].slice(0, 1000) },
+      metadata: { act, url: url || '', cat, text: batch[k].slice(0, 1200) },
     }));
     await env.VECTORIZE.upsert(vectors);
     total += vectors.length;
@@ -949,25 +983,48 @@ async function handleIngestText(request, env) {
   return json({ ok: true, id, act, chunks: chunks.length, upserted: total });
 }
 
-// ── Cron: monitor act category pages for changes ──────────────────────────────
+// ── Cron: monitor act pages + update sources for changes ──────────────────────
+// Сигнатура: длина + хеш стрипнутого текста (ловит изменения с тем же объёмом).
+function contentSig(text) {
+  const slice = text.slice(0, 8000);
+  let h = 0;
+  for (let i = 0; i < slice.length; i++) { h = (h * 31 + slice.charCodeAt(i)) | 0; }
+  return `${slice.length}:${h}`;
+}
+
+async function checkUrl(env, name, actUrl, changes, extra = {}) {
+  try {
+    const res = await fetch(actUrl, { cf: { cacheTtl: 0 } });
+    if (!res.ok) return;
+    const sig = contentSig(stripTags(await res.text()));
+    const prevKey = `mon:${actUrl}`;
+    const prev = await env.AIFC_KV.get(prevKey);
+    if (prev && prev !== sig) {
+      changes.unshift({ act: name, url: actUrl, date: new Date().toISOString().slice(0, 10), ...extra });
+    }
+    await env.AIFC_KV.put(prevKey, sig);
+  } catch {}
+}
+
 async function runMonitor(env) {
   if (!env.AIFC_KV) return;
   const changes = JSON.parse(await env.AIFC_KV.get('changes') || '[]');
-  for (const [name, actUrl] of ACTS.slice(0, 20)) {  // sample to bound CPU
-    try {
-      const res = await fetch(actUrl, { cf: { cacheTtl: 0 } });
-      if (!res.ok) continue;
-      const html = await res.text();
-      // hash the "last updated"-ish signature: length + first 2000 chars of stripped text
-      const sig = String(stripTags(html).slice(0, 3000).length);
-      const prevKey = `mon:${actUrl}`;
-      const prev = await env.AIFC_KV.get(prevKey);
-      if (prev && prev !== sig) {
-        changes.unshift({ act: name, url: actUrl, date: new Date().toISOString().slice(0, 10) });
-      }
-      await env.AIFC_KV.put(prevKey, sig);
-    } catch {}
-  }
+
+  // 1) Ротация по всем актам: за ~3 дня покрываем весь список (окно 20 со сдвигом по дню).
+  const WINDOW = 20;
+  const dayNum = Math.floor(Date.now() / 86400000);
+  const offset = (dayNum * WINDOW) % ACTS.length;
+  const rotated = ACTS.slice(offset).concat(ACTS.slice(0, offset)).slice(0, WINDOW);
+  for (const [name, actUrl] of rotated) await checkUrl(env, name, actUrl, changes);
+
+  // 2) Источники обновлений МФЦА — всегда проверяем (новые редакции, поправки, консультации).
+  const UPDATE_SOURCES = [
+    ['🆕 Consultation Papers (предстоящие поправки)', 'https://aifc.kz/legal-framework-cat/consultation-papers/'],
+    ['⚖️ AFSA Notice Register (регуляторные уведомления)', 'https://afsa.aifc.kz/notice-register/'],
+    ['📋 Legal Framework (новые акты)', 'https://aifc.kz/legal-framework/'],
+  ];
+  for (const [name, srcUrl] of UPDATE_SOURCES) await checkUrl(env, name, srcUrl, changes, { source: true });
+
   await env.AIFC_KV.put('changes', JSON.stringify(changes.slice(0, 50)));
 }
 
