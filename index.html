@@ -706,7 +706,7 @@
             <span class="input-hint">Область: <strong id="areaLabel">Корпоративное право</strong> · <kbd>Enter</kbd> — отправить</span>
             <span class="powered">⚡ <span>Llama 3.3 · RAG · Cloudflare</span></span>
           </div>
-          <div class="disclaimer"><span id="shortDisclaimer">⚠️ Информация AIFC Legal Assistant носит исключительно общий справочный характер и не является юридической консультацией. Для принятия решений обращайтесь к лицензированному Legal Adviser AIFC.</span> <a onclick="openDisclaimer()" id="disclaimerLink">Подробнее</a></div>
+          <div class="disclaimer"><span id="shortDisclaimer">⚠️ Информация AIFC Legal Assistant носит исключительно общий справочный характер и не является юридической консультацией. Для принятия решений обращайтесь к лицензированному Legal Adviser AIFC.</span> <a onclick="openDisclaimer()" id="disclaimerLink">Подробнее</a> · <a onclick="openPrivacy()" id="privacyLink">Политика конфиденциальности</a></div>
         </div>
       </div>
 
@@ -882,6 +882,17 @@
   </div>
 </div>
 
+<!-- ══ PRIVACY POLICY MODAL ══ -->
+<div class="dlg-overlay" id="privacyModal">
+  <div class="dlg-box">
+    <h2 id="pxTitle">🔒 Политика конфиденциальности</h2>
+    <div class="dlg-body" id="pxBody"></div>
+    <div class="dlg-actions">
+      <button class="dlg-close" id="pxClose" onclick="closePrivacy()">Закрыть</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const WORKER_URL = 'https://aifc-legal-proxy.aifclegal.workers.dev';
 
@@ -960,6 +971,61 @@ function maybeShowDisclaimerGate() {
   if (!accepted) showDisclaimerModal(true);  // первый визит — обязательное согласие
 }
 
+// ── Политика конфиденциальности (двуязычная) ──
+const PRIVACY = {
+  ru: {
+    title: '🔒 Политика конфиденциальности',
+    close: 'Закрыть',
+    link: 'Политика конфиденциальности',
+    body: `
+      <p style="opacity:.7"><strong>Дата вступления в силу: 11 июня 2026 года</strong></p>
+      <p><strong>1. Общие положения.</strong> Сервис AIFC Legal Assistant предоставляется ИП «Vibe MKK» (Республика Казахстан, ИИН 780113301915). Мы придаём большое значение конфиденциальности и собираем минимально возможный объём данных.</p>
+      <p><strong>2. Минимизация данных.</strong> Сервис спроектирован для максимально анонимного использования. Мы <strong>не собираем</strong>: ФИО, ИИН, номер телефона, адрес проживания или регистрации.</p>
+      <p><strong>3. Какие данные обрабатываются.</strong><br>
+      3.1. Предоставляемые вами: адрес электронной почты (при регистрации/подписке); текст запросов к ИИ; документы, загружаемые для анализа.<br>
+      3.2. Технические: IP-адрес (используется транзитно для безопасности и защиты от злоупотреблений; в исходном виде долговременно <strong>не хранится</strong> — для подсчёта уникальных посетителей применяется необратимый хеш); данные браузера/устройства; <strong>localStorage</strong> и аналогичные технологии (история чата, язык, согласия) — хранятся локально в вашем браузере.</p>
+      <p><strong>4. Сроки хранения (session-only).</strong> Текст ваших запросов и загружаемые документы <strong>не сохраняются на наших серверах на постоянной основе</strong> и не используются для долговременной аналитики. Частые запросы могут кэшироваться до 6 часов по хешу содержимого (кэш не привязан к пользователю). В аналитике хранятся только обезличенные метаданные (область права, язык, метрики). Email хранится, пока существует ваш аккаунт.</p>
+      <p><strong>5. Цели обработки.</strong> Предоставление доступа и генерация ответов ИИ; техническая работа и безопасность (защита от DDoS/спама); обработка платежей (внешними системами); улучшение качества — только на обезличенных данных; выполнение требований законодательства РК.</p>
+      <p><strong>6. Передача данных и обработчики (sub-processors).</strong> Для работы сервиса данные обрабатывают: <strong>Anthropic (Claude)</strong> — генерация ответов ИИ (по условиям Anthropic, передаваемые данные не используются для обучения базовых моделей); <strong>Cloudflare</strong> — инфраструктура (вычисления, кэш, векторная база, edge); <strong>Netlify / GitHub Pages</strong> — хостинг сайта; платёжный провайдер — обработка платежей. Мы не можем дать абсолютную гарантию относительно всех внутренних процессов сторонних провайдеров.</p>
+      <p><strong>7. Трансграничная передача.</strong> Указанные обработчики расположены за пределами Республики Казахстан, поэтому данные обрабатываются на серверах за рубежом. Используя Сервис, вы даёте <strong>согласие на трансграничную передачу</strong> ваших данных в соответствии со ст. 16 Закона РК «О персональных данных и их защите» № 94-V.</p>
+      <p><strong>8. Платежи.</strong> Все платежи обрабатываются внешними платёжными провайдерами. Мы <strong>не храним</strong> данные банковских карт, CVV и иную чувствительную платёжную информацию.</p>
+      <p><strong>9. Ваши права.</strong> Вы вправе: очистить историю запросов в любой момент; удалить аккаунт и связанные данные; отозвать согласие на обработку; получить информацию о своих данных. Обращения: <strong>[укажите актуальный email]</strong>.</p>
+      <p><strong>10. Изменения.</strong> Мы можем обновлять Политику; актуальная версия всегда доступна на сайте. Продолжение использования Сервиса означает согласие с новой редакцией.</p>
+      <p><strong>11. Контакты.</strong> ИП «Vibe MKK», ИИН 780113301915, г. Астана, Республика Казахстан. Email: <strong>[укажите актуальный email]</strong>.</p>`,
+  },
+  en: {
+    title: '🔒 Privacy Policy',
+    close: 'Close',
+    link: 'Privacy Policy',
+    body: `
+      <p style="opacity:.7"><strong>Effective date: 11 June 2026</strong></p>
+      <p><strong>1. General.</strong> AIFC Legal Assistant is provided by Sole Proprietor "Vibe MKK" (Republic of Kazakhstan, IIN 780113301915). We value privacy and collect the minimum possible amount of data.</p>
+      <p><strong>2. Data minimization.</strong> The service is designed for use that is as anonymous as possible. We <strong>do not collect</strong>: full name, IIN, phone number, or residential/registration address.</p>
+      <p><strong>3. Data we process.</strong><br>
+      3.1. Provided by you: email address (on registration/subscription); your query text; documents you upload for analysis.<br>
+      3.2. Technical: IP address (used transiently for security and abuse prevention; <strong>not stored long-term in raw form</strong> — a one-way hash is used to count unique visitors); browser/device data; <strong>localStorage</strong> and similar technologies (chat history, language, consents) stored locally in your browser.</p>
+      <p><strong>4. Retention (session-only).</strong> Your query text and uploaded documents are <strong>not stored permanently on our servers</strong> and are not used for long-term analytics. Frequent queries may be cached for up to 6 hours by content hash (cache is not linked to a user). Analytics retain only anonymized metadata (legal area, language, metrics). Email is kept while your account exists.</p>
+      <p><strong>5. Purposes.</strong> Providing access and AI-generated answers; technical operation and security (DDoS/spam protection); payment processing (by external systems); quality improvement on anonymized data only; compliance with the legislation of the Republic of Kazakhstan.</p>
+      <p><strong>6. Data sharing & sub-processors.</strong> The service relies on: <strong>Anthropic (Claude)</strong> — AI answer generation (under Anthropic's terms, the data provided is not used to train its foundation models); <strong>Cloudflare</strong> — infrastructure (compute, cache, vector database, edge); <strong>Netlify / GitHub Pages</strong> — site hosting; a payment provider — payment processing. We cannot guarantee all internal processes of third-party providers.</p>
+      <p><strong>7. Cross-border transfer.</strong> These sub-processors are located outside the Republic of Kazakhstan, so data is processed on servers abroad. By using the Service you <strong>consent to the cross-border transfer</strong> of your data under Art. 16 of the RK Law "On Personal Data and Its Protection" No. 94-V.</p>
+      <p><strong>8. Payments.</strong> All payments are processed by external providers. We <strong>do not store</strong> card data, CVV or other sensitive payment information.</p>
+      <p><strong>9. Your rights.</strong> You may: clear your query history at any time; delete your account and related data; withdraw consent; request information about your data. Contact: <strong>[insert email]</strong>.</p>
+      <p><strong>10. Changes.</strong> We may update this Policy; the current version is always available on the site. Continued use means acceptance of the new version.</p>
+      <p><strong>11. Contact.</strong> Sole Proprietor "Vibe MKK", IIN 780113301915, Astana, Republic of Kazakhstan. Email: <strong>[insert email]</strong>.</p>`,
+  },
+};
+function renderPrivacy() {
+  const t = PRIVACY[currentLang] || PRIVACY.ru;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('pxTitle', t.title);
+  set('pxClose', t.close);
+  set('privacyLink', t.link);
+  const b = document.getElementById('pxBody');
+  if (b) b.innerHTML = t.body;
+}
+function openPrivacy() { renderPrivacy(); document.getElementById('privacyModal').classList.add('visible'); }
+function closePrivacy() { document.getElementById('privacyModal').classList.remove('visible'); }
+
 // ── Маячок посещения (приватно: без cookie и персональных данных) ──
 (function trackVisit(){
   try {
@@ -1027,6 +1093,7 @@ document.getElementById('currentDate').textContent =
   new Date().toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'});
 loadHistory();
 renderDisclaimer();          // короткая строка + модалка на текущем языке
+renderPrivacy();             // Политика конфиденциальности на текущем языке
 maybeShowDisclaimerGate();   // обязательное согласие при первом визите
 
 // ── Lang / Area ───────────────────────────────
@@ -1035,6 +1102,7 @@ function setLang(lang) {
   document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
   document.getElementById('btn-en').classList.toggle('active', lang === 'en');
   renderDisclaimer();  // обновляем короткую строку + модалку под язык
+  renderPrivacy();     // и Политику конфиденциальности
 }
 
 function setArea(btn, area) {
