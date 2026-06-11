@@ -7,7 +7,7 @@
 const INGEST_SECRET = 'aifc-rag-2026';      // защита эндпоинта загрузки RAG
 const ADMIN_SECRET = 'aifc-admin-2026';     // защита /stats и /analyze (мониторинг)
 const RATE_LIMIT_PER_MIN = 25;              // запросов в минуту с одного IP
-const DAILY_NEURON_BUDGET = 10000;          // бесплатная дневная квота Cloudflare AI (для оценки остатка)
+const DAILY_NEURON_BUDGET = 100000;         // Workers Paid план — нейроны по pay-per-use, лимит для мониторинга
 const EMBED_MODEL = '@cf/baai/bge-base-en-v1.5';
 const CHAT_MODEL  = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 
