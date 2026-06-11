@@ -118,6 +118,7 @@ const CITATION_DB = `
 • LLP: AIFC Limited Liability Partnership Regulations, Part 2, Rule 4 — создаётся минимум двумя партнёрами.
 • Филиал (Branch): AIFC Companies Regulations, Part 18, Rule 174 — регистрация представительства иностранной компании.
 • Устав (Articles): Companies Rules, Rule 5 — типовой устав может быть принят без изменений или заменён индивидуальным.
+• Классы акций и особые права (включая veto): Standard Articles (Schedule 5) по умолчанию НЕ содержат таких положений, но компания ВПРАВЕ отступить от типового устава и создать классы акций с особыми правами [AIFC Companies Regulations, Part 5; Companies Rules — раздел о классах акций]. Изменения устава подлежат регистрации у Registrar. ВАЖНО: право вето на крупные сделки/дивиденды чаще целесообразнее оформлять в Shareholder Agreement, а не в Articles (гибче, меньше риска при due diligence и продаже компании). НЕ указывай конкретный номер раздела о классах акций, если он не подтверждён RAG.
 
 ФИНАНСОВЫЕ УСЛУГИ — ЛИЦЕНЗИРОВАНИЕ:
 • Обязанность лицензирования: AIFC Financial Services and Markets Regulations (FSMR) 2017, Part 3, Rule 31 — осуществление регулируемой деятельности без разрешения запрещено.
@@ -129,6 +130,8 @@ const CITATION_DB = `
 • Основание льготы: Конституционный закон РК «О МФЦА» от 07.12.2015 № 438-V, ст. 6 — освобождение от КПН и НДС до 01.01.2066.
 • Условия substance: Rules on Substantial Presence of AIFC Participants (CIT/VAT), п. 3.1 (Qualified Employees), п. 3.2 (Operating Expenditure), Приложение (таблица CIGA по видам деятельности).
 • Дивиденды от КЗ-компаний в МФЦА: Налоговый кодекс РК, ст. 645, п. 10 — ставка 15% у источника, если нет освобождения по СИДН или Substance Rules.
+• Последствия нарушения substance (например, длительное отсутствие CIGA): потеря налоговых льгот (КПН/НДС) и доначисление, штрафы, в крайнем случае — принудительный Strike Off (исключение из реестра). При этом AFSA, как правило, СНАЧАЛА предоставляет срок на устранение нарушения (remediation) до применения санкций; Strike Off — крайняя мера. Для Pure Equity Holding последствия мягче (сниженные требования). НЕ указывай конкретный срок remediation в днях/месяцах, если он не подтверждён первоисточником.
+• Номинальный («nominal») директор: ключевой риск — признание структуры фиктивной («sham director»), если директор не осуществляет реальный контроль и не принимает стратегических решений. Это бьёт по substance (mind & management) и AML (нет реального контролирующего лица). Митигация: реальные полномочия директора, co-director / substance manager, Directors Services Agreement, документированные board minutes и доказательства реального управления [Rules on Substantial Presence; AIFC Companies Regulations, Part 8 (Directors' Duties); AML/CTF Rules].
 
 ТРУДОВОЕ ПРАВО:
 • Применимое право: AIFC Employment Regulations 2017, Rule 1.2 — применяются ко всем трудовым договорам с работой в МФЦА.
@@ -424,7 +427,7 @@ ${ACTS_INDEX}
    - ЗАПРЕЩЕНО: абзац без единой ссылки []. ЗАПРЕЩЕНО: только название акта без номера части/правила.
    - ТОЧНОСТЬ НАЗВАНИЙ АКТОВ:
        • Акт о substance: полное название «Rules on the Substantial Presence of the AIFC Participants applying tax exemptions for the payment of CIT and VAT». Дай его при первом упоминании; далее допустимо сокращение «Substantial Presence Rules».
-       • НИКОГДА не пиши «AIFC Tax Regulations» или «Economic Substance Rules» / «AIFC Rules on Economic Substance» — таких актов НЕ существует (Economic Substance — термин других юрисдикций, не МФЦА).
+       • НИКОГДА не пиши «AIFC Tax Regulations», «AIFC Tax Exemptions Regulations», «Economic Substance Rules» / «AIFC Rules on Economic Substance» — таких актов НЕ существует (Economic Substance — термин других юрисдикций, не МФЦА).
        • Налоговые льготы МФЦА: ссылайся на Конституционный закон РК «О МФЦА» № 438-V, Rules on Substantial Presence, Rules on Tax Administration, List of Financial Services Exempt from CIT/VAT, НК РК — по применимости.
 
 2. ЖЁСТКОЕ РАЗДЕЛЕНИЕ ЮРИСДИКЦИЙ
