@@ -18,11 +18,12 @@
 - **Экспорт в PDF** — кнопка ⬇ PDF в шапке сайта
 
 ### База знаний (RAG)
-- **55+ актов МФЦА** — Companies Regulations, FSMR, Employment Regulations, AML Rules и др.
+- **56 актов МФЦА** — Companies Regulations, FSMR, Employment Regulations, AML Rules, валютное регулирование, несостоятельность/ликвидация, миграция, договорное право, иерархия актов и др.
+- **Глубокая PDF-загрузка** — полные тексты ключевых актов (Companies Regs V8 / Part 8 Directors, Market Rules V13 / Market Abuse, FSMR V12, Insolvency, Currency, Contract Regs) для точных постатейных цитат
 - **CIS Rules** — полная база по коллективным инвестиционным схемам (orderly.myafsa.com)
 - **Substance Rules** — правила налогового присутствия (CIGA, Qualified Employees, OpEx)
 - **Решения Суда МФЦА** — 6 знаковых дел (CFI и Court of Appeal, 2023–2026) в векторной базе
-- **Citation DB** — 30+ точных ссылок на конкретные нормы (Rule/Section), инжектируются в каждый промпт
+- **Citation DB** — 35+ точных ссылок на конкретные нормы (Rule/Section), инжектируются в каждый промпт
 
 ### Инструменты (вкладка 🧰)
 - **Substance Checker** — пошаговая оценка соответствия требованиям налогового присутствия МФЦА (CIGA, сотрудники, расходы, офис, директора), итоговый risk score
@@ -30,8 +31,10 @@
 - **Генератор документов** — двуязычные шаблоны (EN + RU глоссарий): запрос в AFSA, решение участника, NDA
 - **Учредительные документы** — официальные шаблоны AFSA (Articles of Association, LP/LLP Partnership Agreements) с AI-проверкой правок
 
-### Качество ответов (AIFC Legal Assistant Pro v2)
+### Качество ответов (AIFC Legal Assistant Pro v4.5)
 - **Strict Citations** — каждое юридическое утверждение заканчивается точной ссылкой [Акт, Rule X]
+- **Anti-hallucination** — запрет выдуманных номеров и плейсхолдеров; на «процитируй дословно» без текста в базе — честный отказ со ссылкой на первоисточник
+- **Forced structure** — пост-валидация: при отсутствии блока «**Вывод:**» или плейсхолдерах ответ тихо перегенерируется один раз; кэшируются только валидные ответы
 - **Разделение юрисдикций** — AIFC и РК всегда явно маркированы в ответе
 - **Анализ рисков** — на темах substance/лицензирование/AML/холдинги: красные флаги + уровень риска
 - **Режим юриста** — расширенный технический анализ по профессиональным запросам
@@ -51,8 +54,8 @@
 | Frontend | HTML5 / CSS3 / Vanilla JS (Single Page App, без фреймворков) |
 | Хостинг | GitHub Pages |
 | AI-модель | Llama 3.3 70B (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`) |
-| Бэкенд | Cloudflare Workers (serverless, бесплатный тариф) |
-| Векторная база | Cloudflare Vectorize (`aifc-acts`, 768d cosine, ~1000+ векторов) |
+| Бэкенд | Cloudflare Workers (serverless, Workers Paid план) |
+| Векторная база | Cloudflare Vectorize (`aifc-acts`, 768d cosine, ~900+ векторов) |
 | Embeddings | `@cf/baai/bge-base-en-v1.5` |
 | KV-хранилище | Cloudflare KV — кэш, рейтинги, rate-limit, аналитика |
 | Живые данные | Прямой скрапинг aifc.kz, afsa.aifc.kz |
@@ -67,7 +70,7 @@
          ├─ Rate limiting (KV, 25 req/min per IP)
          ├─ Cache check (KV SHA-256 key, 2h TTL)
          ├─ Parallel:
-         │    ├─ RAG retrieval (Vectorize, topK=5, score>0.45)
+         │    ├─ RAG retrieval (Vectorize, topK=7, score>0.42)
          │    │    └─ Cross-lingual boost (English anchor terms for RU queries)
          │    ├─ Live scraping: aifc.kz news
          │    └─ Live scraping: afsa.aifc.kz notices
@@ -75,9 +78,12 @@
          │    ├─ isFundQuery → CIS Rules boost
          │    └─ isLawyerMode → technical response style
          ├─ Llama 3.3 70B streaming (NDJSON protocol)
+         ├─ Structure post-validation → silent self-repair on defect
          ├─ Link verification (HEAD requests, parallel)
-         ├─ Cache write + Analytics track (waitUntil)
-         └─ NDJSON stream → frontend (meta / token / done events)
+         ├─ Cache write (valid answers only) + Analytics track (waitUntil)
+         └─ NDJSON stream → frontend (meta / token / done[/replaceText] events)
+
+Cron (06:00 UTC): монитор всех актов (ротация) + Consultation Papers + AFSA Notice Register
 ```
 
 ## Деплой
