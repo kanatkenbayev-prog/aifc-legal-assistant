@@ -706,7 +706,7 @@
             <span class="input-hint">Область: <strong id="areaLabel">Корпоративное право</strong> · <kbd>Enter</kbd> — отправить</span>
             <span class="powered">⚡ <span>Llama 3.3 · RAG · Cloudflare</span></span>
           </div>
-          <div class="disclaimer"><span id="shortDisclaimer">⚠️ Информация AIFC Legal Assistant носит исключительно общий справочный характер и не является юридической консультацией. Для принятия решений обращайтесь к лицензированному Legal Adviser AIFC.</span> <a onclick="openDisclaimer()" id="disclaimerLink">Подробнее</a> · <a onclick="openPrivacy()" id="privacyLink">Политика конфиденциальности</a></div>
+          <div class="disclaimer"><span id="shortDisclaimer">⚠️ Информация AIFC Legal Assistant носит исключительно общий справочный характер и не является юридической консультацией. Для принятия решений обращайтесь к лицензированному Legal Adviser AIFC.</span> <a onclick="openDisclaimer()" id="disclaimerLink">Подробнее</a><span id="privacySep"> · <a onclick="openPrivacy()" id="privacyLink">Политика конфиденциальности</a></span></div>
         </div>
       </div>
 
@@ -895,6 +895,9 @@
 
 <script>
 const WORKER_URL = 'https://aifc-legal-proxy.aifclegal.workers.dev';
+// LAUNCH-флаг фронтенда: false = пред-релиз (Политика конфиденциальности скрыта).
+// Флипни в true ОДНОВРЕМЕННО с PUBLIC_RELEASE в воркере при официальном запуске.
+const PUBLIC_LAUNCH = false;
 
 // ── Disclaimer (двуязычный): полный текст для модалки + короткая строка ──
 const DISCLAIMER = {
@@ -1094,6 +1097,8 @@ document.getElementById('currentDate').textContent =
 loadHistory();
 renderDisclaimer();          // короткая строка + модалка на текущем языке
 renderPrivacy();             // Политика конфиденциальности на текущем языке
+// До официального релиза ссылка на Политику скрыта (документ ещё не публичный)
+if (!PUBLIC_LAUNCH) { const ps = document.getElementById('privacySep'); if (ps) ps.style.display = 'none'; }
 maybeShowDisclaimerGate();   // обязательное согласие при первом визите
 
 // ── Lang / Area ───────────────────────────────

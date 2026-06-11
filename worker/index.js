@@ -4,6 +4,12 @@
 //  рейтинг ответов (KV) · rate-limiting · cron-мониторинг изменений в актах
 // ═══════════════════════════════════════════════════════════════════════════
 
+// ═══ LAUNCH-ФЛАГ ═══
+// false = пред-релиз: ПОЛНАЯ телеметрия (текст запросов, сырые IP) для отладки/тестов.
+// true  = публичный релиз: session-only (без текста запросов, IP только хешем) под Privacy Policy.
+// Флипни в true ОДНОВРЕМЕННО с публикацией Политики конфиденциальности на сайте.
+const PUBLIC_RELEASE = false;
+
 const INGEST_SECRET = 'aifc-rag-2026';      // защита эндпоинта загрузки RAG
 const ADMIN_SECRET = 'aifc-admin-2026';     // защита /stats и /analyze (мониторинг)
 const RATE_LIMIT_PER_MIN = 25;              // запросов в минуту с одного IP
@@ -225,11 +231,10 @@ function track(env, ctx, ev) {
   if (ev.structDefect)patch.struct_defect = 1;
   tasks.push(bumpDaily(env, patch));
 
-  // Уникальные пользователи за день: храним ТОЛЬКО анонимный хеш IP (не сам IP).
-  // Хеш необратим и нужен лишь для подсчёта уникальных посетителей в аналитике.
+  // Уникальные пользователи за день. На релизе (session-only) — необратимый хеш IP,
+  // в пред-релизе — сырой IP (для отладки/выявления злоупотреблений).
   if (ev.ip) tasks.push((async () => {
-    const h = await sha256hex(ev.ip + '|aifc-salt');
-    const tag = h.slice(0, 12);
+    const tag = PUBLIC_RELEASE ? (await sha256hex(ev.ip + '|aifc-salt')).slice(0, 12) : ev.ip;
     const dk = `stat:ips:${dayKey()}`;
     let hs = []; try { hs = JSON.parse(await env.AIFC_KV.get(dk) || '[]'); } catch {}
     if (!hs.includes(tag)) {
@@ -239,13 +244,17 @@ function track(env, ctx, ev) {
     }
   })());
 
-  // Session-only: НЕ сохраняем текст запросов и документов в долгую аналитику —
-  // только обезличенные метаданные (область, язык, метрики) для статистики.
-  tasks.push(pushList(env, 'stat:recent_q',
-    { area: ev.area || '', lang: ev.lang || '', ts: Date.now(), cached: !!ev.cached,
-      latencyMs: ev.latencyMs || 0, ragCount: ev.ragCount || 0 }, 100));
-  if (ev.negative) tasks.push(pushList(env, 'stat:negative_q',
-    { area: ev.area || '', lang: ev.lang || '', ts: Date.now() }, 50));
+  // recent_q: метаданные всегда; текст запроса — только в пред-релизе (НЕ под Privacy Policy).
+  const rq = { area: ev.area || '', lang: ev.lang || '', ts: Date.now(), cached: !!ev.cached,
+    latencyMs: ev.latencyMs || 0, ragCount: ev.ragCount || 0 };
+  if (!PUBLIC_RELEASE && ev.question) rq.q = ev.question.slice(0, 200);
+  tasks.push(pushList(env, 'stat:recent_q', rq, 100));
+
+  if (ev.negative) {
+    const nq = { area: ev.area || '', lang: ev.lang || '', ts: Date.now() };
+    if (!PUBLIC_RELEASE && ev.negative && ev.negative.q) nq.q = String(ev.negative.q).slice(0, 200);
+    tasks.push(pushList(env, 'stat:negative_q', nq, 50));
+  }
   ctx.waitUntil(Promise.all(tasks).catch(() => {}));
 }
 
@@ -744,9 +753,11 @@ async function handleChat(request, env, ctx) {
         ...(repaired ? { replaceText: finalText } : {}),
       }) + '\n'));
 
-      // Контекст для оценки ответа (24ч): только область, БЕЗ текста запроса (session-only)
+      // Контекст для оценки ответа (24ч). На релизе — только область (session-only);
+      // в пред-релизе дополнительно сохраняем вопрос для отладки негативных оценок.
       if (env.AIFC_KV) ctx.waitUntil(env.AIFC_KV.put(`msg:${msgId}`,
-        JSON.stringify({ area, ts: Date.now() }), { expirationTtl: 86400 }));
+        JSON.stringify(PUBLIC_RELEASE ? { area, ts: Date.now() } : { q: lastUser, area, ts: Date.now() }),
+        { expirationTtl: 86400 }));
 
       // Кэшируем ТОЛЬКО структурно валидные полные ответы (не залипает брак/плейсхолдеры).
       // Документы-шаблоны кэшируем без проверки на «**Вывод:**».
@@ -864,12 +875,13 @@ async function handleRate(request, env, ctx) {
     const cur = parseInt(await env.AIFC_KV.get(key) || '0', 10);
     await env.AIFC_KV.put(key, String(cur + 1));
     await env.AIFC_KV.put(`vote:${msgId}`, vote, { expirationTtl: 2592000 });
-    // Дневная метрика. Для негативной оценки фиксируем ТОЛЬКО область (без текста запроса).
+    // Дневная метрика. Для негативной оценки: область всегда; текст вопроса —
+    // только в пред-релизе (если он был сохранён в msg:).
     let negative = null, area = '';
     if (vote === 'down') {
       try {
         const ctxData = JSON.parse(await env.AIFC_KV.get(`msg:${msgId}`) || 'null');
-        if (ctxData) { negative = true; area = ctxData.area || ''; }
+        if (ctxData) { area = ctxData.area || ''; negative = ctxData.q ? { q: ctxData.q, area } : true; }
       } catch {}
     }
     track(env, ctx, { type: vote === 'up' ? 'vote_up' : 'vote_down', negative, area });
@@ -977,9 +989,14 @@ async function handleAnalyze(request, env) {
     areas: stats.areas,
     topCountries: Object.entries(stats.geo).sort((a, b) => b[1] - a[1]).slice(0, 6),
     last14days: stats.days.map(d => ({ date: d.date, chat: d.chat || 0, pageview: d.pageview || 0, down: d.vote_down || 0 })),
-    // Тексты запросов не хранятся (session-only) — анализируем обезличенные метаданные:
+    // На релизе (session-only) тексты не хранятся — анализируем обезличенные метаданные;
+    // в пред-релизе передаём и сами вопросы, если они сохранены.
     recentByArea: (stats.recentQ || []).slice(0, 30).reduce((m, x) => { const a = x.area || 'н/д'; m[a] = (m[a] || 0) + 1; return m; }, {}),
     negativeByArea: (stats.negativeQ || []).slice(0, 15).reduce((m, x) => { const a = x.area || 'н/д'; m[a] = (m[a] || 0) + 1; return m; }, {}),
+    ...(PUBLIC_RELEASE ? {} : {
+      recentQuestions: (stats.recentQ || []).slice(0, 30).map(x => x.q).filter(Boolean),
+      negativeQuestions: (stats.negativeQ || []).slice(0, 15).map(x => x.q).filter(Boolean),
+    }),
   };
 
   const systemPrompt = `Ты — продуктовый и growth-аналитик SaaS-сервиса «МФЦА Правовой Ассистент» (ИИ-консультант по праву МФЦА для юристов и бизнеса в Казахстане). Сервис готовится к платному запуску (тариф ~5000₸/мес, провайдер ioka, фикс-расходы ~45000₸/мес как ИП, точка безубыточности ~15 подписчиков).
