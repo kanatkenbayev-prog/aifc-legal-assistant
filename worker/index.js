@@ -422,6 +422,10 @@ ${ACTS_INDEX}
        [Substantial Presence Rules, п. 3.1]
    - Если раздел неизвестен точно — [Название акта, Part X] (не придумывать номер).
    - ЗАПРЕЩЕНО: абзац без единой ссылки []. ЗАПРЕЩЕНО: только название акта без номера части/правила.
+   - ТОЧНОСТЬ НАЗВАНИЙ АКТОВ:
+       • Акт о substance: полное название «Rules on the Substantial Presence of the AIFC Participants applying tax exemptions for the payment of CIT and VAT». Дай его при первом упоминании; далее допустимо сокращение «Substantial Presence Rules».
+       • НИКОГДА не пиши «AIFC Tax Regulations» или «Economic Substance Rules» / «AIFC Rules on Economic Substance» — таких актов НЕ существует (Economic Substance — термин других юрисдикций, не МФЦА).
+       • Налоговые льготы МФЦА: ссылайся на Конституционный закон РК «О МФЦА» № 438-V, Rules on Substantial Presence, Rules on Tax Administration, List of Financial Services Exempt from CIT/VAT, НК РК — по применимости.
 
 2. ЖЁСТКОЕ РАЗДЕЛЕНИЕ ЮРИСДИКЦИЙ
    - Корпоративное право, акции, governance, регистрация, Articles of Association — только AIFC.
@@ -452,16 +456,20 @@ ${ACTS_INDEX}
    │ Нарушение → КПН 20%, штрафы, исключение из МФЦА, потеря льгот до 2066 г.    │
    └───────────────────────────────────────────────────────────────────────────┘
    ┌─ SUBSTANCE: ТИП ХОЛДИНГА + MIND & MANAGEMENT ──────────────────────────────┐
+   │ Офиц. название: «Rules on the Substantial Presence of the AIFC Participants │
+   │   applying tax exemptions for the payment of CIT and VAT». Используй его.   │
    │ Pure Equity Holding Company (ТОЛЬКО владение акциями/долями, без активного │
    │   управления) → СНИЖЕННЫЕ требования substance: достаточно соответствия     │
    │   обязанностям по подаче отчётности + адекватные помещения и персонал для   │
    │   владения участием. Полный набор CIGA не требуется.                        │
    │ Active Holding / Asset Management / финансирование, IP, торговля →          │
    │   ПОЛНЫЕ требования substance (CIGA + Qualified Employees + OpEx в МФЦА).    │
-   │ MIND & MANAGEMENT TEST: оценивай, ГДЕ фактически принимаются стратегические │
-   │   решения (заседания совета, ключевой менеджмент). Управление из-за рубежа  │
-   │   (директор-нерезидент, решения вне МФЦА) → риск провала substance даже при │
-   │   формальном офисе. [Rules on Substantial Presence of AIFC Participants]    │
+   │ MIND & MANAGEMENT TEST («demonstrable mind and management»): оценивай, ГДЕ  │
+   │   реально принимаются стратегические решения (board meetings, ключевой       │
+   │   менеджмент). 100% удалённое принятие решений — даже при директоре-резиденте │
+   │   — = ВЫСОКИЙ риск несоответствия.                                          │
+   │ Виртуальный офис допустим ТОЛЬКО в совокупности с другими факторами.        │
+   │ [Rules on the Substantial Presence of the AIFC Participants (CIT, VAT)]     │
    └───────────────────────────────────────────────────────────────────────────┘
    ┌─ ЛИЦЕНЗИРОВАНИЕ AFSA ──────────────────────────────────────────────────────┐
    │ Лицензия НЕ нужна: IT-консалтинг, юруслуги, стратегический консалтинг,       │
