@@ -343,6 +343,34 @@
   .powered { display: flex; align-items: center; gap: 5px; }
   .powered span { background: var(--cream-dark); padding: 2px 7px; border-radius: 4px; border: 1px solid var(--border); font-size: 10px; }
   .disclaimer { font-size: 10.5px; color: var(--text-muted); line-height: 1.45; padding: 6px 2px 0; border-top: 1px dashed var(--border); margin-top: 2px; }
+  .disclaimer a { color: var(--aifc-blue); text-decoration: underline; cursor: pointer; white-space: nowrap; }
+
+  /* Disclaimer consent modal */
+  .dlg-overlay {
+    position: fixed; inset: 0; z-index: 1000; display: none;
+    align-items: center; justify-content: center; padding: 20px;
+    background: rgba(20,24,30,.55); backdrop-filter: blur(3px); animation: fadein .2s ease;
+  }
+  .dlg-overlay.visible { display: flex; }
+  .dlg-box {
+    background: var(--cream, #fff); color: var(--text, #1a1a1a);
+    max-width: 600px; width: 100%; max-height: 88vh; overflow-y: auto;
+    border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 16px 48px rgba(0,0,0,.28);
+    padding: 26px 26px 20px;
+  }
+  .dlg-box h2 { font-size: 18px; margin: 0 0 14px; display: flex; align-items: center; gap: 8px; color: var(--aifc-blue); }
+  .dlg-body { font-size: 13px; line-height: 1.6; color: var(--text-muted); }
+  .dlg-body p { margin: 0 0 11px; }
+  .dlg-body ul { margin: 0 0 11px; padding-left: 20px; }
+  .dlg-body li { margin: 2px 0; }
+  .dlg-body strong { color: var(--text, #1a1a1a); }
+  .dlg-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .dlg-accept {
+    background: var(--gold, #c6a04a); color: #fff; border: none; border-radius: 8px;
+    padding: 10px 22px; font-size: 14px; font-weight: 600; cursor: pointer; transition: filter .15s;
+  }
+  .dlg-accept:hover { filter: brightness(1.07); }
+  .dlg-close { background: transparent; border: 1px solid var(--border); border-radius: 8px; padding: 10px 18px; font-size: 14px; cursor: pointer; color: var(--text-muted); }
 
   /* ══════════════════════════════════════════
      DATABASE PAGE
@@ -678,7 +706,7 @@
             <span class="input-hint">Область: <strong id="areaLabel">Корпоративное право</strong> · <kbd>Enter</kbd> — отправить</span>
             <span class="powered">⚡ <span>Llama 3.3 · RAG · Cloudflare</span></span>
           </div>
-          <div class="disclaimer">⚠️ Ответы сгенерированы ИИ и носят справочный характер. Они не являются юридической консультацией — проверяйте первоисточники и обращайтесь к квалифицированному юристу.</div>
+          <div class="disclaimer"><span id="shortDisclaimer">⚠️ Информация AIFC Legal Assistant носит исключительно общий справочный характер и не является юридической консультацией. Для принятия решений обращайтесь к лицензированному Legal Adviser AIFC.</span> <a onclick="openDisclaimer()" id="disclaimerLink">Подробнее</a></div>
         </div>
       </div>
 
@@ -842,8 +870,93 @@
 
 </div><!-- /pages -->
 
+<!-- ══ DISCLAIMER CONSENT MODAL ══ -->
+<div class="dlg-overlay" id="disclaimerModal">
+  <div class="dlg-box">
+    <h2 id="dlgTitle">⚖️ Важное предупреждение</h2>
+    <div class="dlg-body" id="dlgBody"></div>
+    <div class="dlg-actions">
+      <button class="dlg-close" id="dlgClose" onclick="closeDisclaimer()" style="display:none">Закрыть</button>
+      <button class="dlg-accept" id="dlgAccept" onclick="acceptDisclaimer()">Принимаю и продолжаю</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const WORKER_URL = 'https://aifc-legal-proxy.aifclegal.workers.dev';
+
+// ── Disclaimer (двуязычный): полный текст для модалки + короткая строка ──
+const DISCLAIMER = {
+  ru: {
+    title: '⚖️ Важное предупреждение',
+    accept: 'Принимаю и продолжаю',
+    close: 'Закрыть',
+    moreLink: 'Подробнее',
+    short: '⚠️ Информация AIFC Legal Assistant носит исключительно общий справочный характер и не является юридической консультацией. Для принятия решений обращайтесь к лицензированному Legal Adviser AIFC.',
+    full: `
+      <p><strong>AIFC Legal Assistant</strong> — это искусственный интеллект, предназначенный исключительно для предоставления общей информационно-справочной информации о праве Международного финансового центра «Астана» (AIFC), нормативных актах AFSA и связанных вопросах законодательства Республики Казахстан.</p>
+      <p>Данное взаимодействие <strong>не является и не может рассматриваться</strong> как:</p>
+      <ul>
+        <li>Юридическая консультация;</li>
+        <li>Официальное юридическое заключение (Legal Opinion);</li>
+        <li>Создание отношений «адвокат-клиент» (attorney-client relationship);</li>
+        <li>Замена профессиональной юридической помощи.</li>
+      </ul>
+      <p>Вся информация предоставляется исключительно в ознакомительных целях и основана на данных, доступных на момент генерации ответа. Законодательство AIFC, правила AFSA и нормативные акты Республики Казахстан могут изменяться. Мы не гарантируем актуальность, полноту, точность или применимость информации к конкретной ситуации пользователя.</p>
+      <p>Пользователь самостоятельно несёт все риски, связанные с использованием информации, полученной от ИИ-ассистента. Администрация сервиса и разработчики не несут никакой ответственности за любые прямые, косвенные, случайные или иные убытки, возникшие в результате использования данного сервиса.</p>
+      <p>Для получения квалифицированной юридической помощи, официальных разъяснений, подготовки документов или совершения юридически значимых действий настоятельно рекомендуется обращаться к лицензированному <strong>Legal Adviser AIFC</strong>, авторизованной фирме AFSA или квалифицированному казахстанскому адвокату.</p>
+      <p>Используя данный сервис, вы подтверждаете, что ознакомились с настоящим Disclaimer и соглашаетесь с его условиями.</p>`,
+  },
+  en: {
+    title: '⚖️ Important Disclaimer',
+    accept: 'I accept and continue',
+    close: 'Close',
+    moreLink: 'Read more',
+    short: '⚠️ AIFC Legal Assistant provides general information only and does not constitute legal advice. Always consult a qualified AIFC Licensed Legal Adviser before taking any action.',
+    full: `
+      <p><strong>AIFC Legal Assistant</strong> is an AI-powered tool providing general information only about the law of the Astana International Financial Centre (AIFC), AFSA rules and related matters of the legislation of the Republic of Kazakhstan.</p>
+      <p>This interaction <strong>does not constitute and cannot be regarded as</strong>:</p>
+      <ul>
+        <li>Legal advice;</li>
+        <li>A legal opinion;</li>
+        <li>The creation of an attorney-client relationship;</li>
+        <li>A substitute for professional legal assistance.</li>
+      </ul>
+      <p>All information is provided for informational purposes only and is based on data available at the time of generation. AIFC legislation, AFSA rules and the regulations of the Republic of Kazakhstan may change. We do not guarantee that the information is current, complete, accurate or applicable to your specific situation.</p>
+      <p>Users assume all risks associated with the use of information obtained from the AI assistant. The service administration and developers bear no liability for any direct, indirect, incidental or other damages arising from the use of this service.</p>
+      <p>For qualified legal assistance, official clarifications, document preparation or any legally significant action, you should always seek advice from a qualified <strong>AIFC Licensed Legal Adviser</strong>, an AFSA authorised firm or a qualified Kazakhstani lawyer.</p>
+      <p>By using this service, you confirm that you have read this Disclaimer and agree to its terms.</p>`,
+  },
+};
+const DLG_KEY = 'aifc_disclaimer_accepted_v1';
+
+function renderDisclaimer() {
+  const t = DISCLAIMER[currentLang] || DISCLAIMER.ru;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('dlgTitle', t.title);
+  set('dlgAccept', t.accept);
+  set('dlgClose', t.close);
+  set('shortDisclaimer', t.short);
+  set('disclaimerLink', t.moreLink);
+  const body = document.getElementById('dlgBody');
+  if (body) body.innerHTML = t.full;
+}
+function showDisclaimerModal(gate) {
+  renderDisclaimer();
+  document.getElementById('dlgClose').style.display = gate ? 'none' : '';
+  document.getElementById('disclaimerModal').classList.add('visible');
+}
+function acceptDisclaimer() {
+  try { localStorage.setItem(DLG_KEY, new Date().toISOString()); } catch {}
+  document.getElementById('disclaimerModal').classList.remove('visible');
+}
+function openDisclaimer() { showDisclaimerModal(false); }   // из ссылки «Подробнее» — с кнопкой «Закрыть»
+function closeDisclaimer() { document.getElementById('disclaimerModal').classList.remove('visible'); }
+function maybeShowDisclaimerGate() {
+  let accepted = false;
+  try { accepted = !!localStorage.getItem(DLG_KEY); } catch {}
+  if (!accepted) showDisclaimerModal(true);  // первый визит — обязательное согласие
+}
 
 // ── Маячок посещения (приватно: без cookie и персональных данных) ──
 (function trackVisit(){
@@ -911,12 +1024,15 @@ function exportPdf() {
 document.getElementById('currentDate').textContent =
   new Date().toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'});
 loadHistory();
+renderDisclaimer();          // короткая строка + модалка на текущем языке
+maybeShowDisclaimerGate();   // обязательное согласие при первом визите
 
 // ── Lang / Area ───────────────────────────────
 function setLang(lang) {
   currentLang = lang;
   document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
   document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  renderDisclaimer();  // обновляем короткую строку + модалку под язык
 }
 
 function setArea(btn, area) {
