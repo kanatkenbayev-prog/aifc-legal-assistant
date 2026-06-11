@@ -864,7 +864,7 @@ async function handleIngest(request, env) {
         const vectors = emb.data.map((values, k) => ({
           id: `act${globalIdx}-${b + k}`,
           values,
-          metadata: { act: name, url: actUrl, cat, text: batch[k].slice(0, 1000) },
+          metadata: { act: name, url: actUrl, cat, text: batch[k].slice(0, 1200) },
         }));
         await env.VECTORIZE.upsert(vectors);
         totalChunks += vectors.length;
