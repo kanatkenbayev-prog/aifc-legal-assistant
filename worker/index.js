@@ -379,8 +379,6 @@ ${ACTS_INDEX}
    ┌─ ФОНДЫ (CIS RULES — ПРИОРИТЕТ) ───────────────────────────────────────────┐
    │ Регистрация фонда: [CIS Rules, Rule 4.2–4.3]                                │
    │ Типы: Exempt / Non-Exempt / Specialist Fund [CIS Rules, Rule 2.2, 2.4]      │
-   │ Exempt Fund — минимальный порог инвестора: 100 000 USD [CIS Rules, Rule 2.2]│
-   │ Non-Exempt Fund — доступен розничным инвесторам без минимального порога     │
    │ Источник: https://orderly.myafsa.com/articles/collectiveinvestmentschemerules│
    └───────────────────────────────────────────────────────────────────────────┘` : ''}
 
