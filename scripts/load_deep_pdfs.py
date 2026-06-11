@@ -83,7 +83,8 @@ def extract_pdf_text(pdf_bytes: bytes) -> str:
 def ingest_segment(seg_id, text, act, url, cat):
     resp = requests.post(
         f"{WORKER_URL}/ingest-text",
-        json={"key": INGEST_SECRET, "id": seg_id, "act": act, "url": url, "cat": cat, "text": text},
+        json={"key": INGEST_SECRET, "id": seg_id, "act": act, "url": url, "cat": cat,
+              "text": text, "reset": True},
         timeout=120,
     )
     try:

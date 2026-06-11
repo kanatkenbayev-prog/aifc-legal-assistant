@@ -69,6 +69,12 @@ const ACTS = [
   ['AIFC Regulations on Damages and Remedies','https://aifc.kz/legal-framework/aifc-regulations-on-damages-and-remedies/','Договорное право'],
   ['AIFC Personal Property Regulations','https://aifc.kz/legal-framework/aifc-personal-property-regulations/','Договорное право'],
   ['AIFC Regulations on AIFC Acts','https://aifc.kz/legal-framework/aifc-regulations-on-aifc-acts/','Иерархия актов МФЦА'],
+  // ── Доп. категории: трасты, интеллектуальная собственность, сборы, платёжные системы ──
+  ['AIFC Trust Regulations','https://aifc.kz/legal-framework/aifc-trust-regulations/','Трасты'],
+  ['AIFC Intellectual Property Regulations','https://aifc.kz/legal-framework/aifc-intellectual-property-regulations/','Интеллектуальная собственность'],
+  ['Fees Rules','https://aifc.kz/legal-framework/fees-rules/','Сборы и пошлины'],
+  ['AIFC Payment System Settlement Finality Regulations','https://aifc.kz/legal-framework/aifc-payment-system-settlement-finality-regulations/','Платёжные системы'],
+  ['AIFC Netting Regulations','https://aifc.kz/legal-framework/aifc-netting-regulations/','Платёжные системы'],
 ];
 
 const ACTS_INDEX = ACTS.map(([n,u,c]) => `- ${n} (${c}): ${u}`).join('\n');
@@ -1012,11 +1018,19 @@ function chunkText(text, size = 1200, overlap = 300) {
   return chunks;
 }
 
+// Удаляет диапазон возможных ID `${prefix}-0..${prefix}-(n-1)` (для чистого переингеста
+// без «осиротевших» векторов при изменившемся числе чанков). Несуществующие ID игнорируются.
+async function deleteIdRange(env, prefix, n = 400) {
+  const ids = Array.from({ length: n }, (_, k) => `${prefix}-${k}`);
+  try { await env.VECTORIZE.deleteByIds(ids); } catch {}
+}
+
 async function handleIngest(request, env) {
   const url = new URL(request.url);
   if (url.searchParams.get('key') !== INGEST_SECRET) return json({ error: 'forbidden' }, 403);
   const start = parseInt(url.searchParams.get('start') || '0', 10);
   const count = parseInt(url.searchParams.get('count') || '2', 10);
+  const reset = url.searchParams.get('reset') === '1';
   const slice = ACTS.slice(start, start + count);
   let totalChunks = 0;
   const report = [];
@@ -1030,6 +1044,7 @@ async function handleIngest(request, env) {
       // Limit: keep first ~20k chars to bound CPU
       const chunks = chunkText(text.slice(0, 20000)).filter(c => c.trim().length > 100);
       const globalIdx = start + ai;
+      if (reset) await deleteIdRange(env, `act${globalIdx}`);
       // Embed in sub-batches
       for (let b = 0; b < chunks.length; b += 8) {
         const batch = chunks.slice(b, b + 8);
@@ -1055,10 +1070,11 @@ async function handleIngest(request, env) {
 // ── Ingest arbitrary provided text into Vectorize (manual knowledge additions) ─
 async function handleIngestText(request, env) {
   let body; try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
-  const { key, id, act, url, cat = 'Налоговое право', text = '' } = body;
+  const { key, id, act, url, cat = 'Налоговое право', text = '', reset = false } = body;
   if (key !== INGEST_SECRET) return json({ error: 'forbidden' }, 403);
   if (!id || !act || !text || text.length < 50) return json({ error: 'id, act, text required' }, 400);
 
+  if (reset) await deleteIdRange(env, id);
   const chunks = chunkText(text.slice(0, 40000)).filter(c => c.trim().length > 80);
   let total = 0;
   for (let b = 0; b < chunks.length; b += 8) {
