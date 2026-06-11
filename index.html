@@ -1025,6 +1025,8 @@ async function sendMessage() {
         } else if (evt.type === 'error') {
           throw new Error(evt.error || 'stream error');
         } else if (evt.type === 'done') {
+          // Пост-валидация структуры: воркер мог прислать исправленный ответ
+          if (evt.replaceText && evt.replaceText.length > 0) rawText = evt.replaceText;
           finalizeAiBubble(ai, rawText, meta, evt.linkStatus || {}, evt.brokenCount || 0);
         }
       }

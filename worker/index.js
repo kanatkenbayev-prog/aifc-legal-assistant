@@ -215,6 +215,8 @@ function track(env, ctx, ev) {
   if (ev.isFundQuery) patch.fund_query = 1;
   if (ev.isLawyerMode)patch.lawyer_mode = 1;
   if (ev.ragCount)    patch.rag_hits = ev.ragCount;
+  if (ev.repaired)    patch.struct_repaired = 1;
+  if (ev.structDefect)patch.struct_defect = 1;
   tasks.push(bumpDaily(env, patch));
 
   // Уникальные IP за день (храним в Set-like строке, max 500 записей)
@@ -514,6 +516,20 @@ async function cacheKey(q, area, lang) {
   return 'qa:' + [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
 }
 
+// Детекция структурного дефекта ответа (для пост-валидации и гейта кэширования).
+// Возвращает код дефекта или null. Лечим регенерацией только структурные дефекты —
+// token-drop цифр (модельный артефакт fp8) НЕ триггерит регенерацию.
+function structureDefect(text) {
+  const t = text || '';
+  if (/^ЧИПЫ:/m.test(t)) return null;                 // уточняющий вопрос — структура не нужна
+  if (t.length < 200) return null;                    // короткий/служебный ответ
+  if (!/\*\*Вывод/.test(t)) return 'no_conclusion';   // нет обязательного блока «Вывод»
+  // Плейсхолдеры в ссылках: [Article X], [Part X, Rule Y], [Rule …], [Section X]
+  if (/\[[^\]]*\b(Article|Part|Rule|Section)\s+[XYZ]\b[^\]]*\]/.test(t)) return 'placeholder_cite';
+  if (/\[[^\]]*Rule\s*…[^\]]*\]/.test(t)) return 'placeholder_cite';
+  return null;
+}
+
 // Поток из готового кэшированного ответа (мгновенно)
 function streamFromCache(cached) {
   const enc = new TextEncoder();
@@ -629,27 +645,56 @@ async function handleChat(request, env, ctx) {
         controller.enqueue(encoder.encode(JSON.stringify({ type: 'error', error: String(e) }) + '\n'));
       }
 
-      // Verify links after generation
-      const linkStatus = await verifyLinks(fullText);
+      // ── Пост-валидация структуры: одна тихая регенерация при структурном дефекте ──
+      let finalText = fullText;
+      let repaired = false;
+      const defect = structureDefect(fullText);
+      if (defect) {
+        try {
+          const fix = await aiChat(env, [
+            { role: 'system', content: systemPrompt },
+            ...messages,
+            { role: 'system', content:
+              'КРИТИЧНО: предыдущий черновик нарушил формат. Перепиши ответ СТРОГО по структуре, '
+              + 'начиная с «**Вывод:**», с блоками «Применимые нормы», «Анализ», «Риски и красные флаги» где уместно. '
+              + 'ЗАПРЕЩЕНЫ ссылки-плейсхолдеры вида [Article X], [Part X, Rule Y], [Rule …]. '
+              + 'Если точный номер нормы неизвестен — назови акт и раздел словами, без подстановок.' },
+          ], { maxTokens: 2048, temperature: 0.15, stream: false });
+          const fixed = sanitizeText(fix?.response || '');
+          if (fixed.length > 200 && !structureDefect(fixed)) {
+            finalText = fixed;
+            repaired = true;
+          }
+        } catch {}
+      }
+
+      // Verify links (на финальном тексте)
+      const linkStatus = await verifyLinks(finalText);
       const brokenCount = Object.values(linkStatus).filter(v => !v.ok).length;
-      controller.enqueue(encoder.encode(JSON.stringify({ type: 'done', linkStatus, brokenCount }) + '\n'));
+      // Если был ремонт — отдаём replaceText, фронт подменит отображённый ответ
+      controller.enqueue(encoder.encode(JSON.stringify({
+        type: 'done', linkStatus, brokenCount,
+        ...(repaired ? { replaceText: finalText } : {}),
+      }) + '\n'));
 
       // Persist Q/A for rating context (24h)
       if (env.AIFC_KV) ctx.waitUntil(env.AIFC_KV.put(`msg:${msgId}`,
         JSON.stringify({ q: lastUser, area, ts: Date.now() }), { expirationTtl: 86400 }));
 
-      // Сохраняем в кэш (только полные ответы, не уточняющие вопросы)
-      if (ck && env.AIFC_KV && fullText.length > 200 && !/^ЧИПЫ:/m.test(fullText)) {
+      // Кэшируем ТОЛЬКО структурно валидные полные ответы (не залипает брак/плейсхолдеры)
+      if (ck && env.AIFC_KV && finalText.length > 200 && !structureDefect(finalText)) {
         ctx.waitUntil(env.AIFC_KV.put(ck, JSON.stringify({
-          text: fullText, linkStatus, brokenCount, liveCount, ragSources,
+          text: finalText, linkStatus, brokenCount, liveCount, ragSources,
         }), { expirationTtl: CACHE_TTL }));
       }
 
-      // Метрика: сгенерированный ответ (не из кэша)
+      // Метрика: сгенерированный ответ (не из кэша). Ремонт = +1 генерация (нейроны ×2).
       track(env, ctx, {
-        type: 'chat', area, lang, question: lastUser, neurons: NEURON_COST.chat,
+        type: 'chat', area, lang, question: lastUser,
+        neurons: NEURON_COST.chat * (repaired ? 2 : 1),
         ip, country, latencyMs: Date.now() - chatStart,
         isFundQuery, isLawyerMode, ragCount: ragChunks.length,
+        structDefect: defect || '', repaired,
       });
 
       controller.close();
