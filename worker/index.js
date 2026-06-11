@@ -267,9 +267,8 @@ async function ragRetrieve(env, query) {
   try {
     const emb = await env.AI.run(EMBED_MODEL, { text: [query] });
     const vector = emb.data[0];
-    const matches = await env.VECTORIZE.query(vector, { topK: 7, returnMetadata: 'all' });
-    return (matches.matches || [])
-      .filter(m => m.score > 0.42)
+    const matches = await env.VECTORIZE.query(vector, { topK: 12, returnMetadata: 'all' });
+    const all = (matches.matches || [])
       .map(m => ({
         score: m.score,
         text: m.metadata?.text || '',
@@ -277,6 +276,16 @@ async function ragRetrieve(env, query) {
         url: m.metadata?.url || '',
       }))
       .filter(m => m.text);
+
+    // Каскадный отбор против «синдрома Я не знаю»:
+    // уверенные совпадения (>0.42) берём всегда; если их меньше 3 — добираем
+    // менее уверенными (до порога 0.34), помечая их как ориентировочные.
+    const STRONG = 0.42, FLOOR = 0.34;
+    const strong = all.filter(m => m.score > STRONG);
+    if (strong.length >= 3) return strong.slice(0, 8);
+    const relaxed = all.filter(m => m.score > FLOOR)
+      .map(m => ({ ...m, weak: m.score <= STRONG }));
+    return relaxed.slice(0, 8);
   } catch { return []; }
 }
 
@@ -303,9 +312,11 @@ function formatRag(chunks) {
   if (!chunks.length) return '';
   let s = `\n== РЕЛЕВАНТНЫЕ ФРАГМЕНТЫ ИЗ ПОЛНЫХ ТЕКСТОВ АКТОВ (RAG) ==\n`;
   chunks.forEach((c, i) => {
-    s += `\n[Фрагмент ${i + 1}] из «${c.act}» (${c.url}):\n«${c.text.slice(0, 1200)}»\n`;
+    const tag = c.weak ? ' [ориентировочно — проверь применимость]' : '';
+    s += `\n[Фрагмент ${i + 1}] из «${c.act}»${tag} (${c.url}):\n«${c.text.slice(0, 1200)}»\n`;
   });
-  s += `\nИспользуй эти фрагменты как первоисточник. Цитируй конкретные положения дословно, когда уместно.\n`;
+  s += `\nИспользуй эти фрагменты как первоисточник. Цитируй конкретные положения дословно, когда уместно. `
+    + `Фрагменты с пометкой «ориентировочно» могут быть менее точны — опирайся на них с осторожностью, но НЕ отказывайся от ответа только из-за этого.\n`;
   return s;
 }
 
@@ -325,7 +336,7 @@ function formatLive(news, notices) {
 }
 
 // ── System prompt ─────────────────────────────────────────────────────────────
-function buildSystemPrompt({ area, lang, liveCtx, ragCtx, isFundQuery, isLawyerMode }) {
+function buildSystemPrompt({ area, lang, liveCtx, ragCtx, isFundQuery, isLawyerMode, isDocGen }) {
   const langHeader = lang === 'en'
     ? '🌐 LANGUAGE RULE (ABSOLUTE): Respond ONLY in English regardless of the language of source documents or RAG context. Sources in other languages are reference material only.'
     : '🌐 ЯЗЫК ОТВЕТА (АБСОЛЮТНОЕ ПРАВИЛО): Отвечай ИСКЛЮЧИТЕЛЬНО на русском языке кириллицей — НЕЗАВИСИМО от языка источников, актов и RAG-контекста. Английские источники — только основа анализа. Латиница только для названий актов, терминов и URL. ЗАПРЕЩЕНЫ иероглифы и любые нелатинские/некириллические символы.';
@@ -434,15 +445,24 @@ ${ACTS_INDEX}
    - ${isLawyerMode ? '🔬 РЕЖИМ ЮРИСТА АКТИВЕН: углублённый технический анализ — полные ссылки на нормы, коллизии, ratio decidendi, риски для due diligence. Профессиональная юридическая терминология.' : '👤 Режим предпринимателя: прямой вывод → пошаговые действия → таблицы/чек-листы → риски → рекомендация уточнить. Без избыточного юридического жаргона.'}
    - Таблицы и чек-листы — для сравнений, документов, требований.
    - При анализе уставов и договоров — сравнивай со Standard Articles (Schedule 5 для Private Company, Schedule 6 для Public Company).
-   - При генерации документов — предоставляй английскую версию с глоссарием ключевых терминов на русском. Всегда указывай, что это шаблон.
+   - При генерации документов — предоставляй английскую версию с глоссарием ключевых терминов на русском. Всегда указывай, что это шаблон.${isDocGen ? `
+   📄 РЕЖИМ ГЕНЕРАЦИИ ДОКУМЕНТА (двуязычный формат):
+     • Официальный текст документа МФЦА — ВСЕГДА на английском (governing language), даже если запрос на русском. Английский — язык, имеющий юридическую силу в МФЦА.
+     • Структура вывода:
+         1) **EN — Official document** : полный текст документа на английском.
+         2) **RU — Перевод для понимания** : секционный русский перевод (не имеющий силы, «for reference only»).
+         3) Короткий глоссарий ключевых терминов EN→RU.
+     • Обязательно пометь: «Английская версия имеет преимущественную силу. Русский перевод — справочный.»
+     • В конце — «Это шаблон, подготовленный ИИ. Перед использованием проверьте у лицензированного Legal Adviser AIFC.»` : ''}
    - Если вопрос неполный — задай 1–2 уточняющих вопроса ПЕРЕД полным ответом и добавь:
      ЧИПЫ: Вариант А | Вариант Б | Вариант В | Другое
      (строку ЧИПЫ: только к уточняющим вопросам, не к полным ответам)
 
-7. ЕСЛИ ИНФОРМАЦИЯ НЕ НАЙДЕНА — ЧЕСТНОСТЬ, НЕ ГАЛЛЮЦИНАЦИИ
-   - Если точной нормы нет в RAG-базе, Citation DB или ACTS_INDEX:
-     «В доступных материалах AIFC по этому конкретному сценарию прямого регулирования не обнаружено. Рекомендую уточнить детали или обратиться к лицензированному Legal Adviser».
-   - Не извиняйся эмоционально. Нейтральный деловой тон.
+7. БАЛАНС: ОТВЕЧАЙ ПО СУЩЕСТВУ, НО БЕЗ ГАЛЛЮЦИНАЦИЙ
+   - СНАЧАЛА попробуй ответить, опираясь на ЛЮБОЙ доступный источник: фрагменты RAG (включая «ориентировочные»), Citation DB, ACTS_INDEX и общеизвестные принципы права МФЦА (МФЦА основан на английском общем праве; акты построены по модели UK/DIFC).
+   - Полный отказ «не обнаружено» допустим ТОЛЬКО когда нет вообще никакой опоры: пусто в RAG, нет в Citation DB/ACTS_INDEX И тема вне общеизвестных принципов. Не отказывайся лишь потому, что фрагменты короткие или помечены «ориентировочно».
+   - Если общая норма понятна, но точный номер не подтверждён — дай ответ по существу со ссылкой на акт/раздел словами и пометь «точную нумерацию уточните в актуальной редакции». Это ЛУЧШЕ, чем отказ.
+   - Когда основы действительно нет: «В доступных материалах AIFC по этому конкретному сценарию прямого регулирования не обнаружено. Рекомендую уточнить детали или обратиться к лицензированному Legal Adviser». Нейтральный деловой тон, без эмоциональных извинений.
 
 8. ПРИОРИТЕТ ИСТОЧНИКОВ
    Фрагменты RAG → Живые данные aifc.kz → Citation DB → ACTS_INDEX → знания модели.
@@ -593,6 +613,8 @@ async function handleChat(request, env, ctx) {
   // Режим юриста: явная команда или профессиональная терминология
   const isLawyerMode = /режим юриста|lawyer mode|ratio decidendi|obiter dictum|ultra vires|mens rea|fiduciary|indemnification|representations and warranties|material adverse change|conditions precedent/i
     .test(messages.map(m => m.content).join(' '));
+  // Генерация документа/шаблона → официальный текст на английском + русский перевод
+  const isDocGen = /составь|сгенерируй|подготовь|напиши|сформируй|драфт|шаблон|образец|договор|соглашение|устав|резолюци|доверенност|заявлени|жалоб|письмо|notice|agreement|articles|resolution|deed|draft|template|nda/i.test(lastUser);
   const cisBoost = isFundQuery ? 'CIS Rules collective investment scheme fund manager domestic fund foreign fund exempt specialist fund registration prospectus unit dealing' : '';
   const ragQuery = `${area || ''} ${lastUser} ${areaKeywordsEn(area)} ${cisBoost}`.trim();
   const [ragChunks, news, notices] = await Promise.all([
@@ -602,7 +624,7 @@ async function handleChat(request, env, ctx) {
   ]);
   const { ctx: liveCtx, count: liveCount } = formatLive(news, notices);
   const ragCtx = formatRag(ragChunks);
-  const systemPrompt = buildSystemPrompt({ area, lang, liveCtx, ragCtx, isFundQuery, isLawyerMode });
+  const systemPrompt = buildSystemPrompt({ area, lang, liveCtx, ragCtx, isFundQuery, isLawyerMode, isDocGen });
 
   const aiStream = await aiChat(env,
     [{ role: 'system', content: systemPrompt }, ...messages],
@@ -646,9 +668,10 @@ async function handleChat(request, env, ctx) {
       }
 
       // ── Пост-валидация структуры: одна тихая регенерация при структурном дефекте ──
+      // Документы-шаблоны (isDocGen) не обязаны иметь «**Вывод:**» — пропускаем проверку.
       let finalText = fullText;
       let repaired = false;
-      const defect = structureDefect(fullText);
+      const defect = isDocGen ? null : structureDefect(fullText);
       if (defect) {
         try {
           const fix = await aiChat(env, [
@@ -681,8 +704,9 @@ async function handleChat(request, env, ctx) {
       if (env.AIFC_KV) ctx.waitUntil(env.AIFC_KV.put(`msg:${msgId}`,
         JSON.stringify({ q: lastUser, area, ts: Date.now() }), { expirationTtl: 86400 }));
 
-      // Кэшируем ТОЛЬКО структурно валидные полные ответы (не залипает брак/плейсхолдеры)
-      if (ck && env.AIFC_KV && finalText.length > 200 && !structureDefect(finalText)) {
+      // Кэшируем ТОЛЬКО структурно валидные полные ответы (не залипает брак/плейсхолдеры).
+      // Документы-шаблоны кэшируем без проверки на «**Вывод:**».
+      if (ck && env.AIFC_KV && finalText.length > 200 && (isDocGen || !structureDefect(finalText))) {
         ctx.waitUntil(env.AIFC_KV.put(ck, JSON.stringify({
           text: finalText, linkStatus, brokenCount, liveCount, ragSources,
         }), { expirationTtl: CACHE_TTL }));
@@ -943,24 +967,41 @@ async function handleAnalyze(request, env) {
 }
 
 // ── RAG ingestion handler ─────────────────────────────────────────────────────
+// Граница нормы: перенос строки + начало пункта/раздела
+// (нумерованный пункт «28.», «5.1», «(1)» или заголовок PART/Rule/Section/Schedule/Chapter/Article).
+const NORM_BOUNDARY = /\n(?=\s*(?:\d+[.\)]|\(\d+\)|PART\b|Part\b|CHAPTER\b|Chapter\b|SCHEDULE\b|Schedule\b|Rule\b|Section\b|Article\b)\s)/g;
+
 function chunkText(text, size = 1200, overlap = 300) {
-  // Нарезка с перекрытием + выравнивание по границам абзацев/правил.
-  // Overlap 300 симв. гарантирует, что норма, разрезанная на стыке чанков,
-  // попадёт целиком хотя бы в один из них.
+  // Нарезка с перекрытием + выравнивание по границам НОРМ (Rule/Section/пункт),
+  // чтобы каждый чанк был самодостаточным и не рвал правило посередине.
+  // Это повышает релевантность ретрива и лечит «синдром Я не знаю».
   const step = size - overlap;
   const chunks = [];
   let i = 0;
   while (i < text.length) {
     let end = i + size;
     if (end < text.length) {
-      // Сдвигаем конец вперёд до ближайшего переноса строки (макс +200 симв.)
-      // чтобы не рвать правило посередине предложения
-      const nl = text.indexOf('\n', end);
-      if (nl !== -1 && nl - end <= 200) end = nl + 1;
+      // Ищем границу нормы в окне [end-200, end+300]; берём ближайшую к end.
+      const wStart = Math.max(i + step, end - 200);
+      const wEnd = Math.min(text.length, end + 300);
+      const slice = text.slice(wStart, wEnd);
+      let best = -1;
+      for (const m of slice.matchAll(NORM_BOUNDARY)) {
+        const pos = wStart + m.index + 1; // позиция сразу после \n
+        if (best === -1 || Math.abs(pos - end) < Math.abs(best - end)) best = pos;
+      }
+      if (best !== -1) {
+        end = best;
+      } else {
+        // Фоллбэк: ближайший перенос строки (±200)
+        const nl = text.indexOf('\n', end);
+        if (nl !== -1 && nl - end <= 200) end = nl + 1;
+      }
     }
-    chunks.push(text.slice(i, end));
+    const chunk = text.slice(i, end).trim();
+    if (chunk.length > 0) chunks.push(chunk);
     if (end >= text.length) break;
-    i += step;
+    i = Math.max(end - overlap, i + step); // сохраняем перекрытие, гарантируем прогресс
   }
   return chunks;
 }
