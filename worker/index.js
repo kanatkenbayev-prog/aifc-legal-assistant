@@ -15,7 +15,11 @@ const ADMIN_SECRET = 'aifc-admin-2026';     // защита /stats и /analyze (
 const RATE_LIMIT_PER_MIN = 25;              // запросов в минуту с одного IP
 const DAILY_NEURON_BUDGET = 100000;         // Workers Paid план — нейроны по pay-per-use, лимит для мониторинга
 const EMBED_MODEL = '@cf/baai/bge-base-en-v1.5';
-const CHAT_MODEL  = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
+const CHAT_MODEL  = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'; // фолбэк, если нет ANTHROPIC_API_KEY
+// Claude (Anthropic) — основная модель, если задан секрет ANTHROPIC_API_KEY.
+// Можно сменить на 'claude-sonnet-4-6' (дешевле) или 'claude-haiku-4-5' (ещё дешевле) одной строкой.
+const CLAUDE_MODEL = 'claude-opus-4-8';
+const ANTHROPIC_VERSION = '2023-06-01';
 
 // ── Полный список актов (название → URL) ──────────────────────────────────────
 const ACTS = [
@@ -172,9 +176,50 @@ const CITATION_DB = `
 • Въезд и пребывание иностранных работников участников МФЦА регулируются специальной процедурой [Terms and Procedures for Entry into RK for Foreign Nationals coming to conduct activities in AIFC]. Директор-нерезидент, работающий из-за рубежа, формально не обязан получать РВП/ВНЖ РК — но фактическая работа извне создаёт риск по Substance Rules.
 `;
 
-// Обёртка над нативным AI binding — упрощает вызовы и позволит добавить провайдер позднее.
-function aiChat(env, messages, { maxTokens = 2048, temperature = 0.2, stream = false } = {}) {
-  return env.AI.run(CHAT_MODEL, { messages, max_tokens: maxTokens, temperature, stream });
+// Провайдер-aware обёртка. Если задан секрет ANTHROPIC_API_KEY — используем Claude,
+// иначе фолбэк на Cloudflare Workers AI (Llama). Возвращает единый формат:
+//   stream:false → { response: '<текст>', provider }
+//   stream:true  → { stream: <ReadableStream SSE>, provider }
+async function aiChat(env, messages, { maxTokens = 2048, temperature = 0.2, stream = false } = {}) {
+  if (env.ANTHROPIC_API_KEY) return aiChatAnthropic(env, messages, { maxTokens, stream });
+  // Фолбэк: Cloudflare Workers AI (Llama). temperature поддерживается.
+  const out = await env.AI.run(CHAT_MODEL, { messages, max_tokens: maxTokens, temperature, stream });
+  return stream ? { stream: out, provider: 'cloudflare' } : { response: out.response || '', provider: 'cloudflare' };
+}
+
+// Вызов Anthropic Messages API (raw HTTP — воркер без SDK).
+// ВАЖНО: у Claude Opus 4.8 параметр temperature УДАЛЁН (вернёт 400) — не отправляем.
+// system-сообщения вынесены в отдельный top-level параметр system.
+async function aiChatAnthropic(env, messages, { maxTokens, stream }) {
+  const system = messages.filter(m => m.role === 'system').map(m => m.content).join('\n\n');
+  const convo = messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.content }));
+  const body = { model: CLAUDE_MODEL, max_tokens: maxTokens, system, messages: convo, stream: !!stream };
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': env.ANTHROPIC_API_KEY,
+      'anthropic-version': ANTHROPIC_VERSION,
+    },
+    body: JSON.stringify(body),
+  });
+  if (stream) {
+    if (!res.ok) throw new Error(`Anthropic ${res.status}: ${(await res.text()).slice(0, 300)}`);
+    return { stream: res.body, provider: 'anthropic' };
+  }
+  const data = await res.json();
+  if (!res.ok) throw new Error(`Anthropic ${res.status}: ${JSON.stringify(data).slice(0, 300)}`);
+  const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+  return { response: text, provider: 'anthropic' };
+}
+
+// Извлекает текстовый токен из распарсенного data-JSON в зависимости от провайдера.
+function streamToken(provider, obj) {
+  if (provider === 'anthropic') {
+    return (obj.type === 'content_block_delta' && obj.delta && obj.delta.type === 'text_delta')
+      ? (obj.delta.text || '') : '';
+  }
+  return obj.response || ''; // cloudflare
 }
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
@@ -707,10 +752,12 @@ async function handleChat(request, env, ctx) {
   const ragCtx = formatRag(ragChunks);
   const systemPrompt = buildSystemPrompt({ area, lang, liveCtx, ragCtx, isFundQuery, isLawyerMode, isDocGen });
 
-  const aiStream = await aiChat(env,
+  const aiResult = await aiChat(env,
     [{ role: 'system', content: systemPrompt }, ...messages],
     { maxTokens: 2048, temperature: 0.2, stream: true }
   );
+  const aiStream = aiResult.stream;
+  const aiProvider = aiResult.provider;
 
   const msgId = crypto.randomUUID();
   const ragSources = ragChunks.map(c => ({ act: c.act, url: c.url }));
@@ -739,7 +786,7 @@ async function handleChat(request, env, ctx) {
             const data = line.slice(5).trim();
             if (data === '[DONE]') continue;
             try {
-              const tok = sanitizeText(JSON.parse(data).response || '');
+              const tok = sanitizeText(streamToken(aiProvider, JSON.parse(data)));
               if (tok) { fullText += tok; controller.enqueue(encoder.encode(JSON.stringify({ type: 'token', t: tok }) + '\n')); }
             } catch {}
           }
