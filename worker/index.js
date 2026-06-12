@@ -18,7 +18,7 @@ const EMBED_MODEL = '@cf/baai/bge-base-en-v1.5';
 const CHAT_MODEL  = '@cf/meta/llama-3.3-70b-instruct-fp8-fast'; // фолбэк, если нет ANTHROPIC_API_KEY
 // Claude (Anthropic) — основная модель, если задан секрет ANTHROPIC_API_KEY.
 // Можно сменить на 'claude-sonnet-4-6' (дешевле) или 'claude-haiku-4-5' (ещё дешевле) одной строкой.
-const CLAUDE_MODEL = 'claude-opus-4-8';
+const CLAUDE_MODEL = 'claude-sonnet-4-6';
 const ANTHROPIC_VERSION = '2023-06-01';
 
 // ── Полный список актов (название → URL) ──────────────────────────────────────
