@@ -2585,10 +2585,18 @@ async function renderNews() {
     const res = await fetch(WORKER_URL + '/changes');
     const data = await res.json();
     if (data.changes && data.changes.length) {
-      const changeCards = data.changes.map(c => newsCardHtml({
-        date: c.date, badge: 'change', title: `Обновление: ${c.act}`,
-        desc: 'Обнаружено изменение в тексте акта на aifc.kz (автомониторинг).', url: c.url,
-      })).join('');
+      const changeCards = data.changes.map(c => {
+        const displayDate = c.effectiveDate || c.detectedDate || c.date;
+        const dateLabel = c.effectiveDate
+          ? `Вступило в силу: ${c.effectiveDate}`
+          : `Обнаружено системой: ${c.detectedDate || c.date}`;
+        const versionLabel = c.version ? ` · ${c.version}` : '';
+        const title = `Обновление: ${c.act}${versionLabel}`;
+        const desc = c.effectiveDate
+          ? `Изменение вступило в силу ${c.effectiveDate}.${c.version ? ` Редакция: ${c.version}.` : ''} Источник: автомониторинг aifc.kz.`
+          : `Изменение в тексте акта обнаружено системой ${c.detectedDate || c.date}. Точная дата вступления в силу не найдена — проверьте на aifc.kz.`;
+        return newsCardHtml({ date: displayDate, badge: 'change', title, desc, url: c.url });
+      }).join('');
       grid.insertAdjacentHTML('afterbegin', changeCards);
     }
   } catch {}
