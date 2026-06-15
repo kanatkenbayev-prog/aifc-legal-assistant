@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тарифы — AIFC Legal Assistant · aifclex.ai</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Serif+4:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold:#C9A84C; --gold-light:#E8C97A; --navy:#0D1B3E; --navy-light:#1A2D5A;
+    --cream:#FAF7F2; --cream-dark:#F0EBE0; --text:#1A1A2E; --text-muted:#5A5A72;
+    --aifc-blue:#1B4F8A; --border:#DDD5C8; --success:#1A7A4A;
+    --shadow:0 2px 16px rgba(13,27,62,.09); --shadow-lg:0 8px 40px rgba(13,27,62,.15);
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { height:100%; }
+  body { font-family:'Source Serif 4',Georgia,serif; background:var(--cream); color:var(--text); line-height:1.7; display:flex; flex-direction:column; }
+
+  /* Header */
+  header { background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 100%); color:#fff; flex-shrink:0; box-shadow:var(--shadow-lg); }
+  .h-inner { max-width:1100px; margin:0 auto; padding:14px 28px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .logo-area { display:flex; align-items:center; gap:12px; text-decoration:none; color:#fff; }
+  .logo-emblem { width:38px; height:38px; background:linear-gradient(135deg,var(--gold),var(--gold-light)); border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-size:17px; font-weight:700; color:var(--navy); flex-shrink:0; }
+  .logo-text h1 { font-family:'Playfair Display',serif; font-size:15px; font-weight:700; line-height:1.2; }
+  .logo-text p  { font-size:10px; color:var(--gold-light); letter-spacing:.08em; text-transform:uppercase; font-weight:300; }
+  .h-nav { display:flex; align-items:center; gap:14px; }
+  .h-link { color:rgba(255,255,255,.75); text-decoration:none; font-size:13px; transition:color .2s; }
+  .h-link:hover { color:#fff; }
+  .h-btn { padding:7px 16px; font-size:12px; font-family:inherit; font-weight:600; background:var(--gold); color:var(--navy); border:none; border-radius:6px; cursor:pointer; text-decoration:none; transition:opacity .2s; }
+  .h-btn:hover { opacity:.9; }
+
+  /* Hero */
+  .hero { text-align:center; padding:52px 20px 36px; }
+  .hero-tag { display:inline-block; background:rgba(201,168,76,.15); border:1px solid rgba(201,168,76,.4); color:#9B7B2E; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; border-radius:20px; padding:4px 14px; margin-bottom:16px; }
+  .hero h2 { font-family:'Playfair Display',serif; font-size:34px; color:var(--navy); line-height:1.25; margin-bottom:12px; }
+  .hero p { font-size:14.5px; color:var(--text-muted); max-width:520px; margin:0 auto 6px; }
+  .hero-note { font-size:12px; color:var(--text-muted); margin-top:8px; }
+  .hero-note a { color:var(--aifc-blue); }
+
+  /* Plans grid */
+  .plans-wrap { max-width:1000px; margin:0 auto; padding:0 20px 48px; }
+  .plans-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  .plan { background:#fff; border:1.5px solid var(--border); border-radius:16px; padding:28px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; position:relative; transition:transform .2s,box-shadow .2s; }
+  .plan:hover { transform:translateY(-3px); box-shadow:var(--shadow-lg); }
+  .plan.featured { border-color:var(--gold); border-width:2px; }
+  .plan-badge { position:absolute; top:-13px; left:50%; transform:translateX(-50%); background:var(--gold); color:var(--navy); font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; padding:4px 14px; border-radius:20px; white-space:nowrap; }
+  .plan-name { font-family:'Playfair Display',serif; font-size:20px; color:var(--navy); margin-bottom:4px; }
+  .plan-desc { font-size:12.5px; color:var(--text-muted); margin-bottom:20px; }
+  .plan-price { margin-bottom:4px; }
+  .plan-price .amount { font-family:'Playfair Display',serif; font-size:36px; font-weight:700; color:var(--navy); }
+  .plan-price .currency { font-size:16px; color:var(--text-muted); margin-left:2px; }
+  .plan-period { font-size:12px; color:var(--text-muted); margin-bottom:22px; }
+  .plan-credits { display:inline-flex; align-items:center; gap:6px; background:rgba(201,168,76,.12); border:1px solid rgba(201,168,76,.3); border-radius:8px; padding:7px 12px; font-size:13px; font-weight:600; color:#9B7B2E; margin-bottom:22px; }
+  .plan-features { list-style:none; display:flex; flex-direction:column; gap:9px; flex:1; margin-bottom:28px; }
+  .plan-features li { display:flex; align-items:flex-start; gap:8px; font-size:13px; color:var(--text); line-height:1.45; }
+  .plan-features li::before { content:'✓'; color:var(--success); font-weight:700; flex-shrink:0; margin-top:1px; }
+  .plan-features li.no::before { content:'—'; color:var(--text-muted); }
+  .plan-features li.no { color:var(--text-muted); }
+  .plan-cta { display:block; text-align:center; padding:12px 20px; font-family:inherit; font-size:14px; font-weight:600; border-radius:10px; cursor:pointer; transition:all .2s; text-decoration:none; }
+  .plan-cta.primary { background:linear-gradient(135deg,var(--navy),var(--navy-light)); color:#fff; border:none; box-shadow:0 3px 12px rgba(13,27,62,.25); }
+  .plan-cta.primary:hover { box-shadow:0 5px 20px rgba(13,27,62,.35); transform:translateY(-1px); }
+  .plan-cta.secondary { background:var(--cream); color:var(--navy); border:1.5px solid var(--border); }
+  .plan-cta.secondary:hover { border-color:var(--gold); background:var(--cream-dark); }
+
+  /* Compare note */
+  .compare-note { text-align:center; font-size:12.5px; color:var(--text-muted); margin:-24px auto 40px; max-width:600px; padding:0 20px; }
+  .compare-note a { color:var(--aifc-blue); }
+
+  /* What is credit */
+  .credit-explain { max-width:760px; margin:0 auto 40px; padding:0 20px; }
+  .credit-box { background:#fff; border:1px solid var(--border); border-radius:12px; padding:22px 26px; box-shadow:var(--shadow); }
+  .credit-box h3 { font-family:'Playfair Display',serif; color:var(--navy); font-size:17px; margin-bottom:10px; padding-bottom:8px; border-bottom:2px solid var(--gold); }
+  .credit-box p { font-size:13.5px; color:var(--text-muted); margin-bottom:6px; }
+  .credit-box strong { color:var(--text); }
+
+  /* FAQ */
+  .faq-wrap { max-width:760px; margin:0 auto 60px; padding:0 20px; }
+  .faq-wrap h2 { font-family:'Playfair Display',serif; color:var(--navy); font-size:24px; margin-bottom:20px; text-align:center; }
+  .faq-item { border:1px solid var(--border); border-radius:10px; margin-bottom:10px; background:#fff; overflow:hidden; }
+  .faq-q { width:100%; text-align:left; padding:16px 20px; font-family:inherit; font-size:14px; font-weight:600; color:var(--navy); background:none; border:none; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .faq-q::after { content:'﹢'; font-size:18px; flex-shrink:0; color:var(--gold); transition:transform .2s; }
+  .faq-item.open .faq-q::after { transform:rotate(45deg); }
+  .faq-a { display:none; padding:0 20px 16px; font-size:13.5px; color:var(--text-muted); line-height:1.65; }
+  .faq-item.open .faq-a { display:block; }
+  .faq-a a { color:var(--aifc-blue); }
+
+  /* Disclaimer strip */
+  .disclaimer-strip { background:rgba(13,27,62,.04); border-top:1px solid var(--border); padding:16px 28px; text-align:center; font-size:11.5px; color:var(--text-muted); line-height:1.6; }
+  .disclaimer-strip a { color:var(--aifc-blue); }
+
+  /* Footer */
+  footer { background:#fff; border-top:1px solid var(--border); padding:16px 28px; text-align:center; font-size:11.5px; color:var(--text-muted); margin-top:auto; }
+  footer a { color:var(--aifc-blue); text-decoration:none; }
+  footer a:hover { text-decoration:underline; }
+
+  /* Responsive */
+  @media (max-width:780px) {
+    .plans-grid { grid-template-columns:1fr; max-width:400px; margin:0 auto; }
+    .hero h2 { font-size:26px; }
+    .h-nav .h-link { display:none; }
+  }
+  @media (max-width:480px) {
+    .h-inner { padding:10px 14px; }
+    .logo-text p { display:none; }
+    .hero { padding:36px 16px 24px; }
+    .plans-wrap { padding:0 14px 36px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-inner">
+    <a class="logo-area" href="/">
+      <div class="logo-emblem">⚖</div>
+      <div class="logo-text">
+        <h1>AIFC Legal Assistant</h1>
+        <p>aifclex.ai</p>
+      </div>
+    </a>
+    <nav class="h-nav">
+      <a class="h-link" href="/">Ассистент</a>
+      <a class="h-link" href="/legal.html">Оферта</a>
+      <a class="h-btn" href="/">Попробовать</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-tag">Тарифы</div>
+  <h2>Прозрачная оплата.<br>Платите только за использование.</h2>
+  <p>Кредиты не сгорают в конце месяца. Пополняйте когда нужно — работайте в своём темпе.</p>
+  <p class="hero-note">Вопросы? Пишите на <a href="mailto:info@aifclex.ai">info@aifclex.ai</a></p>
+</section>
+
+<div class="plans-wrap">
+  <div class="plans-grid">
+
+    <!-- Старт -->
+    <div class="plan">
+      <div class="plan-name">Старт</div>
+      <div class="plan-desc">Для разовых вопросов и знакомства с сервисом</div>
+      <div class="plan-price"><span class="amount">1&nbsp;990</span><span class="currency">₸</span></div>
+      <div class="plan-period">разово · без подписки</div>
+      <div class="plan-credits">🪙 15 кредитов</div>
+      <ul class="plan-features">
+        <li>15 вопросов к ИИ-ассистенту</li>
+        <li>Поиск по всей базе актов AIFC</li>
+        <li>Экспорт ответов в PDF</li>
+        <li>Ссылки на первоисточники</li>
+        <li class="no">Шаблоны документов</li>
+        <li class="no">Приоритетная поддержка</li>
+      </ul>
+      <a href="#ioka-start" class="plan-cta secondary" onclick="connectPlan('start')">Подключить</a>
+    </div>
+
+    <!-- Профессионал (featured) -->
+    <div class="plan featured">
+      <div class="plan-badge">Популярный</div>
+      <div class="plan-name">Профессионал</div>
+      <div class="plan-desc">Для юристов и консультантов, работающих с AIFC регулярно</div>
+      <div class="plan-price"><span class="amount">5&nbsp;000</span><span class="currency">₸</span></div>
+      <div class="plan-period">разово · без подписки</div>
+      <div class="plan-credits">🪙 50 кредитов</div>
+      <ul class="plan-features">
+        <li>50 вопросов к ИИ-ассистенту</li>
+        <li>Поиск по всей базе актов AIFC</li>
+        <li>Экспорт ответов в PDF</li>
+        <li>Ссылки на первоисточники</li>
+        <li>Шаблоны документов AIFC</li>
+        <li class="no">Приоритетная поддержка</li>
+      </ul>
+      <a href="#ioka-pro" class="plan-cta primary" onclick="connectPlan('pro')">Подключить</a>
+    </div>
+
+    <!-- Команда -->
+    <div class="plan">
+      <div class="plan-name">Команда</div>
+      <div class="plan-desc">Для юридических команд и частых пользователей</div>
+      <div class="plan-price"><span class="amount">12&nbsp;000</span><span class="currency">₸</span></div>
+      <div class="plan-period">разово · без подписки</div>
+      <div class="plan-credits">🪙 150 кредитов</div>
+      <ul class="plan-features">
+        <li>150 вопросов к ИИ-ассистенту</li>
+        <li>Поиск по всей базе актов AIFC</li>
+        <li>Экспорт ответов в PDF</li>
+        <li>Ссылки на первоисточники</li>
+        <li>Шаблоны документов AIFC</li>
+        <li>Email-поддержка (ответ до 24 ч)</li>
+      </ul>
+      <a href="#ioka-team" class="plan-cta secondary" onclick="connectPlan('team')">Подключить</a>
+    </div>
+
+  </div>
+</div>
+
+<p class="compare-note">
+  Кредиты не сгорают. Нет автопродления. Возврат неиспользованного остатка в течение 14 дней —
+  подробнее в <a href="/legal.html">Пользовательском соглашении</a>.
+</p>
+
+<!-- Что такое кредит -->
+<div class="credit-explain">
+  <div class="credit-box">
+    <h3>Что такое кредит?</h3>
+    <p><strong>1 кредит = 1 вопрос</strong> к ИИ-ассистенту AIFC Legal Assistant.</p>
+    <p>Каждый раз, когда вы отправляете запрос и получаете ответ — списывается 1 кредит. Уточняющие сообщения в рамках одного диалога также расходуют кредиты.</p>
+    <p>Кредиты <strong>не сгорают</strong> в конце месяца и хранятся до полного использования.</p>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq-wrap">
+  <h2>Частые вопросы</h2>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">Что такое кредит и как он расходуется?</button>
+    <div class="faq-a">
+      1 кредит = 1 отправленный вопрос к ИИ-ассистенту. После получения ответа кредит списывается. Кредиты хранятся бессрочно и не сгорают в конце месяца.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">Что если кредиты закончились?</button>
+    <div class="faq-a">
+      Сервис уведомит вас о том, что баланс исчерпан. Вы сможете пополнить кредиты в любой момент, выбрав любой тариф. Вопросы будут доступны сразу после оплаты.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">Как отменить подписку или автопродление?</button>
+    <div class="faq-a">
+      Автопродления нет — вы платите только один раз за пакет кредитов. Никаких скрытых списаний. Когда кредиты закончатся, следующий платёж произойдёт только по вашей инициативе.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">Являются ли ответы ИИ юридической консультацией?</button>
+    <div class="faq-a">
+      Нет. AIFC Legal Assistant — инструмент правовой аналитики на основе ИИ. Ответы не являются официальным юридическим заключением (Legal Opinion) и не заменяют консультацию лицензированного юриста. Для совершения юридически значимых действий обращайтесь к Licensed Legal Practitioner AIFC.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">Как получить возврат средств?</button>
+    <div class="faq-a">
+      Возврат неиспользованного остатка возможен в течение 14 дней с момента оплаты, если использовано не более 50% кредитов из пакета. Возврат предоставляется однократно. Для запроса напишите на <a href="mailto:refund@aifclex.ai">refund@aifclex.ai</a> с темой «Возврат» и укажите email аккаунта.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">Какие способы оплаты принимаются?</button>
+    <div class="faq-a">
+      Оплата принимается через платёжный сервис <strong>ioka</strong> — банковские карты Visa, Mastercard, а также казахстанские карты. Платежи обрабатываются в тенге (₸).
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">Мои данные и запросы в безопасности?</button>
+    <div class="faq-a">
+      Да. Мы не передаём ваши запросы третьим лицам и не используем их для обучения ИИ-моделей (согласно условиям Anthropic). Данные хранятся на серверах Cloudflare (США/ЕС) и Supabase. Подробнее — в <a href="/legal.html#privacy">Политике конфиденциальности</a>.
+    </div>
+  </div>
+
+</div>
+
+<div class="disclaimer-strip">
+  AIFC Legal Assistant — ИИ-инструмент для правовой аналитики. Ответы не являются юридическим заключением.<br>
+  ИП «Vibe MKK» · ИИН 780113301915 · <a href="/legal.html">Пользовательское соглашение</a> · <a href="/legal.html#privacy">Политика конфиденциальности</a>
+</div>
+
+<footer>
+  © 2026 ИП «Vibe MKK» ·
+  <a href="/legal.html">Пользовательское соглашение</a> ·
+  <a href="/legal.html#privacy">Политика конфиденциальности</a> ·
+  <a href="mailto:info@aifclex.ai">info@aifclex.ai</a>
+</footer>
+
+<script>
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+function connectPlan(plan) {
+  // TODO: заменить на реальные ссылки ioka после подключения платёжного шлюза
+  alert('Оплата через ioka будет доступна при официальном запуске сервиса.\n\nВопросы: info@aifclex.ai');
+}
+</script>
+</body>
+</html>
