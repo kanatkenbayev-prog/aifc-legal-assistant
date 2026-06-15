@@ -337,6 +337,13 @@
   }
   .send-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(13,27,62,.35); }
   .send-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+  .pdf-btn {
+    height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--gold);
+    background: rgba(201,168,76,.1); color: var(--navy); font-size: 12px; font-weight: 600;
+    cursor: pointer; flex-shrink: 0; transition: all .2s; white-space: nowrap;
+    font-family: inherit;
+  }
+  .pdf-btn:hover { background: rgba(201,168,76,.22); transform: translateY(-1px); }
   .input-meta { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--text-muted); }
   .input-hint { font-style: italic; }
   .input-hint strong { font-style: normal; }
@@ -630,6 +637,27 @@
   .paywall-btn.primary { background:var(--gold); color:var(--navy); }
   .paywall-btn.ghost   { background:var(--cream); color:var(--text-muted); font-weight:400; }
   .ioka-soon { font-size:12px; color:var(--text-muted); margin-top:8px; padding:8px 10px; background:var(--cream); border-radius:6px; }
+  /* ── Print / PDF export ────────────────────────────────────────────── */
+  @media print {
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #fff !important; font-family: 'Source Serif 4', Georgia, serif; }
+    .sidebar, .tab-bar, .input-area, .pdf-btn, .send-btn, .disclaimer,
+    .input-meta, .verify-summary, .rating-row, #welcome, .welcome,
+    header, footer, .user-widget, .auth-modal, .paywall-modal { display: none !important; }
+    .app-shell, .main-layout, .chat-area { all: unset; display: block; }
+    .messages { all: unset; display: block; padding: 0; }
+    .print-header { display: block !important; }
+    .msg.assistant .bubble {
+      background: #fff !important; border: none !important; box-shadow: none !important;
+      padding: 0 !important; font-size: 12pt; line-height: 1.7; color: #111;
+    }
+    .msg.user { display: none; }
+    a { color: #1B4F8A; text-decoration: underline; }
+    h1,h2,h3,strong { color: #0D1B3E; }
+    .bubble a[href]:after { content: ''; }
+    @page { margin: 22mm 20mm; size: A4; }
+  }
+  .print-header { display: none; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -739,20 +767,30 @@
         </div>
 
         <div class="card">
-          <div class="card-title" id="ct-starters">💡 Начать с вопроса</div>
+          <div class="card-title" id="ct-starters">💡 Шаблоны запросов</div>
           <div class="starter-list">
-            <button class="starter-btn" id="sb-1" onclick="sendStarter(this.textContent)">Регистрация финансовой организации в МФЦА</button>
-            <button class="starter-btn" id="sb-2" onclick="sendStarter(this.textContent)">Налоговые льготы для участников МФЦА</button>
-            <button class="starter-btn" id="sb-3" onclick="sendStarter(this.textContent)">Листинг ценных бумаг на AIX</button>
-            <button class="starter-btn" id="sb-4" onclick="sendStarter(this.textContent)">Трудовые отношения в МФЦА</button>
-            <button class="starter-btn" id="sb-5" onclick="sendStarter(this.textContent)">Требования AML/KYC в МФЦА</button>
-            <button class="starter-btn" id="sb-6" onclick="sendStarter(this.textContent)">Разрешение споров в суде МФЦА</button>
+            <button class="starter-btn" id="sb-1" onclick="sendStarter(this.textContent)">Проверить структуру Exempt Fund на соответствие CIS Rules — требования к управляющему, инвесторам и раскрытию</button>
+            <button class="starter-btn" id="sb-2" onclick="sendStarter(this.textContent)">Составить чек-лист подтверждения Substantial Presence (CIGA) для получения льгот КПН 0% и НДС 0%</button>
+            <button class="starter-btn" id="sb-3" onclick="sendStarter(this.textContent)">Рассчитать налоговые последствия выплаты дивидендов из ТОО РК в Private Company МФЦА и далее физлицу-нерезиденту</button>
+            <button class="starter-btn" id="sb-4" onclick="sendStarter(this.textContent)">Какие лицензии AFSA нужны для запуска платформы цифровых активов (Digital Asset Activities) в МФЦА?</button>
+            <button class="starter-btn" id="sb-5" onclick="sendStarter(this.textContent)">Сравнить организационно-правовые формы: Private Company vs LLP vs Foundation для холдинговой структуры в МФЦА</button>
+            <button class="starter-btn" id="sb-6" onclick="sendStarter(this.textContent)">Какие требования AML/KYC применяются к управляющей компании фонда в МФЦА — Due Diligence и MLRO</button>
           </div>
         </div>
       </aside>
 
       <!-- Chat -->
       <div class="chat-area">
+        <div class="print-header" style="border-bottom:2px solid #C9A84C;padding-bottom:12px;margin-bottom:20px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:22px">⚖️</span>
+            <div>
+              <div style="font-size:16pt;font-weight:700;color:#0D1B3E">AIFC Legal Assistant</div>
+              <div style="font-size:9pt;color:#5A5A72">aifclex.ai · ИП «Vibe MKK» · <span id="printDate"></span></div>
+            </div>
+          </div>
+          <div style="margin-top:8px;font-size:8pt;color:#888;font-style:italic">Ответы носят информационный характер и не являются юридическим заключением (Legal Opinion). Для официальной консультации обращайтесь к лицензированному Legal Adviser AIFC.</div>
+        </div>
         <div class="messages" id="messages">
           <div class="welcome" id="welcome">
             <div class="welcome-icon">⚖️</div>
@@ -785,6 +823,7 @@
               <textarea id="msgInput" rows="1" placeholder="Введите вопрос или уточнение..."></textarea>
             </div>
             <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Отправить (Enter)">➤</button>
+            <button class="pdf-btn" id="pdfBtn" onclick="exportPDF()" title="Скачать PDF" style="display:none">⬇ PDF</button>
           </div>
           <div class="input-meta">
             <span class="input-hint"><span id="areaHint">Область:</span> <strong id="areaLabel">Корпоративное право</strong> · <kbd>Enter</kbd> <span id="enterHint">— отправить</span></span>
@@ -1381,12 +1420,12 @@ const UI_STRINGS = {
     'ab-corporate': 'Корпоративное', 'ab-financial': 'Финансовое', 'ab-tax': 'Налоговое',
     'ab-employment': 'Трудовое', 'ab-disputes': 'Споры',
     'ss-aifc': 'Онлайн', 'ss-adilet': 'Онлайн', 'ss-publicreg': 'Онлайн', 'ss-orderly': 'Онлайн',
-    'sb-1': 'Регистрация финансовой организации в МФЦА',
-    'sb-2': 'Налоговые льготы для участников МФЦА',
-    'sb-3': 'Листинг ценных бумаг на AIX',
-    'sb-4': 'Трудовые отношения в МФЦА',
-    'sb-5': 'Требования AML/KYC в МФЦА',
-    'sb-6': 'Разрешение споров в суде МФЦА',
+    'sb-1': 'Проверить структуру Exempt Fund на соответствие CIS Rules — требования к управляющему, инвесторам и раскрытию',
+    'sb-2': 'Составить чек-лист подтверждения Substantial Presence (CIGA) для получения льгот КПН 0% и НДС 0%',
+    'sb-3': 'Рассчитать налоговые последствия выплаты дивидендов из ТОО РК в Private Company МФЦА и далее физлицу-нерезиденту',
+    'sb-4': 'Какие лицензии AFSA нужны для запуска платформы цифровых активов (Digital Asset Activities) в МФЦА?',
+    'sb-5': 'Сравнить организационно-правовые формы: Private Company vs LLP vs Foundation для холдинговой структуры в МФЦА',
+    'sb-6': 'Какие требования AML/KYC применяются к управляющей компании фонда в МФЦА — Due Diligence и MLRO',
     welcomeH: 'МФЦА Правовой Ассистент',
     welcomeP: 'Задайте вопрос по законодательству МФЦА или Республики Казахстан. Я уточню детали и дам структурированную консультацию со ссылками на нормативные акты.',
     'wc-1': 'Как зарегистрировать компанию в МФЦА?',
@@ -1412,12 +1451,12 @@ const UI_STRINGS = {
     'ab-corporate': 'Corporate', 'ab-financial': 'Financial', 'ab-tax': 'Tax',
     'ab-employment': 'Employment', 'ab-disputes': 'Disputes',
     'ss-aifc': 'Online', 'ss-adilet': 'Online', 'ss-publicreg': 'Online', 'ss-orderly': 'Online',
-    'sb-1': 'Registering a financial firm in AIFC',
-    'sb-2': 'Tax exemptions for AIFC participants',
-    'sb-3': 'Securities listing on AIX',
-    'sb-4': 'Employment relations in AIFC',
-    'sb-5': 'AML/KYC requirements in AIFC',
-    'sb-6': 'Dispute resolution in AIFC Court',
+    'sb-1': 'Review Exempt Fund structure for CIS Rules compliance — manager, investor and disclosure requirements',
+    'sb-2': 'Create a Substantial Presence (CIGA) checklist for CIT 0% and VAT 0% tax exemptions',
+    'sb-3': 'Analyse tax consequences of dividend flow from RK LLP to AIFC Private Company to non-resident individual',
+    'sb-4': 'What AFSA licences are required to launch a Digital Asset Activities platform in AIFC?',
+    'sb-5': 'Compare entity types: Private Company vs LLP vs Foundation for a holding structure in AIFC',
+    'sb-6': 'AML/KYC requirements for an AIFC fund manager — Customer Due Diligence and MLRO obligations',
     welcomeH: 'AIFC Legal Assistant',
     welcomeP: 'Ask a question about AIFC law or the legislation of Kazakhstan. I will clarify the details and provide a structured overview with references to applicable regulations.',
     'wc-1': 'How to register a company in AIFC?',
@@ -1563,6 +1602,18 @@ function newChat() {
       <button class="welcome-chip" onclick="sendStarter(this.textContent)">Требования AML/KYC для банков МФЦА</button>
     </div>
   </div>`;
+}
+
+function exportPDF() {
+  document.getElementById('printDate').textContent = new Date().toLocaleDateString('ru-RU', { day:'2-digit', month:'long', year:'numeric' });
+  window.print();
+}
+
+function updatePdfBtn() {
+  const btn = document.getElementById('pdfBtn');
+  if (!btn) return;
+  const hasAssistantMsg = document.querySelector('.msg.assistant');
+  btn.style.display = hasAssistantMsg ? '' : 'none';
 }
 
 function sendStarter(text) {
@@ -1785,6 +1836,7 @@ function finalizeAiBubble(ai, rawText, meta, linkStatus, brokenCount) {
     document.getElementById('messages').appendChild(row);
   }
   scrollToBottom();
+  updatePdfBtn();
 }
 
 function scrollToBottom() {
