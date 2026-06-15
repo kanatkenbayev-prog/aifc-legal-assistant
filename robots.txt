@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /stats
+Disallow: /analyze
+
+Sitemap: https://aifclex.ai/sitemap.xml
