@@ -598,7 +598,7 @@
     <div class="logo-area">
       <div class="logo-emblem">А</div>
       <div class="logo-text">
-        <h1>МФЦА Правовой Ассистент</h1>
+        <h1 id="siteTitle">МФЦА Правовой Ассистент</h1>
         <p>AIFC Legal Assistant · AI-powered</p>
       </div>
     </div>
@@ -609,18 +609,18 @@
         <button class="lang-btn"        id="btn-en" onclick="setLang('en')">ENG</button>
       </div>
       <button class="header-btn" onclick="exportPdf()" title="Сохранить консультацию как PDF">⬇ PDF</button>
-      <button class="header-btn" onclick="newChat()">＋ Новый чат</button>
+      <button class="header-btn" id="newChatBtn" onclick="newChat()">＋ Новый чат</button>
     </div>
   </div>
 </header>
 
 <div class="tabs-bar">
   <div class="tabs-inner">
-    <button class="tab active" data-page="chat"     onclick="showPage('chat',this)">💬 Консультация</button>
-    <button class="tab"        data-page="database" onclick="showPage('database',this)">📚 База актов</button>
-    <button class="tab"        data-page="tools"    onclick="showPage('tools',this)">🧰 Инструменты</button>
-    <button class="tab"        data-page="docs"     onclick="showPage('docs',this)">📋 Учр. документы</button>
-    <button class="tab"        data-page="news"     onclick="showPage('news',this)">📰 Новости</button>
+    <button class="tab active" id="tab-chat"     data-page="chat"     onclick="showPage('chat',this)">💬 Консультация</button>
+    <button class="tab"        id="tab-database" data-page="database" onclick="showPage('database',this)">📚 База актов</button>
+    <button class="tab"        id="tab-tools"    data-page="tools"    onclick="showPage('tools',this)">🧰 Инструменты</button>
+    <button class="tab"        id="tab-docs"     data-page="docs"     onclick="showPage('docs',this)">📋 Учр. документы</button>
+    <button class="tab"        id="tab-news"     data-page="news"     onclick="showPage('news',this)">📰 Новости</button>
   </div>
 </div>
 
@@ -633,36 +633,36 @@
       <!-- Sidebar -->
       <aside class="sidebar">
         <div class="card">
-          <div class="card-title">⚖️ Область права</div>
+          <div class="card-title" id="ct-area">⚖️ Область права</div>
           <div class="area-grid">
-            <button class="area-btn active" onclick="setArea(this,'Корпоративное право')">Корпоративное</button>
-            <button class="area-btn" onclick="setArea(this,'Финансовые услуги')">Финансовое</button>
-            <button class="area-btn" onclick="setArea(this,'Налоговое право')">Налоговое</button>
-            <button class="area-btn" onclick="setArea(this,'Трудовое право')">Трудовое</button>
-            <button class="area-btn" onclick="setArea(this,'Разрешение споров')">Споры</button>
+            <button class="area-btn active" id="ab-corporate" onclick="setArea(this,'Корпоративное право')">Корпоративное</button>
+            <button class="area-btn" id="ab-financial" onclick="setArea(this,'Финансовые услуги')">Финансовое</button>
+            <button class="area-btn" id="ab-tax" onclick="setArea(this,'Налоговое право')">Налоговое</button>
+            <button class="area-btn" id="ab-employment" onclick="setArea(this,'Трудовое право')">Трудовое</button>
+            <button class="area-btn" id="ab-disputes" onclick="setArea(this,'Разрешение споров')">Споры</button>
             <button class="area-btn" onclick="setArea(this,'AML/KYC')">AML/KYC</button>
           </div>
         </div>
 
         <div class="card">
-          <div class="card-title">🔗 Источники</div>
+          <div class="card-title" id="ct-sources">🔗 Источники</div>
           <div class="source-list">
-            <div class="source-item"><div class="dot green"></div><span class="source-name">aifc.kz</span><span class="source-ok">Онлайн</span></div>
-            <div class="source-item"><div class="dot green"></div><span class="source-name">adilet.zan.kz</span><span class="source-ok">Онлайн</span></div>
-            <div class="source-item"><div class="dot green"></div><span class="source-name">publicreg.myafsa.com</span><span class="source-ok">Онлайн</span></div>
-            <div class="source-item"><div class="dot yellow"></div><span class="source-name">orderly.myafsa.com</span><span class="source-warn">Авторизация</span></div>
+            <div class="source-item"><div class="dot green"></div><span class="source-name">aifc.kz</span><span id="ss-aifc" class="source-ok">Онлайн</span></div>
+            <div class="source-item"><div class="dot green"></div><span class="source-name">adilet.zan.kz</span><span id="ss-adilet" class="source-ok">Онлайн</span></div>
+            <div class="source-item"><div class="dot green"></div><span class="source-name">publicreg.myafsa.com</span><span id="ss-publicreg" class="source-ok">Онлайн</span></div>
+            <div class="source-item"><div class="dot yellow"></div><span class="source-name">orderly.myafsa.com</span><span id="ss-orderly" class="source-warn">Авторизация</span></div>
           </div>
         </div>
 
         <div class="card">
-          <div class="card-title">💡 Начать с вопроса</div>
+          <div class="card-title" id="ct-starters">💡 Начать с вопроса</div>
           <div class="starter-list">
-            <button class="starter-btn" onclick="sendStarter(this.textContent)">Регистрация финансовой организации в МФЦА</button>
-            <button class="starter-btn" onclick="sendStarter(this.textContent)">Налоговые льготы для участников МФЦА</button>
-            <button class="starter-btn" onclick="sendStarter(this.textContent)">Листинг ценных бумаг на AIX</button>
-            <button class="starter-btn" onclick="sendStarter(this.textContent)">Трудовые отношения в МФЦА</button>
-            <button class="starter-btn" onclick="sendStarter(this.textContent)">Требования AML/KYC в МФЦА</button>
-            <button class="starter-btn" onclick="sendStarter(this.textContent)">Разрешение споров в суде МФЦА</button>
+            <button class="starter-btn" id="sb-1" onclick="sendStarter(this.textContent)">Регистрация финансовой организации в МФЦА</button>
+            <button class="starter-btn" id="sb-2" onclick="sendStarter(this.textContent)">Налоговые льготы для участников МФЦА</button>
+            <button class="starter-btn" id="sb-3" onclick="sendStarter(this.textContent)">Листинг ценных бумаг на AIX</button>
+            <button class="starter-btn" id="sb-4" onclick="sendStarter(this.textContent)">Трудовые отношения в МФЦА</button>
+            <button class="starter-btn" id="sb-5" onclick="sendStarter(this.textContent)">Требования AML/KYC в МФЦА</button>
+            <button class="starter-btn" id="sb-6" onclick="sendStarter(this.textContent)">Разрешение споров в суде МФЦА</button>
           </div>
         </div>
       </aside>
@@ -672,13 +672,13 @@
         <div class="messages" id="messages">
           <div class="welcome" id="welcome">
             <div class="welcome-icon">⚖️</div>
-            <h2>МФЦА Правовой Ассистент</h2>
-            <p>Задайте вопрос по законодательству МФЦА или Республики Казахстан. Я уточню детали и дам структурированную консультацию со ссылками на нормативные акты.</p>
+            <h2 id="welcomeH">МФЦА Правовой Ассистент</h2>
+            <p id="welcomeP">Задайте вопрос по законодательству МФЦА или Республики Казахстан. Я уточню детали и дам структурированную консультацию со ссылками на нормативные акты.</p>
             <div class="welcome-chips">
-              <button class="welcome-chip" onclick="sendStarter(this.textContent)">Как зарегистрировать компанию в МФЦА?</button>
-              <button class="welcome-chip" onclick="sendStarter(this.textContent)">Какие налоговые льготы есть в МФЦА?</button>
-              <button class="welcome-chip" onclick="sendStarter(this.textContent)">Как работает суд МФЦА?</button>
-              <button class="welcome-chip" onclick="sendStarter(this.textContent)">Требования AML/KYC для банков МФЦА</button>
+              <button class="welcome-chip" id="wc-1" onclick="sendStarter(this.textContent)">Как зарегистрировать компанию в МФЦА?</button>
+              <button class="welcome-chip" id="wc-2" onclick="sendStarter(this.textContent)">Какие налоговые льготы есть в МФЦА?</button>
+              <button class="welcome-chip" id="wc-3" onclick="sendStarter(this.textContent)">Как работает суд МФЦА?</button>
+              <button class="welcome-chip" id="wc-4" onclick="sendStarter(this.textContent)">Требования AML/KYC для банков МФЦА</button>
             </div>
           </div>
         </div>
@@ -703,7 +703,7 @@
             <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Отправить (Enter)">➤</button>
           </div>
           <div class="input-meta">
-            <span class="input-hint">Область: <strong id="areaLabel">Корпоративное право</strong> · <kbd>Enter</kbd> — отправить</span>
+            <span class="input-hint"><span id="areaHint">Область:</span> <strong id="areaLabel">Корпоративное право</strong> · <kbd>Enter</kbd> <span id="enterHint">— отправить</span></span>
             <span class="powered">⚡ <span>Claude · RAG · Cloudflare</span></span>
           </div>
           <div class="disclaimer"><span id="shortDisclaimer">⚠️ Информация AIFC Legal Assistant носит исключительно общий справочный характер и не является юридической консультацией. Для принятия решений обращайтесь к лицензированному Legal Adviser AIFC.</span> <a onclick="openDisclaimer()" id="disclaimerLink">Подробнее</a><span id="privacySep"> · <a onclick="openPrivacy()" id="privacyLink">Политика конфиденциальности</a> · <a onclick="openOffer()" id="offerLink">Публичная оферта</a></span></div>
@@ -1089,6 +1089,94 @@ let chatHistory  = []; // [{role:'user'|'assistant', content:'...'}]
 let isLoading    = false;
 let activeDbCat  = 'Все';
 
+// ── i18n ──────────────────────────────────────
+const UI_STRINGS = {
+  ru: {
+    siteTitle: 'МФЦА Правовой Ассистент',
+    newChatBtn: '＋ Новый чат',
+    'tab-chat': '💬 Консультация', 'tab-database': '📚 База актов',
+    'tab-tools': '🧰 Инструменты', 'tab-docs': '📋 Учр. документы', 'tab-news': '📰 Новости',
+    'ct-area': '⚖️ Область права', 'ct-sources': '🔗 Источники', 'ct-starters': '💡 Начать с вопроса',
+    'ab-corporate': 'Корпоративное', 'ab-financial': 'Финансовое', 'ab-tax': 'Налоговое',
+    'ab-employment': 'Трудовое', 'ab-disputes': 'Споры',
+    'ss-aifc': 'Онлайн', 'ss-adilet': 'Онлайн', 'ss-publicreg': 'Онлайн', 'ss-orderly': 'Авторизация',
+    'sb-1': 'Регистрация финансовой организации в МФЦА',
+    'sb-2': 'Налоговые льготы для участников МФЦА',
+    'sb-3': 'Листинг ценных бумаг на AIX',
+    'sb-4': 'Трудовые отношения в МФЦА',
+    'sb-5': 'Требования AML/KYC в МФЦА',
+    'sb-6': 'Разрешение споров в суде МФЦА',
+    welcomeH: 'МФЦА Правовой Ассистент',
+    welcomeP: 'Задайте вопрос по законодательству МФЦА или Республики Казахстан. Я уточню детали и дам структурированную консультацию со ссылками на нормативные акты.',
+    'wc-1': 'Как зарегистрировать компанию в МФЦА?',
+    'wc-2': 'Какие налоговые льготы есть в МФЦА?',
+    'wc-3': 'Как работает суд МФЦА?',
+    'wc-4': 'Требования AML/KYC для банков МФЦА',
+    msgInputPh: 'Введите вопрос или уточнение...',
+    areaHint: 'Область:', enterHint: '— отправить',
+    disclaimerLink: 'Подробнее', privacyLink: 'Политика конфиденциальности', offerLink: 'Публичная оферта',
+    dbSearchPh: '🔍 Поиск по названию акта...',
+    areaNames: {
+      'Корпоративное право': 'Корпоративное право', 'Финансовые услуги': 'Финансовые услуги',
+      'Налоговое право': 'Налоговое право', 'Трудовое право': 'Трудовое право',
+      'Разрешение споров': 'Разрешение споров', 'AML/KYC': 'AML/KYC',
+    },
+  },
+  en: {
+    siteTitle: 'AIFC Legal Assistant',
+    newChatBtn: '＋ New Chat',
+    'tab-chat': '💬 Consultation', 'tab-database': '📚 Acts Database',
+    'tab-tools': '🧰 Tools', 'tab-docs': '📋 Corp. Documents', 'tab-news': '📰 News',
+    'ct-area': '⚖️ Practice Area', 'ct-sources': '🔗 Sources', 'ct-starters': '💡 Start with',
+    'ab-corporate': 'Corporate', 'ab-financial': 'Financial', 'ab-tax': 'Tax',
+    'ab-employment': 'Employment', 'ab-disputes': 'Disputes',
+    'ss-aifc': 'Online', 'ss-adilet': 'Online', 'ss-publicreg': 'Online', 'ss-orderly': 'Auth Required',
+    'sb-1': 'Registering a financial firm in AIFC',
+    'sb-2': 'Tax exemptions for AIFC participants',
+    'sb-3': 'Securities listing on AIX',
+    'sb-4': 'Employment relations in AIFC',
+    'sb-5': 'AML/KYC requirements in AIFC',
+    'sb-6': 'Dispute resolution in AIFC Court',
+    welcomeH: 'AIFC Legal Assistant',
+    welcomeP: 'Ask a question about AIFC law or the legislation of Kazakhstan. I will clarify the details and provide a structured overview with references to applicable regulations.',
+    'wc-1': 'How to register a company in AIFC?',
+    'wc-2': 'What tax exemptions are available in AIFC?',
+    'wc-3': 'How does the AIFC Court work?',
+    'wc-4': 'AML/KYC requirements for AIFC banks',
+    msgInputPh: 'Enter your question or follow-up...',
+    areaHint: 'Area:', enterHint: '— send',
+    disclaimerLink: 'Details', privacyLink: 'Privacy Policy', offerLink: 'Public Offer',
+    dbSearchPh: '🔍 Search by act name...',
+    areaNames: {
+      'Корпоративное право': 'Corporate Law', 'Финансовые услуги': 'Financial Services',
+      'Налоговое право': 'Tax Law', 'Трудовое право': 'Employment Law',
+      'Разрешение споров': 'Dispute Resolution', 'AML/KYC': 'AML/KYC',
+    },
+  },
+};
+
+function applyI18n() {
+  const s = UI_STRINGS[currentLang] || UI_STRINGS.ru;
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const setPh = (id, val) => { const el = document.getElementById(id); if (el) el.placeholder = val; };
+  const ids = [
+    'siteTitle','newChatBtn',
+    'tab-chat','tab-database','tab-tools','tab-docs','tab-news',
+    'ct-area','ct-sources','ct-starters',
+    'ab-corporate','ab-financial','ab-tax','ab-employment','ab-disputes',
+    'ss-aifc','ss-adilet','ss-publicreg','ss-orderly',
+    'sb-1','sb-2','sb-3','sb-4','sb-5','sb-6',
+    'welcomeH','welcomeP',
+    'wc-1','wc-2','wc-3','wc-4',
+    'areaHint','enterHint',
+    'disclaimerLink','privacyLink','offerLink',
+  ];
+  ids.forEach(id => set(id, s[id]));
+  setPh('msgInput', s.msgInputPh);
+  setPh('dbSearch', s.dbSearchPh);
+  set('areaLabel', s.areaNames[currentArea] || currentArea);
+}
+
 // ── localStorage persistence ──────────────────
 const LS_KEY = 'aifc_chat_v2';
 
@@ -1138,6 +1226,7 @@ function exportPdf() {
 document.getElementById('currentDate').textContent =
   new Date().toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'});
 loadHistory();
+applyI18n();                 // перевод UI на текущий язык
 renderDisclaimer();          // короткая строка + модалка на текущем языке
 renderPrivacy();             // Политика конфиденциальности на текущем языке
 renderOffer();               // Публичная оферта на текущем языке
@@ -1150,16 +1239,18 @@ function setLang(lang) {
   currentLang = lang;
   document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
   document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-  renderDisclaimer();  // обновляем короткую строку + модалку под язык
-  renderPrivacy();     // и Политику конфиденциальности
-  renderOffer();       // и Публичную оферту
+  applyI18n();
+  renderDisclaimer();
+  renderPrivacy();
+  renderOffer();
 }
 
 function setArea(btn, area) {
   document.querySelectorAll('.area-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   currentArea = area;
-  document.getElementById('areaLabel').textContent = area;
+  const s = UI_STRINGS[currentLang] || UI_STRINGS.ru;
+  document.getElementById('areaLabel').textContent = s.areaNames[area] || area;
 }
 
 // ── Tabs ──────────────────────────────────────
