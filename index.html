@@ -7,6 +7,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<!-- Google Analytics 4 — замените G-XXXXXXXXXX на реальный Measurement ID -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+  // Helper: track custom events
+  function gaEvent(name, params) { if(typeof gtag !== 'undefined') gtag('event', name, params || {}); }
+</script>
 <style>
   :root {
     --gold: #C9A84C;
@@ -278,6 +288,28 @@
   .verify-chip.broken { background: rgba(192,57,43,.08); color: var(--kz-red);  border: 1px solid rgba(192,57,43,.2); }
   .verify-chip.rag    { background: rgba(27,79,138,.10); color: var(--aifc-blue); border: 1px solid rgba(27,79,138,.25); cursor: help; }
   .verify-chip.cache  { background: rgba(201,168,76,.15); color: #9B7B2E; border: 1px solid rgba(201,168,76,.35); cursor: help; }
+
+  /* Report error button */
+  .report-btn {
+    display: inline-flex; align-items: center; gap: 4px;
+    margin-top: 6px; padding: 3px 10px; font-size: 11px;
+    font-family: inherit; color: var(--text-muted); background: none;
+    border: 1px solid var(--border); border-radius: 12px; cursor: pointer;
+    transition: all .15s; opacity: .6;
+  }
+  .report-btn:hover { opacity: 1; border-color: var(--kz-red); color: var(--kz-red); }
+  .report-btn.sent { opacity: .5; pointer-events: none; }
+
+  /* Report modal */
+  .report-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1100; align-items:center; justify-content:center; padding:20px; }
+  .report-overlay.visible { display:flex; }
+  .report-box { background:#fff; border-radius:14px; padding:24px; width:100%; max-width:440px; box-shadow:0 8px 40px rgba(0,0,0,.18); }
+  .report-box h3 { font-family:'Playfair Display',serif; font-size:16px; margin-bottom:12px; color:var(--navy); }
+  .report-box textarea { width:100%; min-height:100px; padding:10px 12px; font-family:inherit; font-size:13px; border:1px solid var(--border); border-radius:8px; resize:vertical; outline:none; }
+  .report-box textarea:focus { border-color:var(--gold); }
+  .report-actions { display:flex; gap:8px; margin-top:12px; justify-content:flex-end; }
+  .report-cancel { padding:8px 16px; border:1px solid var(--border); border-radius:7px; background:#fff; font-family:inherit; font-size:13px; cursor:pointer; }
+  .report-submit { padding:8px 18px; border:none; border-radius:7px; background:var(--navy); color:#fff; font-family:inherit; font-size:13px; cursor:pointer; font-weight:600; }
 
   /* Rating row */
   .rate-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
@@ -590,11 +622,77 @@
     .sidebar { display: none; }
     .header-date { display: none; }
   }
-  @media (max-width: 540px) {
-    .tabs-inner { padding: 0 10px; overflow-x: auto; }
-    .chat-layout { padding: 8px 10px; }
-    .messages { padding: 14px 12px 6px; }
-    .input-bar { padding: 10px 12px; }
+
+  /* ── MOBILE (≤ 600px) ───────────────────── */
+  @media (max-width: 600px) {
+    /* Header compact */
+    .header-inner { padding: 10px 14px; gap: 10px; }
+    .logo-emblem { width: 34px; height: 34px; font-size: 16px; }
+    .logo-text h1 { font-size: 13px; }
+    .logo-text p  { font-size: 9px; }
+    .header-date  { display: none; }
+    .header-btn   { padding: 5px 10px; font-size: 11px; }
+    .lang-btn     { padding: 4px 8px; font-size: 10px; }
+
+    /* Tabs: scroll horizontally, no wrap */
+    .tabs-inner { padding: 0 8px; overflow-x: auto; scrollbar-width: none; gap: 0; -webkit-overflow-scrolling: touch; }
+    .tabs-inner::-webkit-scrollbar { display: none; }
+    .tab { padding: 10px 14px; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+
+    /* Layout */
+    .chat-layout { padding: 8px 8px; gap: 8px; }
+    .pages { overflow: auto; }
+
+    /* Messages */
+    .messages { padding: 12px 10px 6px; gap: 12px; }
+    .msg-bubble { font-size: 13px; padding: 11px 13px; }
+    .msg.user .msg-bubble { max-width: 90%; }
+    .msg.ai  .msg-bubble { max-width: 100%; }
+    .welcome-title { font-size: 20px; }
+    .welcome-sub   { font-size: 12px; }
+
+    /* Chips */
+    .chips-row { padding-left: 0; gap: 6px; }
+    .chip { font-size: 11px; padding: 6px 11px; }
+
+    /* Input bar — sticky at bottom */
+    .input-bar {
+      position: sticky; bottom: 0; z-index: 50;
+      padding: 10px 10px env(safe-area-inset-bottom, 10px);
+      gap: 8px;
+    }
+    textarea#msgInput { font-size: 16px; /* prevent iOS zoom */ min-height: 44px; padding: 10px 40px 10px 12px; }
+    .send-btn { width: 40px; height: 40px; font-size: 16px; }
+    .pdf-btn  { display: none; } /* скрыть на мобиле — использовать отдельную кнопку */
+    .input-meta { flex-direction: column; align-items: flex-start; gap: 3px; }
+    .disclaimer { font-size: 10px; }
+    .powered { display: none; }
+
+    /* Rating row */
+    .rate-row { flex-wrap: wrap; gap: 6px; }
+    .rate-label { font-size: 10px; }
+    .rate-btn { font-size: 12px; padding: 2px 8px; }
+
+    /* Verify chips */
+    .verify-summary { gap: 6px; }
+    .verify-chip { font-size: 10px; padding: 2px 6px; }
+
+    /* Modals full-screen on mobile */
+    .auth-box { padding: 20px 16px; }
+    .dlg-box  { max-height: 92vh; padding: 20px 16px; }
+
+    /* Footer */
+    footer { font-size: 10px; padding: 10px 14px; text-align: center; flex-direction: column; gap: 4px; }
+
+    /* Cards in other pages */
+    .card { padding: 12px; }
+    .calc-grid { grid-template-columns: 1fr; }
+    .doc-grid  { grid-template-columns: 1fr; }
+    .editor-grid { grid-template-columns: 1fr; }
+
+    /* User widget */
+    .user-email { display: none; }
+    .user-menu { right: 0; min-width: 160px; }
   }
 
   /* ── Auth / User widget ── */
@@ -1026,6 +1124,19 @@
   </div>
 </div>
 
+<!-- Report error modal -->
+<div class="report-overlay" id="reportOverlay">
+  <div class="report-box">
+    <h3>⚑ <span id="reportTitle">Сообщить об ошибке</span></h3>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Опишите, что именно неверно в ответе ИИ:</p>
+    <textarea id="reportText" placeholder="Например: неверная ставка НДС, устаревшая норма, галлюцинация..."></textarea>
+    <div class="report-actions">
+      <button class="report-cancel" onclick="closeReport()">Отмена</button>
+      <button class="report-submit" onclick="submitReport()">Отправить</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const WORKER_URL = 'https://aifc-legal-proxy.aifclegal.workers.dev';
@@ -1145,6 +1256,7 @@ async function signInWithPassword() {
   if (!email || !pass) return setAuthMsg('Заполните все поля', 'error');
   const { error } = await sb.auth.signInWithPassword({ email, password: pass });
   if (error) return setAuthMsg(error.message, 'error');
+  gaEvent('login', { method: 'password' });
 }
 
 async function signUpWithPassword() {
@@ -1154,6 +1266,7 @@ async function signUpWithPassword() {
   if (pass.length < 6) return setAuthMsg('Пароль — минимум 6 символов', 'error');
   const { error } = await sb.auth.signUp({ email, password: pass, options: { emailRedirectTo: location.href } });
   if (error) return setAuthMsg(error.message, 'error');
+  gaEvent('sign_up', { method: 'password' });
   setAuthMsg('✅ Аккаунт создан! Проверьте почту для подтверждения.', 'success');
 }
 
@@ -1172,6 +1285,33 @@ function closePaywall() {
 }
 function showTopUp() {
   document.getElementById('iokaMsg').style.display = 'block';
+}
+
+// ── Report error ───────────────────────────────
+let _reportMsgId = null;
+function reportError(msgId, _text) {
+  _reportMsgId = msgId || null;
+  document.getElementById('reportText').value = '';
+  document.getElementById('reportOverlay').classList.add('visible');
+  setTimeout(() => document.getElementById('reportText').focus(), 100);
+}
+function closeReport() {
+  document.getElementById('reportOverlay').classList.remove('visible');
+}
+async function submitReport() {
+  const comment = document.getElementById('reportText').value.trim();
+  if (!comment) return;
+  gaEvent('report_error', { area: currentArea || 'general' });
+  try {
+    await fetch(WORKER_URL + '/feedback', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'error_report', msgId: _reportMsgId, comment, lang: currentLang, area: currentArea })
+    });
+  } catch(e) {}
+  closeReport();
+  const btn = document.querySelector(`.report-btn[data-msg="${_reportMsgId}"]`);
+  if (btn) { btn.textContent = '✓ Отправлено'; btn.classList.add('sent'); }
+  alert('Спасибо! Мы проверим этот ответ.');
 }
 
 // ── Credits check ─────────────────────────────
@@ -1638,6 +1778,8 @@ async function sendMessage() {
 
   appendBubble('user', text);
   chatHistory.push({ role: 'user', content: text });
+  const isFirstMsg = chatHistory.filter(m => m.role === 'user').length === 1;
+  gaEvent(isFirstMsg ? 'first_chat' : 'chat_message', { area: currentArea || 'general' });
 
   isLoading = true;
   document.getElementById('sendBtn').disabled = true;
@@ -1809,6 +1951,7 @@ function finalizeAiBubble(ai, rawText, meta, linkStatus, brokenCount) {
         rate.querySelectorAll('.rate-btn').forEach(x => x.disabled = true);
         b.classList.add('voted');
         rate.querySelector('.rate-label').textContent = 'Спасибо за отзыв!';
+        gaEvent('rate_answer', { vote: v, area: currentArea || 'general' });
         fetch(WORKER_URL + '/rate', {
           method: 'POST', headers: {'Content-Type':'application/json'},
           body: JSON.stringify({ msgId: meta.msgId, vote: v })
@@ -1818,6 +1961,17 @@ function finalizeAiBubble(ai, rawText, meta, linkStatus, brokenCount) {
       rate.appendChild(b);
     });
     ai.inner.appendChild(rate);
+  }
+
+  // Report error button
+  {
+    const reportBtn = document.createElement('button');
+    reportBtn.className = 'report-btn';
+    const rMsgId = meta.msgId || lastQueryId;
+    reportBtn.dataset.msg = rMsgId;
+    reportBtn.textContent = '⚑ ' + (currentLang === 'en' ? 'Report error' : 'Сообщить об ошибке');
+    reportBtn.onclick = () => reportError(rMsgId, ai.inner.querySelector('.msg-bubble')?.innerText || '');
+    ai.inner.appendChild(reportBtn);
   }
 
   // Quick chips
