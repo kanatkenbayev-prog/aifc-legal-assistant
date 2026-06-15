@@ -2592,9 +2592,10 @@ async function renderNews() {
           : `Обнаружено системой: ${c.detectedDate || c.date}`;
         const versionLabel = c.version ? ` · ${c.version}` : '';
         const title = `Обновление: ${c.act}${versionLabel}`;
+        const amendPart = c.amendDate ? ` Поправки от ${c.amendDate}.` : '';
         const desc = c.effectiveDate
-          ? `Изменение вступило в силу ${c.effectiveDate}.${c.version ? ` Редакция: ${c.version}.` : ''} Источник: автомониторинг aifc.kz.`
-          : `Изменение в тексте акта обнаружено системой ${c.detectedDate || c.date}. Точная дата вступления в силу не найдена — проверьте на aifc.kz.`;
+          ? `Вступает в силу: ${c.effectiveDate}.${amendPart}${c.version ? ` Редакция: ${c.version}.` : ''} Источник: автомониторинг aifc.kz.`
+          : `Изменение обнаружено системой ${c.detectedDate || c.date}.${amendPart} Дата вступления в силу не найдена — проверьте на aifc.kz.`;
         return newsCardHtml({ date: displayDate, badge: 'change', title, desc, url: c.url });
       }).join('');
       grid.insertAdjacentHTML('afterbegin', changeCards);
