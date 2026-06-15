@@ -1136,7 +1136,11 @@ function showTopUp() {
 }
 
 // ── Credits check ─────────────────────────────
+// До релиза: все запросы бесплатны и без регистрации.
+// После релиза: раскомментировать блок ниже.
 async function checkCredits() {
+  return true;
+  /*
   if (!currentUser) {
     const anon = parseInt(localStorage.getItem('aifc_anon_q') || '0');
     if (anon >= 3) {
@@ -1149,6 +1153,7 @@ async function checkCredits() {
   if (!userProfile) await loadProfile();
   if (userProfile && userProfile.credits <= 0) { showPaywall(); return false; }
   return true;
+  */
 }
 
 // ── Track query in Supabase ───────────────────
