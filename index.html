@@ -1432,6 +1432,8 @@ function showTopUp() {
 function fakedoorClick(e) {
   e.preventDefault();
   gaEvent('fakedoor_court_click', { user_id: currentUser?.id || 'guest' });
+  fetch(WORKER_URL + '/track', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ event: 'fakedoor_court_click' }), keepalive: true }).catch(()=>{});
   document.getElementById('fakedoorOverlay').classList.add('visible');
 }
 function closeFakedoor() {
@@ -1439,6 +1441,8 @@ function closeFakedoor() {
 }
 function fakedoorRequest() {
   gaEvent('fakedoor_court_request', { user_id: currentUser?.id || 'guest' });
+  fetch(WORKER_URL + '/track', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ event: 'fakedoor_court_request' }), keepalive: true }).catch(()=>{});
   closeFakedoor();
   // Показываем подтверждение
   const btn = document.querySelector('#fakedoorOverlay .fakedoor-cta');
