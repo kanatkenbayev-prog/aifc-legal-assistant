@@ -1272,14 +1272,12 @@ async function loadProfile() {
     userProfile = data;
   } else {
     // Новый пользователь — создаём профиль с 100 кредитами на 30 дней
-    const expiresAt = new Date(Date.now() + 30 * 86400000).toISOString();
     const { data: created } = await sb.from('profiles').insert({
       id: currentUser.id,
       email: currentUser.email,
       credits: 100,
       credits_used_total: 0,
       plan: 'free_trial',
-      credits_expires_at: expiresAt,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }).select().single();
@@ -1433,7 +1431,14 @@ async function checkCredits() {
   // Зарегистрированный пользователь: проверяем кредиты в профиле
   if (currentUser) {
     if (!userProfile) await loadProfile();
-    if (userProfile && userProfile.credits <= 0) { showPaywall(); return false; }
+    if (userProfile) {
+      // Для free_trial: срок 30 дней от created_at
+      if (userProfile.plan === 'free_trial' && userProfile.created_at) {
+        const expired = Date.now() - new Date(userProfile.created_at).getTime() > 30 * 86400000;
+        if (expired) { showPaywall(); return false; }
+      }
+      if (userProfile.credits <= 0) { showPaywall(); return false; }
+    }
     return true;
   }
   // Гость: лимит контролируется на сервере (5/день по IP).
