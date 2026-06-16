@@ -1338,12 +1338,11 @@ async function sendMagicLink() {
   setAuthMsg('✅ Ссылка отправлена! Проверьте почту и перейдите по ссылке.', 'success');
 }
 
-async function signInWithGoogle() {
-  const { error } = await sb.auth.signInWithOAuth({
+function signInWithGoogle() {
+  sb.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo: location.origin + location.pathname },
-  });
-  if (error) setAuthMsg(error.message, 'error');
+  }).then(({ error }) => { if (error) setAuthMsg(error.message, 'error'); });
 }
 
 async function signInWithPassword() {
