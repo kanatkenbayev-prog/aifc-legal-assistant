@@ -743,6 +743,29 @@
   .auth-msg.success { display:block; background:#e8f5e9; color:#2e7d32; }
   .auth-msg.error   { display:block; background:#fdecea; color:#c62828; }
   .auth-x { position:absolute; top:12px; right:14px; background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-muted); line-height:1; }
+  .auth-divider { display:flex; align-items:center; gap:10px; margin:16px 0 14px; color:var(--text-muted); font-size:12px; }
+  .auth-divider::before,.auth-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+  .btn-google { width:100%; padding:10px; border:1.5px solid var(--border); border-radius:8px; background:#fff; font-size:14px; font-weight:600; font-family:inherit; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; color:var(--text); transition:border-color .2s,box-shadow .2s; margin-bottom:4px; }
+  .btn-google:hover { border-color:#4285F4; box-shadow:0 2px 8px rgba(66,133,244,.15); }
+
+  /* Welcome screen */
+  .welcome-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:1100; align-items:center; justify-content:center; padding:16px; }
+  .welcome-overlay.visible { display:flex; }
+  .welcome-box { background:#fff; border-radius:16px; padding:32px 28px; width:100%; max-width:460px; position:relative; box-shadow:0 12px 48px rgba(0,0,0,.22); }
+  .welcome-logo { display:flex; align-items:center; gap:10px; margin-bottom:20px; }
+  .welcome-logo .emblem { width:36px; height:36px; background:linear-gradient(135deg,var(--gold),#E8C97A); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; color:var(--navy); font-weight:700; }
+  .welcome-logo span { font-size:15px; font-weight:700; color:var(--navy); }
+  .welcome-box h3 { font-size:20px; color:var(--navy); margin-bottom:8px; }
+  .welcome-box .welcome-sub { font-size:13.5px; color:var(--text-muted); margin-bottom:20px; line-height:1.6; }
+  .welcome-points { list-style:none; padding:0; margin:0 0 24px; display:flex; flex-direction:column; gap:12px; }
+  .welcome-points li { display:flex; align-items:flex-start; gap:10px; font-size:13px; line-height:1.5; background:var(--cream); border-radius:8px; padding:10px 12px; }
+  .welcome-points li .wp-icon { font-size:18px; flex-shrink:0; }
+  .welcome-points li strong { display:block; color:var(--navy); font-size:13px; margin-bottom:2px; }
+  .welcome-points li span { color:var(--text-muted); font-size:12.5px; }
+  .welcome-accept { width:100%; padding:13px; background:var(--navy); color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:inherit; cursor:pointer; transition:background .2s; }
+  .welcome-accept:hover { background:#1a3a5c; }
+  .welcome-tos { font-size:11px; color:var(--text-muted); text-align:center; margin-top:10px; }
+  .welcome-tos a { color:var(--aifc-blue); }
 
   /* Paywall / top-up modal */
   .paywall-box { background:#fff; border-radius:14px; padding:28px; width:100%; max-width:360px; text-align:center; position:relative; box-shadow:0 8px 40px rgba(0,0,0,.18); }
@@ -783,6 +806,12 @@
     <button class="auth-x" onclick="closeAuthModal()">×</button>
     <h2>⚖️ AIFC Legal Assistant</h2>
     <p class="auth-sub" id="authSubtitle">Войдите или зарегистрируйтесь — 100 бесплатных кредитов</p>
+    <!-- Google OAuth -->
+    <button class="btn-google" onclick="signInWithGoogle()">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58Z"/></svg>
+      Войти через Google
+    </button>
+    <div class="auth-divider">или</div>
     <div class="auth-tabs-row">
       <button class="auth-tab-btn active" id="tabMagic" onclick="switchAuthTab('magic')">✉️ Magic Link</button>
       <button class="auth-tab-btn" id="tabPass"  onclick="switchAuthTab('pass')">🔑 Пароль</button>
@@ -800,6 +829,34 @@
       <button class="auth-submit" style="background:var(--cream);color:var(--navy);margin-top:6px" onclick="signUpWithPassword()">Зарегистрироваться</button>
     </div>
     <div class="auth-msg" id="authMsg"></div>
+  </div>
+</div>
+
+<!-- Welcome screen (показывается один раз при первом входе) -->
+<div class="welcome-overlay" id="welcomeOverlay">
+  <div class="welcome-box">
+    <div class="welcome-logo">
+      <div class="emblem">⚖</div>
+      <span>AIFC Legal Assistant · aifclex.ai</span>
+    </div>
+    <h3>Добро пожаловать</h3>
+    <p class="welcome-sub">Перед началом работы — несколько важных моментов о том, как мы обрабатываем ваши данные.</p>
+    <ul class="welcome-points">
+      <li>
+        <span class="wp-icon">🔒</span>
+        <div><strong>Конфиденциальность ваших запросов</strong><span>Ваши вопросы передаются по зашифрованному каналу (TLS). Мы не используем их для обучения публичных ИИ-моделей и не передаём третьим лицам.</span></div>
+      </li>
+      <li>
+        <span class="wp-icon">⚠️</span>
+        <div><strong>Не вводите чувствительные данные</strong><span>Избегайте реальных имён клиентов, ИИН, паспортных данных и конфиденциальных сведений о сделках. Используйте обезличенные фабулы.</span></div>
+      </li>
+      <li>
+        <span class="wp-icon">📋</span>
+        <div><strong>Ответы носят информационный характер</strong><span>AIFC Legal Assistant — инструмент правовой аналитики, а не замена официального юридического заключения лицензированного советника AFSA.</span></div>
+      </li>
+    </ul>
+    <button class="welcome-accept" onclick="acceptWelcome()">Понятно, начать работу</button>
+    <p class="welcome-tos">Продолжая, вы соглашаетесь с <a href="/legal.html" target="_blank">Пользовательским соглашением</a> и <a href="/legal.html#privacy" target="_blank">Политикой конфиденциальности</a></p>
   </div>
 </div>
 
@@ -1186,6 +1243,20 @@ async function onSignIn(user) {
   await loadProfile();
   renderUserWidget();
   closeAuthModal();
+  maybeShowWelcome();
+}
+
+function maybeShowWelcome() {
+  const key = 'aifc_welcome_seen';
+  if (!localStorage.getItem(key)) {
+    document.getElementById('welcomeOverlay').classList.add('visible');
+  }
+}
+
+function acceptWelcome() {
+  localStorage.setItem('aifc_welcome_seen', '1');
+  document.getElementById('welcomeOverlay').classList.remove('visible');
+  gaEvent('welcome_accepted');
 }
 
 function onSignOut() {
@@ -1265,6 +1336,14 @@ async function sendMagicLink() {
   btn.disabled = false; btn.textContent = 'Отправить ссылку для входа';
   if (error) return setAuthMsg(error.message, 'error');
   setAuthMsg('✅ Ссылка отправлена! Проверьте почту и перейдите по ссылке.', 'success');
+}
+
+async function signInWithGoogle() {
+  const { error } = await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: location.origin + location.pathname },
+  });
+  if (error) setAuthMsg(error.message, 'error');
 }
 
 async function signInWithPassword() {
