@@ -399,6 +399,12 @@
   .powered { display: flex; align-items: center; gap: 5px; }
   .powered span { background: var(--cream-dark); padding: 2px 7px; border-radius: 4px; border: 1px solid var(--border); font-size: 10px; }
   .disclaimer { font-size: 10.5px; color: var(--text-muted); line-height: 1.45; padding: 6px 2px 0; border-top: 1px dashed var(--border); margin-top: 2px; }
+  .fakedoor-row { display: flex; align-items: center; margin-top: 6px; }
+  .fakedoor-toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+  .fakedoor-toggle input { display: none; }
+  .fakedoor-slider { width: 32px; height: 18px; background: var(--border); border-radius: 9px; position: relative; flex-shrink: 0; transition: background .2s; }
+  .fakedoor-slider::after { content:''; position:absolute; width:14px; height:14px; background:#fff; border-radius:50%; top:2px; left:2px; transition: left .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .fakedoor-label { font-size: 11px; color: var(--text-muted); }
   .disclaimer a { color: var(--aifc-blue); text-decoration: underline; cursor: pointer; white-space: nowrap; }
 
   /* Disclaimer consent modal */
@@ -861,6 +867,24 @@
 </div>
 
 <!-- Paywall / top-up modal -->
+<div class="auth-overlay" id="fakedoorOverlay">
+  <div class="auth-box" style="max-width:420px;text-align:center">
+    <button class="auth-x" onclick="closeFakedoor()">×</button>
+    <div style="font-size:32px;margin-bottom:8px">⚖️</div>
+    <h2 style="margin-bottom:8px">База прецедентов AIFC Court</h2>
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px">Поиск по решениям Суда МФЦА и IAC доступен в расширенной базе знаний тарифа <strong>Expert</strong>.</p>
+    <div style="background:var(--cream-dark);border-radius:10px;padding:14px 16px;margin-bottom:20px;text-align:left;font-size:13px">
+      <div style="font-weight:600;margin-bottom:8px">Что войдёт в базу прецедентов:</div>
+      <div>✓ Решения AIFC Court 2018–2026</div>
+      <div>✓ Арбитражные решения IAC</div>
+      <div>✓ Enforcement Notices AFSA</div>
+      <div>✓ Поиск по сторонам, норме, исходу</div>
+    </div>
+    <button class="auth-submit fakedoor-cta" onclick="fakedoorRequest()">Запросить ранний доступ</button>
+    <button style="margin-top:8px;width:100%;padding:9px;border:none;background:none;color:var(--text-muted);cursor:pointer;font-size:13px" onclick="closeFakedoor()">Закрыть</button>
+  </div>
+</div>
+
 <div class="auth-overlay" id="paywallOverlay">
   <div class="paywall-box">
     <button class="auth-x" onclick="closePaywall()">×</button>
@@ -999,6 +1023,13 @@
           <div class="input-meta">
             <span class="input-hint"><span id="areaHint">Область:</span> <strong id="areaLabel">Корпоративное право</strong> · <kbd>Enter</kbd> <span id="enterHint">— отправить</span></span>
             <span class="powered">⚡ <span>Claude · RAG · Cloudflare</span></span>
+          </div>
+          <div class="fakedoor-row">
+            <label class="fakedoor-toggle" onclick="fakedoorClick(event)" title="Поиск по прецедентам Суда МФЦА">
+              <input type="checkbox" id="courtToggle" disabled>
+              <span class="fakedoor-slider"></span>
+              <span class="fakedoor-label">🔒 Поиск по прецедентам AIFC Court</span>
+            </label>
           </div>
           <div class="disclaimer"><span id="shortDisclaimer">⚠️ aifclex.ai — ИИ-инструмент для автоматизации правовой аналитики. Ответы не являются официальным юридическим заключением (Legal Opinion) или индивидуальной налоговой консультацией. Для принятия решений обращайтесь к лицензированному Legal Adviser AIFC.</span> <a onclick="openDisclaimer()" id="disclaimerLink">Подробнее</a><span id="privacySep"> · <a onclick="openPrivacy()" id="privacyLink">Политика конфиденциальности</a> · <a onclick="openOffer()" id="offerLink">Публичная оферта</a></span></div>
         </div>
@@ -1395,6 +1426,30 @@ function closePaywall() {
 }
 function showTopUp() {
   document.getElementById('iokaMsg').style.display = 'block';
+}
+
+// ── Fake-door: AIFC Court precedents toggle ────
+function fakedoorClick(e) {
+  e.preventDefault();
+  gaEvent('fakedoor_court_click', { user_id: currentUser?.id || 'guest' });
+  document.getElementById('fakedoorOverlay').classList.add('visible');
+}
+function closeFakedoor() {
+  document.getElementById('fakedoorOverlay').classList.remove('visible');
+}
+function fakedoorRequest() {
+  gaEvent('fakedoor_court_request', { user_id: currentUser?.id || 'guest' });
+  closeFakedoor();
+  // Показываем подтверждение
+  const btn = document.querySelector('#fakedoorOverlay .fakedoor-cta');
+  if (btn) { btn.textContent = '✓ Запрос отправлен!'; btn.disabled = true; }
+  setTimeout(() => {
+    const note = document.createElement('div');
+    note.style.cssText = 'position:fixed;bottom:80px;right:20px;background:var(--navy);color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3)';
+    note.textContent = '✓ Мы сообщим вам, когда функция станет доступна';
+    document.body.appendChild(note);
+    setTimeout(() => note.remove(), 4000);
+  }, 200);
 }
 
 // ── Report error ───────────────────────────────
