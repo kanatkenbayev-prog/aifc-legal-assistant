@@ -2131,6 +2131,18 @@ function finalizeAiBubble(ai, rawText, meta, linkStatus, brokenCount) {
           body: JSON.stringify({ msgId: meta.msgId, vote: v })
         }).catch(()=>{});
         saveRating(lastQueryId, v);
+        // Карантин галлюцинаций: при 👎 сохраняем Q&A в bug_reports для ревью
+        if (v === 'down') {
+          const userQ = chatHistory.at(-2)?.content || '';
+          const aiA = ai.inner.querySelector('.msg-bubble')?.innerText || '';
+          sb.from('bug_reports').insert({
+            user_id: currentUser?.id || null,
+            area: currentArea || 'general',
+            question: userQ.slice(0, 2000),
+            answer: aiA.slice(0, 4000),
+            created_at: new Date().toISOString(),
+          }).catch(() => {});
+        }
       };
       rate.appendChild(b);
     });

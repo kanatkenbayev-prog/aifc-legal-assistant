@@ -64,6 +64,20 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
   created_at        TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- ── Карантин галлюцинаций — Q&A пары при нажатии 👎 ──
+CREATE TABLE IF NOT EXISTS public.bug_reports (
+  id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID        REFERENCES public.profiles(id) ON DELETE SET NULL,
+  area        TEXT,
+  question    TEXT,
+  answer      TEXT,
+  reviewed    BOOLEAN     DEFAULT FALSE,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.bug_reports ENABLE ROW LEVEL SECURITY;
+-- Любой (в т.ч. гость) может вставить; читать — только сервисная роль (admin)
+CREATE POLICY "bug_reports: insert" ON public.bug_reports FOR INSERT WITH CHECK (true);
+
 -- ── Row Level Security ──────────────────────────────
 ALTER TABLE public.profiles     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.queries      ENABLE ROW LEVEL SECURITY;
