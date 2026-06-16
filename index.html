@@ -1413,22 +1413,16 @@ async function submitReport() {
 // ── Credits check ─────────────────────────────
 // До релиза: все запросы бесплатны и без регистрации.
 // После релиза: раскомментировать блок ниже.
-async function checkCredits() {
-  return true;
-  /*
-  if (!currentUser) {
-    const anon = parseInt(localStorage.getItem('aifc_anon_q') || '0');
-    if (anon >= 3) {
-      showAuthModal('Войдите чтобы продолжить — 100 бесплатных кредитов');
-      return false;
-    }
-    localStorage.setItem('aifc_anon_q', String(anon + 1));
+async function async function checkCredits() {
+  // Зарегистрированный пользователь: проверяем кредиты в профиле
+  if (currentUser) {
+    if (!userProfile) await loadProfile();
+    if (userProfile && userProfile.credits <= 0) { showPaywall(); return false; }
     return true;
   }
-  if (!userProfile) await loadProfile();
-  if (userProfile && userProfile.credits <= 0) { showPaywall(); return false; }
+  // Гость: лимит контролируется на сервере (5/день по IP).
+  // Здесь только показываем модальное окно если сервер вернул guest_limit.
   return true;
-  */
 }
 
 // ── Track query in Supabase ───────────────────
@@ -1923,10 +1917,14 @@ async function sendMessage() {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: chatHistory, area: currentArea, lang: currentLang })
+      body: JSON.stringify({ messages: chatHistory, area: currentArea, lang: currentLang, userId: currentUser?.id || null })
     });
     if (!res.ok || !res.body) {
       const err = await res.json().catch(() => ({}));
+      if (err.error === 'guest_limit') {
+        showAuthModal('Бесплатный лимит исчерпан. Зарегистрируйтесь — это займёт 10 секунд.');
+        throw new Error('guest_limit');
+      }
       throw new Error(err.error || `HTTP ${res.status}`);
     }
 
