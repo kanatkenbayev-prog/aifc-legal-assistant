@@ -13,9 +13,9 @@ id = "158cbdeedd144fe487699af26f1d9f9d"
 
 [[vectorize]]
 binding = "VECTORIZE"
-index_name = "aifc-acts"
+index_name = "aifc-acts-v2"
 
-# Ежедневный мониторинг изменений в актах МФЦА (06:00 UTC)
+# Мониторинг актов + Telegram-дайджест (03:00 UTC = 09:00 Алматы)
 [triggers]
-crons = ["0 6 * * *"]
+crons = ["0 3 * * *"]
 
