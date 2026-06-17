@@ -1,0 +1,88 @@
+{
+  "timestamp": "20260617_1628",
+  "total": 5,
+  "passed": 5,
+  "avg_coverage": 100,
+  "by_domain": {
+    "AIFC Fundamentals": {
+      "pass": 5,
+      "fail": 0,
+      "avg": 100
+    }
+  },
+  "questions": [
+    {
+      "id": "AIFC-001",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "easy",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "hit": [
+        "special jurisdiction",
+        "financial centre",
+        "AIFC legal framework"
+      ],
+      "miss": [],
+      "response_len": 3153
+    },
+    {
+      "id": "AIFC-002",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "easy",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "hit": [
+        "common law",
+        "England and Wales",
+        "AIFC Acts"
+      ],
+      "miss": [],
+      "response_len": 3099
+    },
+    {
+      "id": "AIFC-003",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "easy",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "hit": [
+        "primary legislation",
+        "AIFC framework"
+      ],
+      "miss": [],
+      "response_len": 3068
+    },
+    {
+      "id": "AIFC-004",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "easy",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "hit": [
+        "branch",
+        "subsidiary",
+        "registration"
+      ],
+      "miss": [],
+      "response_len": 5268
+    },
+    {
+      "id": "AIFC-005",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "easy",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "hit": [
+        "English",
+        "court proceedings"
+      ],
+      "miss": [],
+      "response_len": 2192
+    }
+  ]
+}
