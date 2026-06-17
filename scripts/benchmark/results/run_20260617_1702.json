@@ -1,0 +1,225 @@
+{
+  "timestamp": "20260617_1702",
+  "total": 15,
+  "passed": 10,
+  "avg_coverage": 69,
+  "by_domain": {
+    "AIFC Fundamentals": {
+      "pass": 10,
+      "fail": 5,
+      "avg": 69
+    }
+  },
+  "questions": [
+    {
+      "id": "AIFC-001",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "easy",
+      "score": 67,
+      "pass": true,
+      "error": false,
+      "hit": [
+        "financial centre",
+        "AIFC legal framework"
+      ],
+      "miss": [
+        "special jurisdiction"
+      ],
+      "response_len": 4123
+    },
+    {
+      "id": "AIFC-002",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "easy",
+      "score": 67,
+      "pass": true,
+      "error": false,
+      "hit": [
+        "common law",
+        "AIFC Acts"
+      ],
+      "miss": [
+        "England and Wales"
+      ],
+      "response_len": 2760
+    },
+    {
+      "id": "AIFC-003",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "easy",
+      "score": 50,
+      "pass": false,
+      "error": false,
+      "hit": [
+        "AIFC framework"
+      ],
+      "miss": [
+        "primary legislation"
+      ],
+      "response_len": 3154
+    },
+    {
+      "id": "AIFC-004",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "easy",
+      "score": 33,
+      "pass": false,
+      "error": false,
+      "hit": [
+        "branch"
+      ],
+      "miss": [
+        "subsidiary",
+        "registration"
+      ],
+      "response_len": 5092
+    },
+    {
+      "id": "AIFC-005",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "easy",
+      "score": 50,
+      "pass": false,
+      "error": false,
+      "hit": [
+        "court proceedings"
+      ],
+      "miss": [
+        "English"
+      ],
+      "response_len": 2556
+    },
+    {
+      "id": "AIFC-006",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "hit": [
+        "consensual jurisdiction",
+        "AIFC Court"
+      ],
+      "miss": [],
+      "response_len": 4068
+    },
+    {
+      "id": "AIFC-007",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": false,
+      "hit": [],
+      "miss": [
+        "interaction",
+        "priority",
+        "jurisdiction"
+      ],
+      "response_len": 4925
+    },
+    {
+      "id": "AIFC-008",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "medium",
+      "score": 33,
+      "pass": false,
+      "error": false,
+      "hit": [
+        "registration"
+      ],
+      "miss": [
+        "continuation",
+        "redomiciliation"
+      ],
+      "response_len": 5857
+    },
+    {
+      "id": "AIFC-009",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "medium",
+      "score": 67,
+      "pass": true,
+      "error": false,
+      "hit": [
+        "common law",
+        "court system"
+      ],
+      "miss": [
+        "investment"
+      ],
+      "response_len": 6685
+    },
+    {
+      "id": "AIFC-010",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "hard",
+      "score": 67,
+      "pass": true,
+      "error": false,
+      "hit": [
+        "jurisdiction agreement",
+        "AIFC Court"
+      ],
+      "miss": [
+        "contractual choice"
+      ],
+      "response_len": 5934
+    },
+    {
+      "id": "FUND-001",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "hit": [],
+      "miss": [],
+      "response_len": 5744
+    },
+    {
+      "id": "FUND-002",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "hit": [],
+      "miss": [],
+      "response_len": 5782
+    },
+    {
+      "id": "FUND-003",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "hit": [],
+      "miss": [],
+      "response_len": 6486
+    },
+    {
+      "id": "FUND-004",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "hit": [],
+      "miss": [],
+      "response_len": 5643
+    },
+    {
+      "id": "FUND-005",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "hit": [],
+      "miss": [],
+      "response_len": 5604
+    }
+  ]
+}

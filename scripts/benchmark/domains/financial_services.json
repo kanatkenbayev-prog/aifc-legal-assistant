@@ -1,0 +1,11 @@
+{
+  "domain": "Financial Services",
+  "total_questions": 50,
+  "questions": [
+    {
+      "id": "FIN-001",
+      "scenario": "Компания А (лицензия Managing CIS) выступает Fund Administrator (Administering CIS) в Exempt PE Fund у Компании Б.",
+      "test_intent": "Защита от нашей исторической галлюцинации. ИИ обязан выдать жесткое требование о проверке Permission Schedule на два независимых вида деятельности по Schedule 1 FSMR."
+    }
+  ]
+}

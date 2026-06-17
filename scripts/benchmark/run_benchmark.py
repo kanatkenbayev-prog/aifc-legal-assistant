@@ -1,91 +1,31 @@
 #!/usr/bin/env python3
 """
 AIFC Legal Benchmark Runner
+Supports two question formats:
+  - ChatGPT: {question, expected_topics}
+  - Gemini:  {scenario, test_intent}
+
 Usage:
-  python3 run_benchmark.py                         # all questions
-  python3 run_benchmark.py --domain Companies      # one domain
-  python3 run_benchmark.py --difficulty easy       # one difficulty
-  python3 run_benchmark.py --ids AIFC-001,COMP-003 # specific IDs
+  python3 run_benchmark.py                          # all questions from domains/
+  python3 run_benchmark.py --domain tax             # one domain file
+  python3 run_benchmark.py --difficulty hard        # filter by difficulty
+  python3 run_benchmark.py --ids TAX-001,COMP-003  # specific IDs
   python3 run_benchmark.py --limit 20              # first N questions
+  python3 run_benchmark.py --lang ru               # Russian language
 """
 
-import json, subprocess, sys, time, re, os
+import json, subprocess, sys, time, re, argparse
 from pathlib import Path
 from collections import defaultdict
 from datetime import datetime
 
 WORKER   = "https://aifc-legal-proxy.aifclegal.workers.dev"
 TEST_KEY = "aifc-admin-2026-v2"
-TIMEOUT  = 90   # seconds per question (Opus is slow)
-BENCH    = Path(__file__).parent / "benchmark_v1.json"
-RESULTS  = Path(__file__).parent / "results"
-
-# ── CLI args ─────────────────────────────────────────────────────────────────
-import argparse
-ap = argparse.ArgumentParser()
-ap.add_argument("--domain",     default=None)
-ap.add_argument("--difficulty", default=None)
-ap.add_argument("--ids",        default=None)
-ap.add_argument("--limit",      type=int, default=None)
-ap.add_argument("--lang",       default="en", choices=["en","ru"])
-args = ap.parse_args()
-
-# ── Load questions ────────────────────────────────────────────────────────────
-questions = json.loads(BENCH.read_text())
-
-if args.ids:
-    ids = set(args.ids.split(","))
-    questions = [q for q in questions if q["id"] in ids]
-if args.domain:
-    questions = [q for q in questions if q["domain"] == args.domain]
-if args.difficulty:
-    questions = [q for q in questions if q["difficulty"] == args.difficulty]
-if args.limit:
-    questions = questions[:args.limit]
-
-# ── Ask AIFCLex ───────────────────────────────────────────────────────────────
-def ask(question: str, lang: str = "en") -> str:
-    payload = json.dumps({
-        "messages": [{"role": "user", "content": question}],
-        "area": "Общее",
-        "lang": lang,
-        "test_key": TEST_KEY,
-    })
-    r = subprocess.run(
-        ["curl", "-s", "-X", "POST", f"{WORKER}/chat",
-         "-H", "Content-Type: application/json",
-         "-d", payload, "--max-time", str(TIMEOUT)],
-        capture_output=True
-    )
-    raw = r.stdout.decode("utf-8", errors="ignore")
-    # Extract token stream → full text
-    text = ""
-    for line in raw.splitlines():
-        try:
-            d = json.loads(line)
-            if d.get("type") == "token":
-                text += d.get("t", "")
-        except Exception:
-            pass
-    return text.strip()
-
-# ── Score: keyword coverage ───────────────────────────────────────────────────
-def score_response(response: str, expected_topics: list) -> tuple[int, list, list]:
-    """Returns (score_pct, hit_topics, missed_topics)"""
-    resp_lower = response.lower()
-    hit, miss = [], []
-    for topic in expected_topics:
-        # Match any word from the topic phrase
-        words = [w for w in re.split(r'[\s/]+', topic.lower()) if len(w) > 3]
-        if any(w in resp_lower for w in words) or topic.lower() in resp_lower:
-            hit.append(topic)
-        else:
-            miss.append(topic)
-    pct = round(len(hit) / len(expected_topics) * 100) if expected_topics else 100
-    return pct, hit, miss
-
-# ── Run ───────────────────────────────────────────────────────────────────────
-PASS_THRESHOLD = 60   # % topic coverage to count as PASS
+TIMEOUT  = 90
+BASE     = Path(__file__).parent
+DOMAINS  = BASE / "domains"
+RESULTS  = BASE / "results"
+PASS_THRESHOLD = 60
 
 GREEN  = "\033[0;32m"
 RED    = "\033[0;31m"
@@ -93,85 +33,203 @@ YELLOW = "\033[1;33m"
 BOLD   = "\033[1m"
 NC     = "\033[0m"
 
-print(f"\n{'═'*60}")
+# ── CLI ───────────────────────────────────────────────────────────────────────
+ap = argparse.ArgumentParser()
+ap.add_argument("--domain",     default=None, help="domain slug, e.g. tax")
+ap.add_argument("--difficulty", default=None, choices=["easy","medium","hard","expert"])
+ap.add_argument("--ids",        default=None, help="comma-separated IDs")
+ap.add_argument("--limit",      type=int,     default=None)
+ap.add_argument("--lang",       default="en", choices=["en","ru"])
+args = ap.parse_args()
+
+# ── Load questions from domains/ ──────────────────────────────────────────────
+def load_domains() -> list:
+    questions = []
+    files = sorted(DOMAINS.glob("*.json")) if DOMAINS.exists() else []
+    # also load legacy benchmark_v1.json
+    legacy = BASE / "benchmark_v1.json"
+    if legacy.exists():
+        files = [legacy] + list(files)
+
+    for f in files:
+        data = json.loads(f.read_text())
+        # Gemini format: {domain, questions: [{id, scenario, test_intent, ...}]}
+        if isinstance(data, dict) and "questions" in data:
+            domain_name = data.get("domain", f.stem)
+            for q in data["questions"]:
+                q.setdefault("domain", domain_name)
+                questions.append(normalise(q))
+        # ChatGPT format: [{id, domain, question, expected_topics, ...}]
+        elif isinstance(data, list):
+            for q in data:
+                questions.append(normalise(q))
+    return questions
+
+def normalise(q: dict) -> dict:
+    """Unified format: id, domain, difficulty, question, expected_topics, test_intent"""
+    # Gemini uses 'scenario' as the question
+    if "scenario" in q and "question" not in q:
+        q["question"] = q["scenario"]
+    # Extract scoring keywords from test_intent
+    if "test_intent" in q and not q.get("expected_topics"):
+        q["expected_topics"] = extract_keywords(q["test_intent"])
+    q.setdefault("expected_topics", [])
+    q.setdefault("difficulty", "medium")
+    q.setdefault("test_intent", "")
+    return q
+
+def extract_keywords(intent: str) -> list:
+    """Pull meaningful keywords from test_intent for scoring."""
+    # Look for quoted terms, rule references, and key phrases
+    quoted   = re.findall(r'«([^»]+)»|"([^"]+)"', intent)
+    rules    = re.findall(r'(?:Schedule|Rule|Regulation|Section|ст\.)\s*[\d\.]+', intent, re.I)
+    # Key legal terms
+    terms_re = r'\b(?:Permission Schedule|FSMR|Substance|CIGA|ТК РК|Employment Regulations|' \
+               r'Solvency Test|АО|ТОО|Articles|НДС|КПН|WHT|UBO|AML|MLRO|CIS Rules|' \
+               r'Предохранитель|отказ|категорически|запрет|ничтожн|обязан)\b'
+    key_terms = re.findall(terms_re, intent, re.I)
+    flat = [t for pair in quoted for t in pair if t] + rules + key_terms
+    return list(dict.fromkeys(flat))[:6]  # max 6 unique keywords
+
+# ── Filter ────────────────────────────────────────────────────────────────────
+questions = load_domains()
+if args.ids:
+    ids = set(args.ids.split(","))
+    questions = [q for q in questions if q.get("id") in ids]
+if args.domain:
+    questions = [q for q in questions if args.domain.lower() in q.get("domain","").lower()]
+if args.difficulty:
+    questions = [q for q in questions if q.get("difficulty") == args.difficulty]
+if args.limit:
+    questions = questions[:args.limit]
+
+if not questions:
+    print("No questions matched filters.")
+    sys.exit(0)
+
+# ── Ask AIFCLex ───────────────────────────────────────────────────────────────
+def ask(question: str, lang: str = "en") -> tuple:
+    """Returns (text, error_msg)"""
+    payload = json.dumps({
+        "messages": [{"role": "user", "content": question}],
+        "area": "Общее", "lang": lang, "test_key": TEST_KEY,
+    })
+    r = subprocess.run(
+        ["curl","-s","-X","POST",f"{WORKER}/chat",
+         "-H","Content-Type: application/json","-d",payload,"--max-time",str(TIMEOUT)],
+        capture_output=True)
+    text = ""
+    error_msg = ""
+    for line in r.stdout.decode("utf-8", errors="ignore").splitlines():
+        try:
+            d = json.loads(line)
+            if d.get("type") == "token":
+                text += d.get("t","")
+            elif d.get("type") == "error":
+                error_msg = d.get("message", str(d))
+        except Exception:
+            pass
+    if not text and not error_msg and r.returncode != 0:
+        error_msg = f"curl exit {r.returncode}"
+    return text.strip(), error_msg
+
+# ── Score ─────────────────────────────────────────────────────────────────────
+def score(response: str, topics: list) -> tuple:
+    if not topics:
+        # No topics = check response is non-empty and not an error
+        ok = len(response) > 100 and "error" not in response[:50].lower()
+        return (100 if ok else 0), [], []
+    low = response.lower()
+    hit, miss = [], []
+    for t in topics:
+        words = [w for w in re.split(r'[\s/]+', t.lower()) if len(w) > 2]
+        if t.lower() in low or any(w in low for w in words):
+            hit.append(t)
+        else:
+            miss.append(t)
+    pct = round(len(hit)/len(topics)*100)
+    return pct, hit, miss
+
+# ── Run ───────────────────────────────────────────────────────────────────────
+print(f"\n{'═'*62}")
 print(f"  AIFC Legal Benchmark v1")
-print(f"  {datetime.now().strftime('%Y-%m-%d %H:%M')}  |  {len(questions)} questions  |  lang={args.lang}")
-print(f"{'═'*60}\n")
+print(f"  {datetime.now().strftime('%Y-%m-%d %H:%M')}  |  {len(questions)} вопросов  |  lang={args.lang}")
+print(f"{'═'*62}\n")
 
 results   = []
-by_domain = defaultdict(lambda: {"pass": 0, "fail": 0, "scores": []})
-by_diff   = defaultdict(lambda: {"pass": 0, "fail": 0, "scores": []})
+by_domain = defaultdict(lambda: {"pass":0,"fail":0,"scores":[]})
+by_diff   = defaultdict(lambda: {"pass":0,"fail":0,"scores":[]})
 
 for i, q in enumerate(questions, 1):
-    qid    = q["id"]
-    domain = q["domain"]
-    diff   = q["difficulty"]
-    print(f"  [{i:>3}/{len(questions)}] {qid} ({domain}, {diff})")
+    qid    = q.get("id","?")
+    domain = q.get("domain","?")
+    diff   = q.get("difficulty","?")
+    intent = q.get("test_intent","")
 
-    response = ask(q["question"], args.lang)
+    print(f"  [{i:>3}/{len(questions)}] {qid}  ({domain}, {diff})")
+    if intent:
+        print(f"         {YELLOW}↳ {intent[:90]}{'…' if len(intent)>90 else ''}{NC}")
 
-    if not response or "error" in response[:50].lower():
-        print(f"  {RED}✗ ERROR{NC} — пустой или ошибочный ответ")
-        result = {"id": qid, "domain": domain, "difficulty": diff,
-                  "score": 0, "pass": False, "error": True,
-                  "hit": [], "miss": q["expected_topics"], "response_len": 0}
+    response, err = ask(q["question"], args.lang)
+
+    if not response:
+        msg = err[:80] if err else "пустой ответ"
+        print(f"         {RED}✗ ERROR — {msg}{NC}")
+        rec = {"id":qid,"domain":domain,"difficulty":diff,"score":0,
+               "pass":False,"error":True,"error_msg":msg,"hit":[],"miss":q["expected_topics"]}
     else:
-        score, hit, miss = score_response(response, q["expected_topics"])
-        passed = score >= PASS_THRESHOLD
-        symbol = f"{GREEN}✓{NC}" if passed else f"{RED}✗{NC}"
-        print(f"  {symbol} {score}% topics covered  "
-              f"{'hit: ' + ', '.join(hit) if hit else ''}  "
-              f"{'| miss: ' + ', '.join(miss) if miss else ''}")
-        result = {"id": qid, "domain": domain, "difficulty": diff,
-                  "score": score, "pass": passed, "error": False,
-                  "hit": hit, "miss": miss, "response_len": len(response)}
+        pct, hit, miss = score(response, q["expected_topics"])
+        passed = pct >= PASS_THRESHOLD
+        sym    = f"{GREEN}✓{NC}" if passed else f"{RED}✗{NC}"
+        detail = f"hit: {', '.join(hit)}" if hit else ""
+        if miss: detail += f"  | miss: {', '.join(miss)}"
+        print(f"         {sym} {pct}% coverage  {detail}")
+        rec = {"id":qid,"domain":domain,"difficulty":diff,"score":pct,
+               "pass":passed,"error":False,"hit":hit,"miss":miss,
+               "response_len":len(response)}
 
-    results.append(result)
-    by_domain[domain]["pass" if result["pass"] else "fail"] += 1
-    by_domain[domain]["scores"].append(result["score"])
-    by_diff[diff]["pass" if result["pass"] else "fail"] += 1
-    by_diff[diff]["scores"].append(result["score"])
+    results.append(rec)
+    by_domain[domain]["pass" if rec["pass"] else "fail"] += 1
+    by_domain[domain]["scores"].append(rec["score"])
+    by_diff[diff]["pass" if rec["pass"] else "fail"] += 1
+    by_diff[diff]["scores"].append(rec["score"])
+    time.sleep(5)  # Opus 4.8 rate limit: ~12 rpm
 
-    time.sleep(1)   # be gentle on the worker
+# ── Summary ───────────────────────────────────────────────────────────────────
+total  = len(results)
+passed = sum(1 for r in results if r["pass"])
+avg    = round(sum(r["score"] for r in results)/total) if total else 0
 
-# ── Summary ────────────────────────────────────────────────────────────────────
-total   = len(results)
-passed  = sum(1 for r in results if r["pass"])
-avg     = round(sum(r["score"] for r in results) / total) if total else 0
-
-print(f"\n{'═'*60}")
+print(f"\n{'═'*62}")
 print(f"  {BOLD}ИТОГ: {passed}/{total} PASS  |  Avg coverage: {avg}%{NC}")
-print(f"{'═'*60}")
+print(f"{'═'*62}")
 
 print(f"\n  {BOLD}По доменам:{NC}")
-for domain, stat in sorted(by_domain.items()):
-    t = stat["pass"] + stat["fail"]
-    a = round(sum(stat["scores"]) / len(stat["scores"]))
-    bar = "█" * (a // 10) + "░" * (10 - a // 10)
-    color = GREEN if a >= 70 else YELLOW if a >= 50 else RED
-    print(f"  {color}{bar}{NC}  {a:>3}%  {stat['pass']}/{t}  {domain}")
+for domain, s in sorted(by_domain.items()):
+    t = s["pass"]+s["fail"]
+    a = round(sum(s["scores"])/len(s["scores"]))
+    bar   = "█"*(a//10) + "░"*(10-a//10)
+    color = GREEN if a>=70 else YELLOW if a>=50 else RED
+    print(f"  {color}{bar}{NC}  {a:>3}%  {s['pass']}/{t}  {domain}")
 
 print(f"\n  {BOLD}По сложности:{NC}")
-for diff in ["easy", "medium", "hard", "expert"]:
-    if diff not in by_diff:
-        continue
-    stat = by_diff[diff]
-    t = stat["pass"] + stat["fail"]
-    a = round(sum(stat["scores"]) / len(stat["scores"]))
-    color = GREEN if a >= 70 else YELLOW if a >= 50 else RED
-    print(f"  {color}{a:>3}%{NC}  {stat['pass']}/{t}  {diff}")
+for diff in ["easy","medium","hard","expert"]:
+    if diff not in by_diff: continue
+    s = by_diff[diff]
+    t = s["pass"]+s["fail"]
+    a = round(sum(s["scores"])/len(s["scores"]))
+    color = GREEN if a>=70 else YELLOW if a>=50 else RED
+    print(f"  {color}{a:>3}%{NC}  {s['pass']}/{t}  {diff}")
 
-# ── Save results ───────────────────────────────────────────────────────────────
 RESULTS.mkdir(exist_ok=True)
-ts = datetime.now().strftime("%Y%m%d_%H%M")
+ts  = datetime.now().strftime("%Y%m%d_%H%M")
 out = RESULTS / f"run_{ts}.json"
 out.write_text(json.dumps({
-    "timestamp": ts, "total": total, "passed": passed, "avg_coverage": avg,
-    "by_domain": {d: {"pass": s["pass"], "fail": s["fail"],
-                       "avg": round(sum(s["scores"])/len(s["scores"]))}
-                  for d, s in by_domain.items()},
-    "questions": results
+    "timestamp":ts,"total":total,"passed":passed,"avg_coverage":avg,
+    "by_domain":{d:{"pass":s["pass"],"fail":s["fail"],
+                    "avg":round(sum(s["scores"])/len(s["scores"]))}
+                 for d,s in by_domain.items()},
+    "questions":results
 }, indent=2, ensure_ascii=False))
-print(f"\n  Результаты сохранены: {out}\n")
-
-sys.exit(0 if passed == total else 1)
+print(f"\n  Результаты: {out}\n")
+sys.exit(0 if passed==total else 1)

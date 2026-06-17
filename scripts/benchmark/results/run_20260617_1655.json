@@ -1,0 +1,668 @@
+{
+  "timestamp": "20260617_1655",
+  "total": 47,
+  "passed": 8,
+  "avg_coverage": 18,
+  "by_domain": {
+    "AIFC Fundamentals": {
+      "pass": 5,
+      "fail": 10,
+      "avg": 36
+    },
+    "Companies": {
+      "pass": 3,
+      "fail": 12,
+      "avg": 22
+    },
+    "Foundations": {
+      "pass": 0,
+      "fail": 11,
+      "avg": 0
+    },
+    "Court & Arbitration": {
+      "pass": 0,
+      "fail": 1,
+      "avg": 0
+    },
+    "Employment": {
+      "pass": 0,
+      "fail": 1,
+      "avg": 0
+    },
+    "Financial Services": {
+      "pass": 0,
+      "fail": 1,
+      "avg": 0
+    },
+    "Structuring & Red Team": {
+      "pass": 0,
+      "fail": 2,
+      "avg": 0
+    },
+    "Tax": {
+      "pass": 0,
+      "fail": 1,
+      "avg": 0
+    }
+  },
+  "questions": [
+    {
+      "id": "AIFC-001",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "easy",
+      "score": 67,
+      "pass": true,
+      "error": false,
+      "hit": [
+        "financial centre",
+        "AIFC legal framework"
+      ],
+      "miss": [
+        "special jurisdiction"
+      ],
+      "response_len": 4123
+    },
+    {
+      "id": "AIFC-002",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "easy",
+      "score": 67,
+      "pass": true,
+      "error": false,
+      "hit": [
+        "common law",
+        "AIFC Acts"
+      ],
+      "miss": [
+        "England and Wales"
+      ],
+      "response_len": 2760
+    },
+    {
+      "id": "AIFC-003",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "easy",
+      "score": 50,
+      "pass": false,
+      "error": false,
+      "hit": [
+        "AIFC framework"
+      ],
+      "miss": [
+        "primary legislation"
+      ],
+      "response_len": 3154
+    },
+    {
+      "id": "AIFC-004",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "easy",
+      "score": 33,
+      "pass": false,
+      "error": false,
+      "hit": [
+        "branch"
+      ],
+      "miss": [
+        "subsidiary",
+        "registration"
+      ],
+      "response_len": 5092
+    },
+    {
+      "id": "AIFC-005",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "easy",
+      "score": 50,
+      "pass": false,
+      "error": false,
+      "hit": [
+        "court proceedings"
+      ],
+      "miss": [
+        "English"
+      ],
+      "response_len": 2556
+    },
+    {
+      "id": "AIFC-006",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "hit": [
+        "consensual jurisdiction",
+        "AIFC Court"
+      ],
+      "miss": [],
+      "response_len": 4068
+    },
+    {
+      "id": "AIFC-007",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": false,
+      "hit": [],
+      "miss": [
+        "interaction",
+        "priority",
+        "jurisdiction"
+      ],
+      "response_len": 4925
+    },
+    {
+      "id": "AIFC-008",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "medium",
+      "score": 33,
+      "pass": false,
+      "error": false,
+      "hit": [
+        "registration"
+      ],
+      "miss": [
+        "continuation",
+        "redomiciliation"
+      ],
+      "response_len": 5857
+    },
+    {
+      "id": "AIFC-009",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "medium",
+      "score": 67,
+      "pass": true,
+      "error": false,
+      "hit": [
+        "common law",
+        "court system"
+      ],
+      "miss": [
+        "investment"
+      ],
+      "response_len": 6685
+    },
+    {
+      "id": "AIFC-010",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "hard",
+      "score": 67,
+      "pass": true,
+      "error": false,
+      "hit": [
+        "jurisdiction agreement",
+        "AIFC Court"
+      ],
+      "miss": [
+        "contractual choice"
+      ],
+      "response_len": 5934
+    },
+    {
+      "id": "COMP-001",
+      "domain": "Companies",
+      "difficulty": "easy",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "hit": [
+        "private company",
+        "share capital"
+      ],
+      "miss": [],
+      "response_len": 4377
+    },
+    {
+      "id": "COMP-002",
+      "domain": "Companies",
+      "difficulty": "easy",
+      "score": 0,
+      "pass": false,
+      "error": false,
+      "hit": [],
+      "miss": [
+        "minimum shareholders",
+        "incorporation"
+      ],
+      "response_len": 2474
+    },
+    {
+      "id": "COMP-003",
+      "domain": "Companies",
+      "difficulty": "easy",
+      "score": 0,
+      "pass": false,
+      "error": false,
+      "hit": [],
+      "miss": [
+        "corporate shareholder"
+      ],
+      "response_len": 3872
+    },
+    {
+      "id": "COMP-004",
+      "domain": "Companies",
+      "difficulty": "easy",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "hit": [
+        "limited liability"
+      ],
+      "miss": [],
+      "response_len": 3709
+    },
+    {
+      "id": "COMP-005",
+      "domain": "Companies",
+      "difficulty": "easy",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "hit": [
+        "articles of association",
+        "incorporation documents"
+      ],
+      "miss": [],
+      "response_len": 3519
+    },
+    {
+      "id": "COMP-006",
+      "domain": "Companies",
+      "difficulty": "medium",
+      "score": 33,
+      "pass": false,
+      "error": false,
+      "hit": [
+        "share classes"
+      ],
+      "miss": [
+        "voting rights",
+        "economic rights"
+      ],
+      "response_len": 3158
+    },
+    {
+      "id": "COMP-007",
+      "domain": "Companies",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "preferred shares",
+        "economic rights"
+      ]
+    },
+    {
+      "id": "COMP-008",
+      "domain": "Companies",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "share buyback",
+        "capital maintenance"
+      ]
+    },
+    {
+      "id": "COMP-009",
+      "domain": "Companies",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "ESOP",
+        "employee incentives"
+      ]
+    },
+    {
+      "id": "COMP-010",
+      "domain": "Companies",
+      "difficulty": "hard",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "share classes",
+        "founders",
+        "ESOP",
+        "governance"
+      ]
+    },
+    {
+      "id": "FOUND-001",
+      "domain": "Foundations",
+      "difficulty": "easy",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "legal personality",
+        "asset holding"
+      ]
+    },
+    {
+      "id": "FOUND-002",
+      "domain": "Foundations",
+      "difficulty": "easy",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "no shareholders",
+        "founder"
+      ]
+    },
+    {
+      "id": "FOUND-003",
+      "domain": "Foundations",
+      "difficulty": "easy",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "asset ownership",
+        "shareholding"
+      ]
+    },
+    {
+      "id": "FOUND-004",
+      "domain": "Foundations",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "founder powers",
+        "governance"
+      ]
+    },
+    {
+      "id": "FOUND-005",
+      "domain": "Foundations",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "management",
+        "governance"
+      ]
+    },
+    {
+      "id": "FOUND-006",
+      "domain": "Foundations",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "inheritance planning",
+        "wealth planning"
+      ]
+    },
+    {
+      "id": "FOUND-007",
+      "domain": "Foundations",
+      "difficulty": "hard",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "trust",
+        "legal personality",
+        "ownership"
+      ]
+    },
+    {
+      "id": "FOUND-008",
+      "domain": "Foundations",
+      "difficulty": "hard",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "ownership structure",
+        "governance"
+      ]
+    },
+    {
+      "id": "FOUND-009",
+      "domain": "Foundations",
+      "difficulty": "hard",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "succession",
+        "governance",
+        "asset protection"
+      ]
+    },
+    {
+      "id": "FOUND-010",
+      "domain": "Foundations",
+      "difficulty": "expert",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "probate",
+        "succession",
+        "inheritance"
+      ]
+    },
+    {
+      "id": "FUND-001",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": []
+    },
+    {
+      "id": "FUND-002",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": []
+    },
+    {
+      "id": "FUND-003",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": []
+    },
+    {
+      "id": "FUND-004",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": []
+    },
+    {
+      "id": "FUND-005",
+      "domain": "AIFC Fundamentals",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": []
+    },
+    {
+      "id": "COMP-001",
+      "domain": "Companies",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "Solvency Test"
+      ]
+    },
+    {
+      "id": "COMP-002",
+      "domain": "Companies",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "Articles"
+      ]
+    },
+    {
+      "id": "COMP-003",
+      "domain": "Companies",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "UBO"
+      ]
+    },
+    {
+      "id": "COMP-004",
+      "domain": "Companies",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": []
+    },
+    {
+      "id": "COMP-005",
+      "domain": "Companies",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": []
+    },
+    {
+      "id": "COURT-001",
+      "domain": "Court & Arbitration",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": []
+    },
+    {
+      "id": "EMP-001",
+      "domain": "Employment",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "ТК РК",
+        "Employment Regulations"
+      ]
+    },
+    {
+      "id": "FIN-001",
+      "domain": "Financial Services",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "Schedule 1",
+        "обязан",
+        "Permission Schedule",
+        "FSMR"
+      ]
+    },
+    {
+      "id": "FOUND-001",
+      "domain": "Foundations",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "ТОО"
+      ]
+    },
+    {
+      "id": "STR-001",
+      "domain": "Structuring & Red Team",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": []
+    },
+    {
+      "id": "RED-001",
+      "domain": "Structuring & Red Team",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "обязан",
+        "категорически"
+      ]
+    },
+    {
+      "id": "TAX-001",
+      "domain": "Tax",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": true,
+      "hit": [],
+      "miss": [
+        "Substance",
+        "CIGA"
+      ]
+    }
+  ]
+}
