@@ -2136,12 +2136,12 @@ function finalizeAiBubble(ai, rawText, meta, linkStatus, brokenCount) {
           const userQ = chatHistory.at(-2)?.content || '';
           const aiA = ai.inner.querySelector('.msg-bubble')?.innerText || '';
           sb.from('bug_reports').insert({
-            user_id: currentUser?.id || null,
+            user_id: null,
             area: currentArea || 'general',
             question: userQ.slice(0, 2000),
             answer: aiA.slice(0, 4000),
             created_at: new Date().toISOString(),
-          }).catch(() => {});
+          }).then(({ error }) => { if (error) console.warn('bug_report insert:', error.message); });
         }
       };
       rate.appendChild(b);
