@@ -1,0 +1,70 @@
+{
+  "domain": "Hard Facts (Gemini v3.1, verified)",
+  "total_questions": 7,
+  "_note": "Вопросы — от Gemini (Путь B). Эталоны expected_exact_match ВПИСАНЫ ВРУЧНУЮ после сверки с первоисточниками (afsa.aifc.kz, orderly.myafsa.com, aifc.kz, НК РК 2026), НЕ сгенерированы LLM. Матчинг пробело/регистро-устойчив. Поле _verified фиксирует источник и уровень уверенности (HIGH/MEDIUM). MEDIUM = требует финального подтверждения юристом.",
+  "questions": [
+    {
+      "id": "FACT-COMP-006",
+      "domain": "Companies Rules (Сроки)",
+      "question": "В течение какого точного срока (в днях) компания в МФЦА обязана направить Регистратору уведомление об изменении своего зарегистрированного адреса (Registered Office)?",
+      "expected_exact_match": ["14 дней", "14 days", "14 кален"],
+      "forbidden_match": ["30 дней", "7 дней", "месяц"],
+      "test_intent": "Дедлайн уведомления об изменении Registered Office.",
+      "_verified": "HIGH — AIFC Companies Regulations: уведомление об изменении registered details в течение 14 дней (aifc.kz/notifications, afsa post-registration)."
+    },
+    {
+      "id": "FACT-COMP-007",
+      "domain": "Companies Rules (Директора)",
+      "question": "В течение какого точного срока (в днях) компания в МФЦА обязана уведомить Регистратора о назначении нового директора или прекращении полномочий директора?",
+      "expected_exact_match": ["14 дней", "14 days", "14 кален"],
+      "forbidden_match": ["30 дней", "месяц"],
+      "test_intent": "Дедлайн уведомления о смене директора.",
+      "_verified": "HIGH — тот же 14-дневный режим уведомлений об изменении registered details (AIFC Companies Regulations)."
+    },
+    {
+      "id": "FACT-COMP-008",
+      "domain": "Companies Rules (Капитал)",
+      "question": "Каков минимальный размер уставного капитала (Share Capital) в USD для регистрации Public Company (PLC) в МФЦА?",
+      "expected_exact_match": ["100,000", "100 000", "100000", "$100,000", "100 тыс"],
+      "forbidden_match": ["50,000", "1,000,000", "250,000"],
+      "test_intent": "Минимальный капитал PLC.",
+      "_verified": "HIGH — AIFC Companies Regulations Section 43(3)(a): «a Public Company must have an allotted share capital ... of no less than U.S. $100,000 at any time» (подтверждено и сайтом AFSA). ⚠ БОТ ОШИБАЕТСЯ: выдаёт $25,000 со ссылкой на несуществующее Rule 28 — галлюцинация, требует фикса RAG."
+    },
+    {
+      "id": "FACT-FEES-009",
+      "domain": "Fees Rules (Foundations)",
+      "question": "Каков точный размер регистрационного сбора (USD) за регистрацию Foundation в МФЦА при онлайн-подаче?",
+      "expected_exact_match": ["1500 USD", "1 500 USD", "$1,500", "$1500", "1500 долл"],
+      "forbidden_match": ["1000 USD", "1700 USD", "500 USD"],
+      "test_intent": "Пошлина регистрации Foundation (отличается от Private Company).",
+      "_verified": "MEDIUM — afsa.aifc.kz/registration/types-of-participants/foundations/: «1500 USD online / 4500 USD paper». Поиск ранее давал 1000/1700 — расхождение; подтвердить по AIFC Fees Rules (orderly)."
+    },
+    {
+      "id": "FACT-TAX-010",
+      "domain": "Tax (НДС Порог)",
+      "question": "Каков минимальный порог годового оборота для обязательной постановки на учёт по НДС в РК с 2026 года? Назови в МРП и/или в тенге.",
+      "expected_exact_match": ["10 000 МРП", "10000 МРП", "10 000 мрп", "43 млн", "43 250 000", "43250000"],
+      "forbidden_match": ["20 000 МРП", "20000 МРП", "30 000 МРП"],
+      "test_intent": "Порог НДС 2026 (снижен вдвое с 20 000 до 10 000 МРП).",
+      "_verified": "HIGH — НК РК с 01.01.2026: порог 10 000 МРП (≈43 млн ₸ при МРП≈4325). Множественные источники KZ (iris.kz, mybuh.kz, pro1c.kz)."
+    },
+    {
+      "id": "FACT-FIN-011",
+      "domain": "Financial Services (CIS Сроки)",
+      "question": "В течение какого точного срока после окончания финансового года управляющая компания фонда МФЦА обязана подать в AFSA годовую отчётность фонда?",
+      "expected_exact_match": ["6 месяцев", "6 months", "шести месяцев"],
+      "forbidden_match": ["3 месяца", "4 месяца", "90 дней"],
+      "test_intent": "Срок годовой отчётности CIS-фонда.",
+      "_verified": "HIGH — AIFC CIS Rules / annual filing guidance: в течение 6 месяцев после окончания фин. года (orderly.myafsa.com CIS Rules; afsa annual-filing guidance)."
+    },
+    {
+      "id": "FACT-COURT-012",
+      "domain": "Court & Arbitration (Апелляция)",
+      "question": "В течение какого точного срока (в днях) сторона вправе подать апелляцию в Апелляционный суд МФЦА (Court of Appeal) на решение Суда первой инстанции (общий случай, не interim)?",
+      "expected_exact_match": ["21 день", "21 days", "21 дня", "21 кален"],
+      "forbidden_match": ["30 дней", "14 дней", "60 дней"],
+      "test_intent": "Срок апелляции на решение CFI.",
+      "_verified": "MEDIUM — общий срок 21 день (AIFC Court Rules, по аналогу ADGM r.206: 21 day; 7 дней для interim/после отказа). Подтвердить точную норму AIFC Court Rules 2018."
+    }
+  ]
+}
