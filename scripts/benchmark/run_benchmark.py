@@ -152,7 +152,7 @@ def judge(scenario: str, test_intent: str, answer: str) -> tuple:
     except Exception:
         return None, "judge: invalid JSON"
     if "score" not in d:
-        return None, "judge: " + str(d.get("error", d))[:80]
+        return None, "judge: " + str(d.get("error", d))[:140]
     return d["score"].upper() == "PASSED", d.get("reason", "")
 
 # ── Score (keyword fallback) ──────────────────────────────────────────────────
