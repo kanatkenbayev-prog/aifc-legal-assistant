@@ -222,11 +222,13 @@ for i, q in enumerate(questions, 1):
         # PASS = присутствует хотя бы один эталонный вариант. Это единственный надёжный
         # сигнал: юр-ответ законно упоминает несколько ставок/условий, поэтому
         # forbidden_match НЕ авто-валит (иначе false-fail), а лишь помечает на ревью.
-        low = response.lower()
+        # Матчинг устойчив к пробелам/регистру: "14 дней" == "14  ДНЕЙ", "15 %" == "15%".
+        def _norm(s): return re.sub(r"\s+", "", s.lower())
+        low = _norm(response)
         variants = q["expected_exact_match"]
         forbidden = q.get("forbidden_match", [])
-        hit_v = [v for v in variants if v.lower() in low]
-        bad_v = [v for v in forbidden if v.lower() in low]
+        hit_v = [v for v in variants if _norm(v) in low]
+        bad_v = [v for v in forbidden if _norm(v) in low]
         passed = bool(hit_v)
         sym = f"{GREEN}✓ FACT{NC}" if passed else f"{RED}✗ FACT{NC}"
         detail = (f"matched: {hit_v}" if hit_v else f"none of {variants}")
