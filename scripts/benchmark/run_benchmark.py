@@ -43,15 +43,21 @@ ap.add_argument("--limit",      type=int,     default=None)
 ap.add_argument("--lang",       default="en", choices=["en","ru"])
 ap.add_argument("--judge",      action="store_true",
                 help="LLM-as-judge scoring via /judge (Haiku) instead of keyword matching")
+ap.add_argument("--dir",        default="domains",
+                help="subfolder under benchmark/ to load question files from (default: domains)")
+ap.add_argument("--sample",     type=int, default=None,
+                help="keep at most N questions per unique (domain, test_intent) — для наборов с дубликатами")
 args = ap.parse_args()
+
+DOMAINS = BASE / args.dir
 
 # ── Load questions from domains/ ──────────────────────────────────────────────
 def load_domains() -> list:
     questions = []
     files = sorted(DOMAINS.glob("*.json")) if DOMAINS.exists() else []
-    # also load legacy benchmark_v1.json
+    # legacy benchmark_v1.json подмешиваем только для дефолтного набора
     legacy = BASE / "benchmark_v1.json"
-    if legacy.exists():
+    if args.dir == "domains" and legacy.exists():
         files = [legacy] + list(files)
 
     for f in files:
@@ -103,6 +109,17 @@ if args.domain:
     questions = [q for q in questions if args.domain.lower() in q.get("domain","").lower()]
 if args.difficulty:
     questions = [q for q in questions if q.get("difficulty") == args.difficulty]
+if args.sample:
+    # дедуп почти-дубликатов: не более N на уникальный (domain, test_intent)
+    seen = defaultdict(int)
+    sampled = []
+    for q in questions:
+        key = (q.get("domain",""), q.get("test_intent","") or q.get("question","")[:60])
+        if seen[key] < args.sample:
+            seen[key] += 1
+            sampled.append(q)
+    print(f"  [sample] {len(questions)} → {len(sampled)} (≤{args.sample} на уник. test_intent)")
+    questions = sampled
 if args.limit:
     questions = questions[:args.limit]
 

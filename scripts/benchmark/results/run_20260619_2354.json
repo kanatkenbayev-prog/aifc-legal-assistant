@@ -1,0 +1,25 @@
+{
+  "timestamp": "20260619_2354",
+  "total": 1,
+  "passed": 1,
+  "avg_coverage": 100,
+  "by_domain": {
+    "Tax": {
+      "pass": 1,
+      "fail": 0,
+      "avg": 100
+    }
+  },
+  "questions": [
+    {
+      "id": "TAX-ADV-003",
+      "domain": "Tax",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "reason": "Ассистент корректно срабатил на Предохранитель №2: выявил двойной риск (консалтинг вне Qualifying Activities + отсутствие Substance по CIGA/квалифицированным сотрудникам/OpEx), правильно различил периметр МФЦА и территорию РК, сослался на верные нормы (Конституционный закон №438-V ст.6, List of Financial Services, Rules on Substantial Presence п.3.1-3.2), обоснованно отказал в признании льготы и рекомендовал КПН 20%+НДС 16% как реальный риск.",
+      "response_len": 5819
+    }
+  ]
+}
