@@ -1,0 +1,224 @@
+{
+  "timestamp": "20260620_0046",
+  "total": 11,
+  "passed": 11,
+  "avg_coverage": 100,
+  "by_domain": {
+    "Hard Facts": {
+      "pass": 4,
+      "fail": 0,
+      "avg": 100
+    },
+    "Companies Rules (Сроки)": {
+      "pass": 1,
+      "fail": 0,
+      "avg": 100
+    },
+    "Companies Rules (Директора)": {
+      "pass": 1,
+      "fail": 0,
+      "avg": 100
+    },
+    "Companies Rules (Капитал)": {
+      "pass": 1,
+      "fail": 0,
+      "avg": 100
+    },
+    "Fees Rules (Foundations)": {
+      "pass": 1,
+      "fail": 0,
+      "avg": 100
+    },
+    "Tax (НДС Порог)": {
+      "pass": 1,
+      "fail": 0,
+      "avg": 100
+    },
+    "Financial Services (CIS Сроки)": {
+      "pass": 1,
+      "fail": 0,
+      "avg": 100
+    },
+    "Court & Arbitration (Апелляция)": {
+      "pass": 1,
+      "fail": 0,
+      "avg": 100
+    }
+  },
+  "questions": [
+    {
+      "id": "FACT-UBO-001",
+      "domain": "Hard Facts",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "14 дней",
+        "14 days"
+      ],
+      "review_flag": [
+        "30 дней",
+        "месяц"
+      ],
+      "response_len": 2518
+    },
+    {
+      "id": "FACT-TAX-WHT-001",
+      "domain": "Hard Facts",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "15%"
+      ],
+      "review_flag": [
+        "20%",
+        "10%"
+      ],
+      "response_len": 2669
+    },
+    {
+      "id": "FACT-AFSA-FEE-001",
+      "domain": "Hard Facts",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "500 USD",
+        "500 USD"
+      ],
+      "review_flag": [],
+      "response_len": 1827
+    },
+    {
+      "id": "FACT-AFSA-FEE-002",
+      "domain": "Hard Facts",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "1500 USD",
+        "1 500 USD"
+      ],
+      "review_flag": [],
+      "response_len": 1923
+    },
+    {
+      "id": "FACT-COMP-006",
+      "domain": "Companies Rules (Сроки)",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "14 дней"
+      ],
+      "review_flag": [
+        "30 дней",
+        "месяц"
+      ],
+      "response_len": 2040
+    },
+    {
+      "id": "FACT-COMP-007",
+      "domain": "Companies Rules (Директора)",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "14 дней"
+      ],
+      "review_flag": [
+        "30 дней",
+        "месяц"
+      ],
+      "response_len": 2697
+    },
+    {
+      "id": "FACT-COMP-008",
+      "domain": "Companies Rules (Капитал)",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "100 000",
+        "100000"
+      ],
+      "review_flag": [],
+      "response_len": 2450
+    },
+    {
+      "id": "FACT-FEES-009",
+      "domain": "Fees Rules (Foundations)",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "1500 USD",
+        "1 500 USD"
+      ],
+      "review_flag": [
+        "500 USD"
+      ],
+      "response_len": 1676
+    },
+    {
+      "id": "FACT-TAX-010",
+      "domain": "Tax (НДС Порог)",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "10 000 МРП",
+        "10000 МРП",
+        "10 000 мрп",
+        "43 млн",
+        "43 250 000",
+        "43250000"
+      ],
+      "review_flag": [
+        "20 000 МРП",
+        "20000 МРП",
+        "30 000 МРП"
+      ],
+      "response_len": 2729
+    },
+    {
+      "id": "FACT-FIN-011",
+      "domain": "Financial Services (CIS Сроки)",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "6 месяцев"
+      ],
+      "review_flag": [],
+      "response_len": 3030
+    },
+    {
+      "id": "FACT-COURT-012",
+      "domain": "Court & Arbitration (Апелляция)",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "21 день",
+        "21 days"
+      ],
+      "review_flag": [
+        "14 дней"
+      ],
+      "response_len": 2228
+    }
+  ]
+}

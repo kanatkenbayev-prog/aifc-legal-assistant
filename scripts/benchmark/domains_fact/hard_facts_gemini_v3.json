@@ -64,7 +64,7 @@
       "expected_exact_match": ["21 день", "21 days", "21 дня", "21 кален"],
       "forbidden_match": ["30 дней", "14 дней", "60 дней"],
       "test_intent": "Срок апелляции на решение CFI.",
-      "_verified": "MEDIUM — общий срок 21 день (AIFC Court Rules, по аналогу ADGM r.206: 21 day; 7 дней для interim/после отказа). Подтвердить точную норму AIFC Court Rules 2018."
+      "_verified": "HIGH — AIFC Court Rules 2018, Rule 29.8(2): «within 21 days after the date of the decision» (подтверждено по PDF первоисточника). ⚠ Бот изначально выдавал 14 дней — пробел закрыт заливкой нормы в RAG."
     }
   ]
 }

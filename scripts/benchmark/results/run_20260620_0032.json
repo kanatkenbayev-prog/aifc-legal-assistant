@@ -1,0 +1,196 @@
+{
+  "timestamp": "20260620_0032",
+  "total": 11,
+  "passed": 6,
+  "avg_coverage": 55,
+  "by_domain": {
+    "Hard Facts": {
+      "pass": 4,
+      "fail": 0,
+      "avg": 100
+    },
+    "Companies Rules (Сроки)": {
+      "pass": 0,
+      "fail": 1,
+      "avg": 0
+    },
+    "Companies Rules (Директора)": {
+      "pass": 0,
+      "fail": 1,
+      "avg": 0
+    },
+    "Companies Rules (Капитал)": {
+      "pass": 0,
+      "fail": 1,
+      "avg": 0
+    },
+    "Fees Rules (Foundations)": {
+      "pass": 0,
+      "fail": 1,
+      "avg": 0
+    },
+    "Tax (НДС Порог)": {
+      "pass": 0,
+      "fail": 1,
+      "avg": 0
+    },
+    "Financial Services (CIS Сроки)": {
+      "pass": 1,
+      "fail": 0,
+      "avg": 100
+    },
+    "Court & Arbitration (Апелляция)": {
+      "pass": 1,
+      "fail": 0,
+      "avg": 100
+    }
+  },
+  "questions": [
+    {
+      "id": "FACT-UBO-001",
+      "domain": "Hard Facts",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "14 дней"
+      ],
+      "review_flag": [
+        "незамедлительно"
+      ],
+      "response_len": 3617
+    },
+    {
+      "id": "FACT-TAX-WHT-001",
+      "domain": "Hard Facts",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "15%"
+      ],
+      "review_flag": [
+        "20%",
+        "10%"
+      ],
+      "response_len": 2424
+    },
+    {
+      "id": "FACT-AFSA-FEE-001",
+      "domain": "Hard Facts",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "500 USD",
+        "500 USD"
+      ],
+      "review_flag": [],
+      "response_len": 2289
+    },
+    {
+      "id": "FACT-AFSA-FEE-002",
+      "domain": "Hard Facts",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "1500 USD",
+        "1 500 USD"
+      ],
+      "review_flag": [],
+      "response_len": 2569
+    },
+    {
+      "id": "FACT-COMP-006",
+      "domain": "Companies Rules (Сроки)",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": false,
+      "matched": [],
+      "review_flag": [
+        "30 дней"
+      ],
+      "response_len": 3600
+    },
+    {
+      "id": "FACT-COMP-007",
+      "domain": "Companies Rules (Директора)",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": false,
+      "matched": [],
+      "review_flag": [],
+      "response_len": 3466
+    },
+    {
+      "id": "FACT-COMP-008",
+      "domain": "Companies Rules (Капитал)",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": false,
+      "matched": [],
+      "review_flag": [],
+      "response_len": 2105
+    },
+    {
+      "id": "FACT-FEES-009",
+      "domain": "Fees Rules (Foundations)",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": false,
+      "matched": [],
+      "review_flag": [],
+      "response_len": 3505
+    },
+    {
+      "id": "FACT-TAX-010",
+      "domain": "Tax (НДС Порог)",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": false,
+      "matched": [],
+      "review_flag": [
+        "30 000 МРП"
+      ],
+      "response_len": 3897
+    },
+    {
+      "id": "FACT-FIN-011",
+      "domain": "Financial Services (CIS Сроки)",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "6 месяцев"
+      ],
+      "review_flag": [
+        "3 месяца"
+      ],
+      "response_len": 3265
+    },
+    {
+      "id": "FACT-COURT-012",
+      "domain": "Court & Arbitration (Апелляция)",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "21 день"
+      ],
+      "review_flag": [],
+      "response_len": 3554
+    }
+  ]
+}
