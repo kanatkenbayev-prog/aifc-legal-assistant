@@ -1,0 +1,74 @@
+{
+  "timestamp": "20260620_0009",
+  "total": 4,
+  "passed": 4,
+  "avg_coverage": 100,
+  "by_domain": {
+    "Hard Facts": {
+      "pass": 4,
+      "fail": 0,
+      "avg": 100
+    }
+  },
+  "questions": [
+    {
+      "id": "FACT-UBO-001",
+      "domain": "Hard Facts",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "14 дней"
+      ],
+      "review_flag": [
+        "незамедлительно"
+      ],
+      "response_len": 3617
+    },
+    {
+      "id": "FACT-TAX-WHT-001",
+      "domain": "Hard Facts",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "15%"
+      ],
+      "review_flag": [
+        "20%",
+        "10%"
+      ],
+      "response_len": 2424
+    },
+    {
+      "id": "FACT-AFSA-FEE-001",
+      "domain": "Hard Facts",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "500 USD",
+        "500 USD"
+      ],
+      "review_flag": [],
+      "response_len": 2289
+    },
+    {
+      "id": "FACT-AFSA-FEE-002",
+      "domain": "Hard Facts",
+      "difficulty": "medium",
+      "score": 100,
+      "pass": true,
+      "error": false,
+      "matched": [
+        "1500 USD",
+        "1 500 USD"
+      ],
+      "review_flag": [],
+      "response_len": 2569
+    }
+  ]
+}

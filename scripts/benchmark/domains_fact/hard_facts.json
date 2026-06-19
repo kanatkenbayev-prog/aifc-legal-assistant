@@ -1,6 +1,6 @@
 {
   "domain": "Hard Facts",
-  "total_questions": 3,
+  "total_questions": 4,
   "_note": "Детерминированный exact-match скоринг (без LLM-судьи). ЭТАЛОНЫ обязаны быть сверены с первоисточником (AIFC acts / AFSA fee schedule / НК РК), НЕ сгенерированы LLM. forbidden_match = заведомо неверные значения → авто-FAIL. Поле _verified фиксирует, кто/чем подтвердил ответ.",
   "questions": [
     {
@@ -21,11 +21,19 @@
     },
     {
       "id": "FACT-AFSA-FEE-001",
-      "question": "Каков регистрационный сбор AFSA за создание Private Company в МФЦА (USD)? Назови сумму.",
-      "expected_exact_match": ["__TBD__"],
+      "question": "Каков регистрационный сбор AFSA за создание Private Company в МФЦА при ОНЛАЙН-подаче (USD)? Назови сумму.",
+      "expected_exact_match": ["500 USD", "500 долл", "$500", "500 USD"],
+      "forbidden_match": ["300 USD", "100 USD"],
+      "test_intent": "Точная пошлина онлайн-регистрации Private Company 2026.",
+      "_verified": "VERIFIED 2026-06-20 via afsa.aifc.kz/registration/types-of-participants/private-company/ — «500 USD for online application». (Gemini ошибочно называл 300/100 USD.)"
+    },
+    {
+      "id": "FACT-AFSA-FEE-002",
+      "question": "Каков регистрационный сбор AFSA за создание Private Company в МФЦА при БУМАЖНОЙ подаче (USD)? Назови сумму.",
+      "expected_exact_match": ["1500 USD", "1 500 USD", "1500 долл", "$1500", "$1,500"],
       "forbidden_match": [],
-      "test_intent": "Точный размер пошлины 2026. ЭТАЛОН НЕ ЗАПОЛНЕН — требуется сверка с официальным AFSA Fees Schedule, НЕ из LLM.",
-      "_verified": "NOT SET — заполнить только после сверки с afsa.aifc.kz fee schedule."
+      "test_intent": "Точная пошлина бумажной регистрации Private Company 2026.",
+      "_verified": "VERIFIED 2026-06-20 via afsa.aifc.kz/registration/types-of-participants/private-company/ — «1500 USD for paper application»."
     }
   ]
 }
