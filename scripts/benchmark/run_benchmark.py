@@ -19,9 +19,10 @@ from pathlib import Path
 from collections import defaultdict
 from datetime import datetime
 
-WORKER   = "https://aifc-legal-proxy.aifclegal.workers.dev"
-TEST_KEY = "aifc-admin-2026-v2"
-TIMEOUT  = 90
+WORKER     = "https://aifc-legal-proxy.aifclegal.workers.dev"
+TEST_KEY   = "aifc-admin-2026-v2"
+ADMIN_KEY  = "aifc-admin-2026-v2"
+TIMEOUT    = 90
 BASE     = Path(__file__).parent
 DOMAINS  = BASE / "domains"
 RESULTS  = BASE / "results"
@@ -40,6 +41,8 @@ ap.add_argument("--difficulty", default=None, choices=["easy","medium","hard","e
 ap.add_argument("--ids",        default=None, help="comma-separated IDs")
 ap.add_argument("--limit",      type=int,     default=None)
 ap.add_argument("--lang",       default="en", choices=["en","ru"])
+ap.add_argument("--judge",      action="store_true",
+                help="LLM-as-judge scoring via /judge (Haiku) instead of keyword matching")
 args = ap.parse_args()
 
 # ── Load questions from domains/ ──────────────────────────────────────────────
@@ -133,7 +136,26 @@ def ask(question: str, lang: str = "en") -> tuple:
         error_msg = f"curl exit {r.returncode}"
     return text.strip(), error_msg
 
-# ── Score ─────────────────────────────────────────────────────────────────────
+# ── Judge (LLM-as-judge via /judge endpoint, Haiku) ───────────────────────────
+def judge(scenario: str, test_intent: str, answer: str) -> tuple:
+    """Returns (passed: bool, reason: str). Falls back to (None, err) on failure."""
+    payload = json.dumps({
+        "key": ADMIN_KEY, "scenario": scenario,
+        "test_intent": test_intent, "answer": answer,
+    })
+    r = subprocess.run(
+        ["curl","-s","-X","POST",f"{WORKER}/judge",
+         "-H","Content-Type: application/json","-d",payload,"--max-time","60"],
+        capture_output=True)
+    try:
+        d = json.loads(r.stdout.decode("utf-8", errors="ignore"))
+    except Exception:
+        return None, "judge: invalid JSON"
+    if "score" not in d:
+        return None, "judge: " + str(d.get("error", d))[:80]
+    return d["score"].upper() == "PASSED", d.get("reason", "")
+
+# ── Score (keyword fallback) ──────────────────────────────────────────────────
 def score(response: str, topics: list) -> tuple:
     if not topics:
         # No topics = check response is non-empty and not an error
@@ -153,7 +175,8 @@ def score(response: str, topics: list) -> tuple:
 # ── Run ───────────────────────────────────────────────────────────────────────
 print(f"\n{'═'*62}")
 print(f"  AIFC Legal Benchmark v1")
-print(f"  {datetime.now().strftime('%Y-%m-%d %H:%M')}  |  {len(questions)} вопросов  |  lang={args.lang}")
+scorer = "LLM-judge (Haiku)" if args.judge else "keyword"
+print(f"  {datetime.now().strftime('%Y-%m-%d %H:%M')}  |  {len(questions)} вопросов  |  lang={args.lang}  |  scoring: {scorer}")
 print(f"{'═'*62}\n")
 
 results   = []
@@ -177,6 +200,20 @@ for i, q in enumerate(questions, 1):
         print(f"         {RED}✗ ERROR — {msg}{NC}")
         rec = {"id":qid,"domain":domain,"difficulty":diff,"score":0,
                "pass":False,"error":True,"error_msg":msg,"hit":[],"miss":q["expected_topics"]}
+    elif args.judge:
+        passed, reason = judge(q["question"], intent, response)
+        if passed is None:  # judge unavailable → fall back to keyword
+            pct, hit, miss = score(response, q["expected_topics"])
+            passed = pct >= PASS_THRESHOLD
+            sym = f"{GREEN}✓{NC}" if passed else f"{RED}✗{NC}"
+            print(f"         {sym} {pct}% (judge fail, keyword fallback: {reason})")
+            rec = {"id":qid,"domain":domain,"difficulty":diff,"score":pct,
+                   "pass":passed,"error":False,"hit":hit,"miss":miss,"response_len":len(response)}
+        else:
+            sym = f"{GREEN}✓ PASSED{NC}" if passed else f"{RED}✗ FAILED{NC}"
+            print(f"         {sym}  {reason[:110]}{'…' if len(reason)>110 else ''}")
+            rec = {"id":qid,"domain":domain,"difficulty":diff,"score":100 if passed else 0,
+                   "pass":passed,"error":False,"reason":reason,"response_len":len(response)}
     else:
         pct, hit, miss = score(response, q["expected_topics"])
         passed = pct >= PASS_THRESHOLD
