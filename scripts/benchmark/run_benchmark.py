@@ -217,6 +217,24 @@ for i, q in enumerate(questions, 1):
         print(f"         {RED}✗ ERROR — {msg}{NC}")
         rec = {"id":qid,"domain":domain,"difficulty":diff,"score":0,
                "pass":False,"error":True,"error_msg":msg,"hit":[],"miss":q["expected_topics"]}
+    elif q.get("expected_exact_match"):
+        # Hard Fact: детерминированный матчинг (без LLM-судьи — нет «сговора моделей»).
+        # PASS = присутствует хотя бы один эталонный вариант. Это единственный надёжный
+        # сигнал: юр-ответ законно упоминает несколько ставок/условий, поэтому
+        # forbidden_match НЕ авто-валит (иначе false-fail), а лишь помечает на ревью.
+        low = response.lower()
+        variants = q["expected_exact_match"]
+        forbidden = q.get("forbidden_match", [])
+        hit_v = [v for v in variants if v.lower() in low]
+        bad_v = [v for v in forbidden if v.lower() in low]
+        passed = bool(hit_v)
+        sym = f"{GREEN}✓ FACT{NC}" if passed else f"{RED}✗ FACT{NC}"
+        detail = (f"matched: {hit_v}" if hit_v else f"none of {variants}")
+        if bad_v: detail += f"  | {YELLOW}⚑ review (forbidden present): {bad_v}{NC}"
+        print(f"         {sym}  {detail}")
+        rec = {"id":qid,"domain":domain,"difficulty":diff,"score":100 if passed else 0,
+               "pass":passed,"error":False,"matched":hit_v,"review_flag":bad_v,
+               "response_len":len(response)}
     elif args.judge:
         passed, reason = judge(q["question"], intent, response)
         if passed is None:  # judge unavailable → fall back to keyword

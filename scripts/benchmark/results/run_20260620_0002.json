@@ -1,0 +1,57 @@
+{
+  "timestamp": "20260620_0002",
+  "total": 3,
+  "passed": 0,
+  "avg_coverage": 0,
+  "by_domain": {
+    "Hard Facts": {
+      "pass": 0,
+      "fail": 3,
+      "avg": 0
+    }
+  },
+  "questions": [
+    {
+      "id": "FACT-UBO-001",
+      "domain": "Hard Facts",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": false,
+      "matched": [
+        "14 дней"
+      ],
+      "forbidden_hit": [
+        "незамедлительно"
+      ],
+      "response_len": 3617
+    },
+    {
+      "id": "FACT-TAX-WHT-001",
+      "domain": "Hard Facts",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": false,
+      "matched": [
+        "15%"
+      ],
+      "forbidden_hit": [
+        "20%",
+        "10%"
+      ],
+      "response_len": 2424
+    },
+    {
+      "id": "FACT-AFSA-FEE-001",
+      "domain": "Hard Facts",
+      "difficulty": "medium",
+      "score": 0,
+      "pass": false,
+      "error": false,
+      "matched": [],
+      "forbidden_hit": [],
+      "response_len": 1873
+    }
+  ]
+}
