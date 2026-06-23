@@ -1,0 +1,70 @@
+{
+  "domain": "Table Facts (числа из таблиц актов — сборы, капитал, пороги)",
+  "total_questions": 9,
+  "_note": "Детерминированный exact-match. Эталоны сверены с первоисточниками (orderly.myafsa.com PRU(INV) 3.3; aifc.kz FEES v16; BBR v6 4.10; CIS v8 2.2; COB v14 2.3.1). Закрывают класс багов «таблицы терялись при текстовой заливке RAG». Залито в RAG: pru-inv-base-capital-3-3, afsa-fees-schedule, bbr-base-capital-4-10, cis-fund-types-2-2.",
+  "questions": [
+    {
+      "id": "TBL-CAP-INV-001",
+      "question": "Каков минимальный базовый капитал (Base Capital Requirement) для лицензии Managing Investments в МФЦА? Точная сумма USD.",
+      "expected_exact_match": ["150 000", "150,000", "150000"],
+      "forbidden_match": ["100 000", "50 000", "25 000", "10 000 000"],
+      "_verified": "PRU(INV) Rule 3.3, Table 3.3 — Managing Investments = 150,000 USD."
+    },
+    {
+      "id": "TBL-CAP-INV-002",
+      "question": "Каков минимальный базовый капитал для Dealing in Investments as Principal в МФЦА (не matched principal)? Точная сумма USD.",
+      "expected_exact_match": ["500 000", "500,000", "500000"],
+      "forbidden_match": ["50 000", "150 000", "10 000 000"],
+      "_verified": "PRU(INV) Table 3.3 — Dealing as Principal = 500,000 USD (matched-only = 50,000)."
+    },
+    {
+      "id": "TBL-CAP-BANK-003",
+      "question": "Каков минимальный базовый капитал для банка (Accepting Deposits) в МФЦА? Точная сумма.",
+      "expected_exact_match": ["10 million", "10 млн", "10,000,000", "10 000 000", "10 миллион"],
+      "forbidden_match": ["5 million", "2 million", "500,000", "150 000"],
+      "_verified": "BBR Rule 4.10(a) — Bank = USD 10 million."
+    },
+    {
+      "id": "TBL-CAP-CREDIT-004",
+      "question": "Каков минимальный базовый капитал для Credit Provider (Providing Credit) в МФЦА? Точная сумма.",
+      "expected_exact_match": ["2 million", "2 млн", "2,000,000", "2 000 000", "2 миллион"],
+      "forbidden_match": ["500,000", "10 million", "150 000"],
+      "_verified": "BBR Rule 4.10(c) — Credit Provider = USD 2 million."
+    },
+    {
+      "id": "TBL-FEE-APP-005",
+      "question": "Сколько стоит подать заявку на лицензию (application fee) Managing Investments в МФЦА? Точная сумма USD.",
+      "expected_exact_match": ["5 000", "5,000", "5000"],
+      "forbidden_match": ["3 000", "10 000", "15 000"],
+      "_verified": "FEES Schedule 1 — application fee Managing Investments = 5,000 USD."
+    },
+    {
+      "id": "TBL-FEE-SUP-006",
+      "question": "Каков годовой надзорный сбор AFSA (annual supervision fee) для Managing Investments? Точная сумма USD.",
+      "expected_exact_match": ["3 000", "3,000", "3000"],
+      "forbidden_match": ["5 000", "1 000", "10 000"],
+      "_verified": "FEES — annual supervision fee Managing Investments = 3,000 USD/год."
+    },
+    {
+      "id": "TBL-FEE-SUP-007",
+      "question": "Каков годовой надзорный сбор AFSA для банка (Accepting Deposits)? Точная сумма USD.",
+      "expected_exact_match": ["10 000", "10,000", "10000"],
+      "forbidden_match": ["15 000", "8 000", "3 000"],
+      "_verified": "FEES — annual supervision fee Accepting Deposits = 10,000 USD (application fee = 15,000)."
+    },
+    {
+      "id": "TBL-CIS-008",
+      "question": "Какова минимальная первоначальная подписка инвестора в Exempt Fund в МФЦА? Точная сумма USD.",
+      "expected_exact_match": ["50 000", "50,000", "50000"],
+      "forbidden_match": ["100 000", "150 000", "500 000"],
+      "_verified": "CIS Rule 2.2(a) — Exempt Fund: Professional Clients + min initial subscription US$ 50,000."
+    },
+    {
+      "id": "TBL-COB-009",
+      "question": "Какой минимальный размер чистых активов для квалификации физлица как Assessed Professional Client в МФЦА? Точная сумма USD.",
+      "expected_exact_match": ["100 000", "100,000", "100000"],
+      "forbidden_match": ["1 000 000", "1,000,000", "500 000", "50 000"],
+      "_verified": "COB Rule 2.3.1 — net assets at least USD 100,000 (норма AIFC; НЕ путать с DIFC 1 млн)."
+    }
+  ]
+}

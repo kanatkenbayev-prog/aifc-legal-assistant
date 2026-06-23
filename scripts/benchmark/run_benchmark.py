@@ -225,10 +225,15 @@ for i, q in enumerate(questions, 1):
         # Матчинг устойчив к пробелам/регистру: "14 дней" == "14  ДНЕЙ", "15 %" == "15%".
         def _norm(s): return re.sub(r"\s+", "", s.lower())
         low = _norm(response)
+        # Границы цифр: "50000" не должно матчиться внутри "150000".
+        def _has(needle):
+            n = _norm(needle)
+            if not n: return False
+            return re.search(r"(?<!\d)" + re.escape(n) + r"(?!\d)", low) is not None
         variants = q["expected_exact_match"]
         forbidden = q.get("forbidden_match", [])
-        hit_v = [v for v in variants if _norm(v) in low]
-        bad_v = [v for v in forbidden if _norm(v) in low]
+        hit_v = [v for v in variants if _has(v)]
+        bad_v = [v for v in forbidden if _has(v)]
         passed = bool(hit_v)
         sym = f"{GREEN}✓ FACT{NC}" if passed else f"{RED}✗ FACT{NC}"
         detail = (f"matched: {hit_v}" if hit_v else f"none of {variants}")
