@@ -99,9 +99,30 @@
     .msg-bubble{box-shadow:none!important}
   }
 
+  /* ── Tab dropdown (База актов) ── */
+  .tab-dropdown { position: relative; display: inline-flex; }
+  .tab-arrow { font-size: 9px; margin-left: 3px; opacity: .6; }
+  .tab-drop-menu { display: none; position: absolute; top: 100%; left: 0; background: #fff; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.12); min-width: 210px; z-index: 999; padding: 4px 0; }
+  .tab-drop-menu a { display: block; padding: 8px 16px; font-size: 13px; font-family: inherit; color: var(--text); cursor: pointer; transition: background .15s; white-space: nowrap; }
+  .tab-drop-menu a:hover { background: var(--cream); color: var(--navy); }
+  .tab-dropdown.open .tab-drop-menu { display: block; }
+  .tab-dropdown .tab { padding-right: 10px; }
+
+  /* ── Tools dropdown (header) ── */
+  .tools-dropdown { position: relative; }
+  .tools-drop-btn { white-space: nowrap; }
+  .tools-drop-menu { display: none; position: absolute; top: calc(100% + 6px); right: 0; background: #fff; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.12); min-width: 200px; z-index: 999; padding: 4px 0; }
+  .tools-drop-menu a { display: block; padding: 9px 16px; font-size: 13px; font-family: inherit; color: var(--text); cursor: pointer; transition: background .15s; white-space: nowrap; }
+  .tools-drop-menu a:hover { background: var(--cream); color: var(--navy); }
+  .tools-dropdown.open .tools-drop-menu { display: block; }
+
+  /* ── Tool chips (under input) ── */
+  .tool-chips-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 6px 0 2px; }
+  .tool-chips-label { font-size: 10px; color: var(--text-muted); letter-spacing: .04em; margin-right: 2px; white-space: nowrap; }
+  .tool-chip { font-size: 11px; font-family: inherit; padding: 3px 10px; border: 1px solid var(--border); border-radius: 20px; background: var(--cream); color: var(--text-muted); cursor: pointer; transition: all .15s; white-space: nowrap; }
+  .tool-chip:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+
   /* ── TABS ────────────────────────────────── */
-  /* ── Cases section ── */
-  /* ── Cases section ── */
   /* ── Cases section ── */
   .cases-section { background: var(--navy); padding: 7px 0 7px; display: none; position: relative; }
   .cases-close { position: absolute; top: 6px; right: 10px; background: none; border: none; color: rgba(255,255,255,.4); font-size: 18px; line-height: 1; cursor: pointer; padding: 0 4px; }
@@ -952,8 +973,30 @@
 <div class="tabs-bar">
   <div class="tabs-inner">
     <button class="tab active" id="tab-chat"     data-page="chat"     onclick="showPage('chat',this)">💬 Консультация</button>
-    <button class="tab"        id="tab-database" data-page="database" onclick="showPage('database',this)">📚 База актов</button>
-    <button class="tab"        id="tab-tools"    data-page="tools"    onclick="showPage('tools',this)">🧰 Инструменты</button>
+    <div class="tab-dropdown" id="dbTabDropdown">
+      <button class="tab" id="tab-database" data-page="database" onclick="showPage('database',this); dbTabMenu(false)">📚 База актов <span class="tab-arrow">▾</span></button>
+      <div class="tab-drop-menu" id="dbTabMenu">
+        <a onclick="goDb('Все')">📋 Все документы</a>
+        <a onclick="goDb('AIFC Bodies')">🏛 AIFC Bodies</a>
+        <a onclick="goDb('Корпоративное право')">🏢 Корпоративное право</a>
+        <a onclick="goDb('Финансовые услуги')">💼 Финансовые услуги</a>
+        <a onclick="goDb('Налоговое право')">🧾 Налоговое право</a>
+        <a onclick="goDb('AML/CTF')">🔐 AML/CTF</a>
+        <a onclick="goDb('Трудовое право')">👷 Трудовое право</a>
+        <a onclick="goDb('Разрешение споров')">⚖️ Разрешение споров</a>
+      </div>
+    </div>
+    <div class="tab-dropdown" id="toolsTabDropdown">
+      <button class="tab" id="tab-tools" data-page="tools" onclick="showPage('tools',this); toolsTabMenu(false)">🧰 Инструменты <span class="tab-arrow">▾</span></button>
+      <div class="tab-drop-menu" id="toolsTabMenu">
+        <a onclick="goTool('cmp')">⚖️ МФЦА vs РК</a>
+        <a onclick="goTool('checklist')">✅ Чек-листы</a>
+        <a onclick="goTool('calc')">🧮 Калькуляторы</a>
+        <a onclick="goTool('substance')">🔬 Substance Checker</a>
+        <a onclick="goTool('reg')">🏗️ Registration Wizard</a>
+        <a onclick="goTool('doc')">📝 Генератор документов</a>
+      </div>
+    </div>
     <button class="tab"        id="tab-docs"     data-page="docs"     onclick="showPage('docs',this)">📋 Учр. документы</button>
     <button class="tab"        id="tab-news"     data-page="news"     onclick="showPage('news',this)">📰 Новости</button>
   </div>
@@ -1051,6 +1094,15 @@
           <div class="input-meta">
             <span class="input-hint"><span id="areaHint">Область:</span> <strong id="areaLabel">Корпоративное право</strong> · <kbd>Enter</kbd> <span id="enterHint">— отправить</span></span>
             <span class="powered">⚡ <span>Claude · RAG · Cloudflare</span></span>
+          </div>
+          <div class="tool-chips-row">
+            <span class="tool-chips-label">Инструменты:</span>
+            <button class="tool-chip" onclick="goTool('cmp')">⚖️ МФЦА vs РК</button>
+            <button class="tool-chip" onclick="goTool('checklist')">✅ Чек-листы</button>
+            <button class="tool-chip" onclick="goTool('calc')">🧮 Калькуляторы</button>
+            <button class="tool-chip" onclick="goTool('substance')">🔬 Substance</button>
+            <button class="tool-chip" onclick="goTool('reg')">🏗️ Reg Wizard</button>
+            <button class="tool-chip" onclick="goTool('doc')">📝 Документы</button>
           </div>
           <div class="fakedoor-row">
             <label class="fakedoor-toggle" onclick="fakedoorClick(event)" title="Поиск по прецедентам Суда МФЦА">
@@ -3295,27 +3347,62 @@ function newsCardHtml(n) {
 async function renderNews() {
   const grid = document.getElementById('newsGrid');
   grid.innerHTML = NEWS.map(newsCardHtml).join('');
-  // Append cron-monitored act changes
-  try {
-    const res = await fetch(WORKER_URL + '/changes');
-    const data = await res.json();
-    if (data.changes && data.changes.length) {
-      const changeCards = data.changes.map(c => {
-        const displayDate = c.effectiveDate || c.detectedDate || c.date;
-        const dateLabel = c.effectiveDate
-          ? `Вступило в силу: ${c.effectiveDate}`
-          : `Обнаружено системой: ${c.detectedDate || c.date}`;
-        const versionLabel = c.version ? ` · ${c.version}` : '';
-        const title = `Обновление: ${c.act}${versionLabel}`;
-        const amendPart = c.amendDate ? ` Поправки от ${c.amendDate}.` : '';
-        const desc = c.effectiveDate
-          ? `Вступает в силу: ${c.effectiveDate}.${amendPart}${c.version ? ` Редакция: ${c.version}.` : ''} Источник: автомониторинг aifc.kz.`
-          : `Изменение обнаружено системой ${c.detectedDate || c.date}.${amendPart} Дата вступления в силу не найдена — проверьте на aifc.kz.`;
-        return newsCardHtml({ date: displayDate, badge: 'change', title, desc, url: c.url });
-      }).join('');
-      grid.insertAdjacentHTML('afterbegin', changeCards);
-    }
-  } catch {}
+}
+
+// ── DB tab dropdown ──
+document.getElementById('dbTabDropdown')?.addEventListener('mouseenter', () => dbTabMenu(true));
+document.getElementById('dbTabDropdown')?.addEventListener('mouseleave', () => dbTabMenu(false));
+function dbTabMenu(open) {
+  document.getElementById('dbTabDropdown')?.classList.toggle('open', open);
+}
+function goDb(cat) {
+  dbTabMenu(false);
+  activeDbCat = cat;
+  const tab = document.getElementById('tab-database');
+  showPage('database', tab);
+  setTimeout(() => { renderDatabase(); }, 50);
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#dbTabDropdown')) dbTabMenu(false);
+});
+
+// ── Tools tab dropdown ──
+document.getElementById('toolsTabDropdown')?.addEventListener('mouseenter', () => toolsTabMenu(true));
+document.getElementById('toolsTabDropdown')?.addEventListener('mouseleave', () => toolsTabMenu(false));
+function toolsTabMenu(open) {
+  document.getElementById('toolsTabDropdown')?.classList.toggle('open', open);
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#toolsTabDropdown')) toolsTabMenu(false);
+});
+
+function goTool(id) {
+  document.getElementById('toolsDropdown')?.classList.remove('open');
+  // переключаемся на вкладку Инструменты
+  const tab = document.getElementById('tab-tools');
+  if (tab) showPage('tools', tab);
+  // скроллим к нужной секции
+  const targets = {
+    cmp:       'page-tools',
+    checklist: 'page-tools',
+    calc:      'page-tools',
+    substance: 'substanceSection',
+    reg:       'regSection',
+    doc:       'page-tools',
+  };
+  const scrollIds = {
+    cmp:       null,
+    checklist: null,
+    calc:      null,
+    substance: 'substanceSection',
+    reg:       'regSection',
+    doc:       null,
+  };
+  setTimeout(() => {
+    const el = scrollIds[id] ? document.getElementById(scrollIds[id]) : null;
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    else document.getElementById('page-tools')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 80);
 }
 
 // ── Cases section init ──
