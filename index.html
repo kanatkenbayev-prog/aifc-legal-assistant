@@ -3344,7 +3344,16 @@ function newsCardHtml(n) {
 
 async function renderNews() {
   const grid = document.getElementById('newsGrid');
-  grid.innerHTML = NEWS.map(newsCardHtml).join('');
+  grid.innerHTML = '<div style="padding:24px;color:var(--text-muted);font-size:13px">Загружаем новости…</div>';
+  try {
+    const res = await fetch(WORKER_URL + '/news', { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) throw new Error('fetch error');
+    const items = await res.json();
+    if (!items.length) throw new Error('empty');
+    grid.innerHTML = items.map(newsCardHtml).join('');
+  } catch {
+    grid.innerHTML = NEWS.map(newsCardHtml).join('');
+  }
 }
 
 // ── DB tab dropdown ──
