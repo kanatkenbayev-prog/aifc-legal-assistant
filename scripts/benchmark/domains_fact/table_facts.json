@@ -1,7 +1,7 @@
 {
   "domain": "Table Facts (числа из таблиц актов — сборы, капитал, пороги)",
-  "total_questions": 9,
-  "_note": "Детерминированный exact-match. Эталоны сверены с первоисточниками (orderly.myafsa.com PRU(INV) 3.3; aifc.kz FEES v16; BBR v6 4.10; CIS v8 2.2; COB v14 2.3.1). Закрывают класс багов «таблицы терялись при текстовой заливке RAG». Залито в RAG: pru-inv-base-capital-3-3, afsa-fees-schedule, bbr-base-capital-4-10, cis-fund-types-2-2.",
+  "total_questions": 13,
+  "_note": "Детерминированный exact-match. Эталоны сверены с первоисточниками (orderly.myafsa.com PRU(INV) 3.3; aifc.kz FEES v16; BBR v6 4.10; CIS v8 2.2; COB v14 2.3.1; PINS Schedule 4 / 14.4; AIX MLR 11). Закрывают класс багов «таблицы терялись при текстовой заливке RAG». Залито в RAG: pru-inv-base-capital-3-3, afsa-fees-schedule, bbr-base-capital-4-10, cis-fund-types-2-2, pins-capital-floor, aix-listing-mlr.",
   "questions": [
     {
       "id": "TBL-CAP-INV-001",
@@ -65,6 +65,34 @@
       "expected_exact_match": ["100 000", "100,000", "100000"],
       "forbidden_match": ["1 000 000", "1,000,000", "500 000", "50 000"],
       "_verified": "COB Rule 2.3.1 — net assets at least USD 100,000 (норма AIFC; НЕ путать с DIFC 1 млн)."
+    },
+    {
+      "id": "TBL-INS-010",
+      "question": "Каков минимальный капитал (Capital Floor) для страховой компании общего страхования (General Insurance) в МФЦА? Точная сумма USD.",
+      "expected_exact_match": ["7 000 000", "7,000,000", "7000000", "7 million", "7 млн"],
+      "forbidden_match": ["2 000 000", "10 000 000", "100 000", "5 million"],
+      "_verified": "PINS Schedule 4 / 5.4 — Capital Floor General/Long-term Insurance = US$ 7,000,000."
+    },
+    {
+      "id": "TBL-INS-011",
+      "question": "Каков Base Capital Requirement для Class 1 Captive Insurer в МФЦА? Точная сумма USD.",
+      "expected_exact_match": ["100 000", "100,000", "100000"],
+      "forbidden_match": ["200 000", "300 000", "7 000 000"],
+      "_verified": "PINS 14.4 — BCR Captive: Class 1=100k, Class 2=200k, Class 3=300k."
+    },
+    {
+      "id": "TBL-AIX-012",
+      "question": "Какой минимальный free float (доля акций в публичных руках) нужен для листинга акций на AIX? Точный процент.",
+      "expected_exact_match": ["25%", "25 %", "25 процент", "25 per cent"],
+      "forbidden_match": ["10%", "50%", "20%"],
+      "_verified": "AIX MLR — не менее 25% Shares in public hands."
+    },
+    {
+      "id": "TBL-AIX-013",
+      "question": "Какова минимальная ожидаемая рыночная капитализация для листинга акций на AIX? Точная сумма USD.",
+      "expected_exact_match": ["1 000 000", "1,000,000", "1000000", "1 million", "1 млн"],
+      "forbidden_match": ["500 000", "5 000 000", "10 000 000"],
+      "_verified": "AIX MLR 11.1 — expected aggregate market value Shares ≥ US$ 1,000,000 (Debentures ≥ 500,000)."
     }
   ]
 }
