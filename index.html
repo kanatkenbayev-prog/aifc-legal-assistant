@@ -859,7 +859,7 @@
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-box">
     <button class="auth-x" onclick="closeAuthModal()">×</button>
-    <h2>⚖️ AIFC Legal Assistant</h2>
+    <h2>AIFCLex</h2>
     <p class="auth-sub" id="authSubtitle">Зарегистрируйтесь — 200 кредитов бесплатно на 30 дней</p>
     <!-- Google OAuth -->
     <button class="btn-google" onclick="signInWithGoogle()">
@@ -891,8 +891,7 @@
 <div class="welcome-overlay" id="welcomeOverlay">
   <div class="welcome-box">
     <div class="welcome-logo">
-      <div class="emblem">⚖</div>
-      <span>AIFC Legal Assistant · aifclex.ai</span>
+      <span style="font-family:'Lora',serif;font-size:20px;font-weight:700;color:var(--navy)">AIFCLex</span>
     </div>
     <h3>Добро пожаловать!</h3>
     <p class="welcome-sub">Вам начислено <strong>100 бесплатных кредитов на 30 дней</strong>. Перед началом работы — пара важных моментов.</p>
@@ -919,7 +918,6 @@
 <div class="auth-overlay" id="fakedoorOverlay">
   <div class="auth-box" style="max-width:420px;text-align:center">
     <button class="auth-x" onclick="closeFakedoor()">×</button>
-    <div style="font-size:32px;margin-bottom:8px">⚖️</div>
     <h2 style="margin-bottom:8px">Расширенный поиск по прецедентам</h2>
     <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px">Базовые вопросы по решениям Суда МФЦА уже доступны в чате. Структурированный поиск с фильтрами — в тарифе <strong>Expert</strong>.</p>
     <div style="background:var(--cream-dark);border-radius:10px;padding:14px 16px;margin-bottom:20px;text-align:left;font-size:13px">
@@ -1058,8 +1056,7 @@
         </div>
         <div class="messages" id="messages">
           <div class="welcome" id="welcome">
-            <div class="welcome-icon">⚖️</div>
-            <h2 id="welcomeH">МФЦА Правовой Ассистент</h2>
+            <h2 id="welcomeH" style="font-size:28px;">AIFCLex</h2>
             <p id="welcomeP">Задайте вопрос по праву МФЦА (AIFC) — а также по смежным вопросам РК: налоги, валютный контроль, трудовые отношения. Отвечу по существу, со ссылками на конкретные нормы официальных актов и судебную практику МФЦА.</p>
             <div class="welcome-offer" style="background:var(--cream-dark,#f3efe4);border:1px solid var(--border,#e2dccb);border-radius:12px;padding:14px 16px;margin:6px auto 16px;max-width:640px;text-align:left">
               <div style="display:inline-block;background:var(--navy,#1b2a4a);color:#fff;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:8px" id="welcomeBadge">🔎 RAG-поиск по 67 актам AIFC + судебная практика</div>
@@ -1802,7 +1799,7 @@ let activeDbCat  = 'Все';
 // ── i18n ──────────────────────────────────────
 const UI_STRINGS = {
   ru: {
-    siteTitle: 'МФЦА Правовой Ассистент',
+    siteTitle: 'AIFCLex',
     newChatBtn: '＋ Новый чат',
     'tab-chat': '💬 Консультация', 'tab-database': '📚 База актов',
     'tab-tools': '🧰 Инструменты', 'tab-docs': '📋 Учр. документы', 'tab-news': '📰 Новости',
@@ -1816,7 +1813,7 @@ const UI_STRINGS = {
     'sb-4': 'Какие лицензии AFSA нужны для запуска платформы цифровых активов (Digital Asset Activities) в МФЦА?',
     'sb-5': 'Сравнить организационно-правовые формы: Private Company vs LLP vs Foundation для холдинговой структуры в МФЦА',
     'sb-6': 'Какие требования AML/KYC применяются к управляющей компании фонда в МФЦА — Due Diligence и MLRO',
-    welcomeH: 'МФЦА Правовой Ассистент',
+    welcomeH: 'AIFCLex',
     welcomeP: 'Задайте вопрос по праву МФЦА (AIFC) — а также по смежным вопросам РК: налоги, валютный контроль, трудовые отношения. Отвечу по существу, со ссылками на конкретные нормы официальных актов и судебную практику МФЦА.',
     welcomeBadge: '⚡ Ответ по 67 актам МФЦА + судебная практика — за секунды',
     welcomeOffer: 'Проверяйте дедлайны, пошлины и substance-требования МФЦА за секунды — со ссылкой на норму, а не на догадку.',
@@ -1850,7 +1847,7 @@ const UI_STRINGS = {
     'sb-4': 'What AFSA licences are required to launch a Digital Asset Activities platform in AIFC?',
     'sb-5': 'Compare entity types: Private Company vs LLP vs Foundation for a holding structure in AIFC',
     'sb-6': 'AML/KYC requirements for an AIFC fund manager — Customer Due Diligence and MLRO obligations',
-    welcomeH: 'AIFC Legal Assistant',
+    welcomeH: 'AIFCLex',
     welcomeP: 'Ask a question about AIFC law — and related Kazakhstan matters: taxation, currency control, employment. You will get a substantive answer with citations to specific provisions of official acts and AIFC case law.',
     welcomeBadge: '⚡ Answer across 67 AIFC acts + case law — in seconds',
     welcomeOffer: 'Check AIFC deadlines, fees and substance requirements in seconds — with a citation to the rule, not a guess.',
@@ -1988,8 +1985,7 @@ function newChat() {
   saveHistory();
   const msgs = document.getElementById('messages');
   msgs.innerHTML = `<div class="welcome" id="welcome">
-    <div class="welcome-icon">⚖️</div>
-    <h2>МФЦА Правовой Ассистент</h2>
+    <h2>AIFCLex</h2>
     <p>Задайте вопрос по праву МФЦА (AIFC) — а также по смежным вопросам РК: налоги, валютный контроль, трудовые отношения. Отвечу по существу, со ссылками на конкретные нормы официальных актов и судебную практику МФЦА.</p>
     <div class="welcome-chips">
       <button class="welcome-chip" onclick="sendStarter(this.textContent)">Как зарегистрировать компанию в МФЦА?</button>
