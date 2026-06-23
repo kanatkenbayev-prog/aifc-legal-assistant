@@ -100,6 +100,34 @@
   }
 
   /* ── TABS ────────────────────────────────── */
+  /* ── Cases section ── */
+  /* ── Cases section ── */
+  /* ── Cases section ── */
+  .cases-section { background: var(--navy); padding: 7px 0 7px; display: none; position: relative; }
+  .cases-close { position: absolute; top: 6px; right: 10px; background: none; border: none; color: rgba(255,255,255,.4); font-size: 18px; line-height: 1; cursor: pointer; padding: 0 4px; }
+  .cases-close:hover { color: rgba(255,255,255,.8); }
+  .cases-section.visible { display: block; }
+  .cases-header { display: flex; align-items: center; gap: 12px; max-width: 1000px; margin: 0 auto 5px; padding: 0 28px; }
+  .cases-label { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin: 0; white-space: nowrap; }
+  .cases-title { font-size: 11px; font-weight: 400; color: rgba(255,255,255,.45); margin: 0; }
+  .cases-track-wrap { max-width: 1000px; margin: 0 auto; padding: 0 28px; }
+  .cases-track { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+  .cases-track::-webkit-scrollbar { display: none; }
+  .case-card { flex: 0 0 190px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 5px; padding: 6px 8px; display: flex; flex-direction: column; gap: 4px; }
+  .case-tag { display: inline-block; font-size: 7px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; padding: 1px 5px; border-radius: 20px; width: fit-content; }
+  .tag-corp    { background: #1e3a6e; color: #7eb3f7; }
+  .tag-fund    { background: #0e3d2e; color: #5fd9a0; }
+  .tag-tax     { background: #3d2e0a; color: #f5c842; }
+  .tag-disputes{ background: #3d1a1a; color: #f78080; }
+  .tag-employ  { background: #2a1f3d; color: #b49cf7; }
+  .case-q { font-size: 10px; color: rgba(255,255,255,.72); line-height: 1.35; margin: 0; flex: 1; font-style: italic; }
+  .case-a { border-top: 1px solid rgba(255,255,255,.06); padding-top: 4px; display: flex; align-items: baseline; gap: 5px; }
+  .case-metric { font-family: 'Playfair Display', serif; font-size: 11px; font-weight: 700; color: var(--gold); white-space: nowrap; }
+  .case-detail { font-size: 9px; color: rgba(255,255,255,.32); line-height: 1.3; }
+  .cases-cta { text-align: center; margin-top: 7px; }
+  .cases-cta-btn { background: var(--gold); color: var(--navy); font-family: inherit; font-size: 11px; font-weight: 700; padding: 5px 15px; border: none; border-radius: 4px; cursor: pointer; transition: opacity .2s; }
+  .cases-cta-btn:hover { opacity: .88; }
+
   .tabs-bar {
     background: #fff; border-bottom: 2px solid var(--border);
     flex-shrink: 0;
@@ -1275,6 +1303,7 @@ async function onSignIn(user) {
   renderUserWidget();
   closeAuthModal();
   maybeShowWelcome();
+  document.getElementById('casesSection').classList.remove('visible');
 }
 
 function maybeShowWelcome() {
@@ -1294,6 +1323,7 @@ function onSignOut() {
   currentUser = null;
   userProfile = null;
   renderUserWidget();
+  document.getElementById('casesSection').classList.add('visible');
 }
 
 async function loadProfile() {
@@ -3080,10 +3110,16 @@ let templateOriginal = '';
 async function renderDocs() {
   if (!docsManifest) {
     try {
-      const res = await fetch('templates/manifest.json');
+      const res = await fetch('templates/manifest.json', { cache: 'no-cache' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       docsManifest = await res.json();
-    } catch {
-      document.getElementById('docsCatalog').innerHTML = '<p style="color:var(--kz-red)">Не удалось загрузить список шаблонов.</p>';
+    } catch (e) {
+      console.error('Загрузка templates/manifest.json не удалась:', e);
+      const hint = location.protocol === 'file:'
+        ? ' Похоже, страница открыта как локальный файл — откройте сайт по ссылке (https), браузер блокирует загрузку шаблонов с file://.'
+        : '';
+      document.getElementById('docsCatalog').innerHTML =
+        `<p style="color:var(--kz-red)">Не удалось загрузить список шаблонов.${hint} <button class="tmpl-btn ghost" style="margin-left:8px" onclick="docsManifest=null;renderDocs()">↻ Повторить</button></p>`;
       return;
     }
   }
@@ -3281,8 +3317,70 @@ async function renderNews() {
     }
   } catch {}
 }
+
+// ── Cases section init ──
+document.addEventListener('DOMContentLoaded', () => {
+  const section = document.getElementById('casesSection');
+  if (section) section.classList.add('visible');
+});
 </script>
-<footer style="text-align:center;padding:20px 16px;font-size:12px;color:var(--text-muted);border-top:1px solid var(--border);margin-top:8px">
+<!-- ══ CASES SECTION (только для незалогиненных) ══ -->
+<div class="cases-section" id="casesSection">
+  <button class="cases-close" onclick="document.getElementById('casesSection').style.display='none'" aria-label="Закрыть">×</button>
+  <div class="cases-header">
+    <p class="cases-label">Реальные кейсы</p>
+    <h2 class="cases-title">Примеры того, как юристы используют AIFCLex</h2>
+  </div>
+  <div class="cases-track-wrap">
+    <div class="cases-track" id="casesTrack">
+      <div class="case-card">
+        <span class="case-tag tag-corp">Корпоративное</span>
+        <p class="case-q">«Когда подавать Annual Return для private company в AIFC и какой штраф за просрочку?»</p>
+        <div class="case-a"><span class="case-metric">28 дней</span><span class="case-detail">срок подачи после return date — с точной ссылкой на Companies Regulations</span></div>
+      </div>
+      <div class="case-card">
+        <span class="case-tag tag-fund">Инвестфонды</span>
+        <p class="case-q">«Нужна ли лицензия AFSA для Exempt Fund — какой порог по числу инвесторов?»</p>
+        <div class="case-a"><span class="case-metric">3 мин</span><span class="case-detail">полный ответ с порогом $100 000 и ссылкой на AIFC Fund Management Rules</span></div>
+      </div>
+      <div class="case-card">
+        <span class="case-tag tag-tax">Налоговые льготы</span>
+        <p class="case-q">«Какие условия Substance Rules для получения 0% КПН в МФЦА?»</p>
+        <div class="case-a"><span class="case-metric">§ 4.2</span><span class="case-detail">точная норма из официального PDF AIFC Substance Rules с матрицей требований</span></div>
+      </div>
+      <div class="case-card">
+        <span class="case-tag tag-disputes">Споры</span>
+        <p class="case-q">«Каков срок исковой давности по коммерческим спорам в AIFC Court?»</p>
+        <div class="case-a"><span class="case-metric">6 лет</span><span class="case-detail">общий срок по AIFC Court Rules + исключения для договорных и деликтных требований</span></div>
+      </div>
+      <div class="case-card">
+        <span class="case-tag tag-corp">Корпоративное</span>
+        <p class="case-q">«Что должен содержать Shareholders Agreement для SPV в AIFC?»</p>
+        <div class="case-a"><span class="case-metric">11 пунктов</span><span class="case-detail">чек-лист обязательных положений со ссылками на Companies Act AIFC</span></div>
+      </div>
+      <div class="case-card">
+        <span class="case-tag tag-employ">Трудовое</span>
+        <p class="case-q">«Срок уведомления при увольнении в AIFC — казахстанский ТК или свои правила?»</p>
+        <div class="case-a"><span class="case-metric">30 дней</span><span class="case-detail">AIFC Employment Regulations применяются самостоятельно — ТК РК не действует</span></div>
+      </div>
+      <div class="case-card">
+        <span class="case-tag tag-disputes">Споры</span>
+        <p class="case-q">«Как подать заявление в AIFC Court на сумму до $10 000 — есть упрощённый порядок?»</p>
+        <div class="case-a"><span class="case-metric">Small Claims</span><span class="case-detail">пошаговая процедура подачи по Small Claims Rules с размером госпошлины</span></div>
+      </div>
+      <div class="case-card">
+        <span class="case-tag tag-corp">Корпоративное</span>
+        <p class="case-q">«Нужен ли зарегистрированный офис внутри периметра AIFC для компании-резидента?»</p>
+        <div class="case-a"><span class="case-metric">Да</span><span class="case-detail">обязательное требование Companies Regulations — с допустимыми адресами и исключениями</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="cases-cta">
+    <button class="cases-cta-btn" onclick="showAuthModal()">Попробовать бесплатно — 100 кредитов</button>
+  </div>
+</div>
+
+<footer style="text-align:center;padding:10px 16px;font-size:11px;color:var(--text-muted);border-top:1px solid var(--border);margin-top:4px">
   © 2026 ИП «Vibe MKK» · <a href="pricing.html" style="color:var(--text-muted)">Тарифы</a> · <a href="legal.html" style="color:var(--text-muted)">Пользовательское соглашение</a> · <a href="legal.html#privacy" style="color:var(--text-muted)">Политика конфиденциальности</a> · <a href="mailto:info@aifclex.ai" style="color:var(--text-muted)">info@aifclex.ai</a>
 </footer>
 </body>
