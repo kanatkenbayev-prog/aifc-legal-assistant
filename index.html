@@ -212,7 +212,8 @@
      (.welcome убирается) область сообщений снова растягивается и скроллится. */
   .chat-area:has(#welcome) { justify-content: center; }
   .chat-area:has(#welcome) .messages { flex: 0 1 auto; overflow: visible; }
-  .chat-area:has(#welcome) .welcome { flex: 0 0 auto; padding: 24px; }
+  .chat-area:has(#welcome) .welcome { flex: 0 0 auto; padding: 20px 24px; gap: 10px; }
+  .chat-area:has(#welcome) .welcome-chips { margin-top: 2px; }
 
   /* Messages */
   .messages {
@@ -1063,12 +1064,12 @@
         </div>
         <div class="messages" id="messages">
           <div class="welcome" id="welcome">
-            <h2 id="welcomeH" style="font-size:28px;">AIFCLex</h2>
-            <p id="welcomeP">Задайте вопрос по праву МФЦА (AIFC) — а также по смежным вопросам РК: налоги, валютный контроль, трудовые отношения. Отвечу по существу, со ссылками на конкретные нормы официальных актов и судебную практику МФЦА.</p>
-            <div class="welcome-offer" style="background:var(--cream-dark,#f3efe4);border:1px solid var(--border,#e2dccb);border-radius:12px;padding:14px 16px;margin:6px auto 16px;max-width:640px;text-align:left">
-              <div style="display:inline-block;background:var(--navy,#1b2a4a);color:#fff;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:8px" id="welcomeBadge">🔎 RAG-поиск по 67 актам AIFC + судебная практика</div>
-              <p id="welcomeOffer" style="font-weight:600;margin:0 0 6px;font-size:15px;color:var(--navy,#1b2a4a)">Единственный ассистент с RAG-поиском по всей правовой базе и судебным решениям МФЦА.</p>
-              <p id="welcomeRag" style="margin:0;font-size:13px;line-height:1.5;color:var(--text-muted,#5a5a5a)">Как это работает: на каждый вопрос система находит точные фрагменты официальных актов МФЦА и решений Суда МФЦА — и отвечает строго по ним, со ссылками на источник. Не выдумывает, а цитирует первоисточник.</p>
+            <h2 id="welcomeH" style="font-size:22px;margin:0;">AIFCLex</h2>
+            <p id="welcomeP" style="font-size:12.5px;margin:0;">Задайте вопрос по праву МФЦА (AIFC) — а также по смежным вопросам РК: налоги, валютный контроль, трудовые отношения. Отвечу по существу, со ссылками на конкретные нормы официальных актов и судебную практику МФЦА.</p>
+            <div class="welcome-offer" style="background:var(--cream-dark,#f3efe4);border:1px solid var(--border,#e2dccb);border-radius:10px;padding:9px 14px;margin:2px auto 6px;max-width:620px;text-align:left">
+              <div style="display:inline-block;background:var(--navy,#1b2a4a);color:#fff;font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:20px;margin-bottom:6px" id="welcomeBadge">🔎 RAG-поиск по 67 актам AIFC + судебная практика</div>
+              <p id="welcomeOffer" style="font-weight:600;margin:0 0 4px;font-size:13px;line-height:1.35;color:var(--navy,#1b2a4a)">Единственный ассистент с RAG-поиском по всей правовой базе и судебным решениям МФЦА.</p>
+              <p id="welcomeRag" style="margin:0;font-size:12px;line-height:1.4;color:var(--text-muted,#5a5a5a)">Как это работает: на каждый вопрос система находит точные фрагменты официальных актов МФЦА и решений Суда МФЦА — и отвечает строго по ним, со ссылками на источник. Не выдумывает, а цитирует первоисточник.</p>
             </div>
             <div class="welcome-chips">
               <button class="welcome-chip" id="wc-1" onclick="sendStarter(this.textContent)">Как зарегистрировать компанию в МФЦА?</button>
