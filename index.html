@@ -206,6 +206,13 @@
     box-shadow: var(--shadow); border: 1px solid var(--border);
     overflow: hidden;
   }
+  /* Welcome-состояние: не раздувать панель сообщений на всю высоту — сжать до
+     содержимого и отцентрировать группу «приветствие + поле ввода» по вертикали,
+     чтобы верх и низ были визуально сбалансированы (≈50/50). После начала диалога
+     (.welcome убирается) область сообщений снова растягивается и скроллится. */
+  .chat-area:has(#welcome) { justify-content: center; }
+  .chat-area:has(#welcome) .messages { flex: 0 1 auto; overflow: visible; }
+  .chat-area:has(#welcome) .welcome { flex: 0 0 auto; padding: 24px; }
 
   /* Messages */
   .messages {
@@ -1020,16 +1027,6 @@
         </div>
 
         <div class="card">
-          <div class="card-title" id="ct-sources">🔗 Источники</div>
-          <div class="source-list">
-            <div class="source-item"><div class="dot green"></div><span class="source-name">aifc.kz</span><span id="ss-aifc" class="source-ok">Онлайн</span></div>
-            <div class="source-item"><div class="dot green"></div><span class="source-name">adilet.zan.kz</span><span id="ss-adilet" class="source-ok">Онлайн</span></div>
-            <div class="source-item"><div class="dot green"></div><span class="source-name">publicreg.myafsa.com</span><span id="ss-publicreg" class="source-ok">Онлайн</span></div>
-            <div class="source-item"><div class="dot green"></div><span class="source-name">orderly.myafsa.com</span><span id="ss-orderly" class="source-ok">Онлайн</span></div>
-          </div>
-        </div>
-
-        <div class="card">
           <div class="card-title" id="ct-starters">💡 Шаблоны запросов</div>
           <div class="starter-list">
             <button class="starter-btn" id="sb-1" onclick="sendStarter(this.textContent)">Проверить структуру Exempt Fund на соответствие CIS Rules — требования к управляющему, инвесторам и раскрытию</button>
@@ -1038,6 +1035,16 @@
             <button class="starter-btn" id="sb-4" onclick="sendStarter(this.textContent)">Какие лицензии AFSA нужны для запуска платформы цифровых активов (Digital Asset Activities) в МФЦА?</button>
             <button class="starter-btn" id="sb-5" onclick="sendStarter(this.textContent)">Сравнить организационно-правовые формы: Private Company vs LLP vs Foundation для холдинговой структуры в МФЦА</button>
             <button class="starter-btn" id="sb-6" onclick="sendStarter(this.textContent)">Какие требования AML/KYC применяются к управляющей компании фонда в МФЦА — Due Diligence и MLRO</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" id="ct-sources">🔗 Источники</div>
+          <div class="source-list">
+            <div class="source-item"><div class="dot green"></div><span class="source-name">aifc.kz</span><span id="ss-aifc" class="source-ok">Онлайн</span></div>
+            <div class="source-item"><div class="dot green"></div><span class="source-name">adilet.zan.kz</span><span id="ss-adilet" class="source-ok">Онлайн</span></div>
+            <div class="source-item"><div class="dot green"></div><span class="source-name">publicreg.myafsa.com</span><span id="ss-publicreg" class="source-ok">Онлайн</span></div>
+            <div class="source-item"><div class="dot green"></div><span class="source-name">orderly.myafsa.com</span><span id="ss-orderly" class="source-ok">Онлайн</span></div>
           </div>
         </div>
       </aside>
