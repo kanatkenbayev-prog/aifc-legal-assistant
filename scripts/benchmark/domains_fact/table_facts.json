@@ -1,6 +1,6 @@
 {
   "domain": "Table Facts (числа из таблиц актов — сборы, капитал, пороги)",
-  "total_questions": 13,
+  "total_questions": 16,
   "_note": "Детерминированный exact-match. Эталоны сверены с первоисточниками (orderly.myafsa.com PRU(INV) 3.3; aifc.kz FEES v16; BBR v6 4.10; CIS v8 2.2; COB v14 2.3.1; PINS Schedule 4 / 14.4; AIX MLR 11). Закрывают класс багов «таблицы терялись при текстовой заливке RAG». Залито в RAG: pru-inv-base-capital-3-3, afsa-fees-schedule, bbr-base-capital-4-10, cis-fund-types-2-2, pins-capital-floor, aix-listing-mlr.",
   "questions": [
     {
@@ -93,6 +93,27 @@
       "expected_exact_match": ["1 000 000", "1,000,000", "1000000", "1 million", "1 млн"],
       "forbidden_match": ["500 000", "5 000 000", "10 000 000"],
       "_verified": "AIX MLR 11.1 — expected aggregate market value Shares ≥ US$ 1,000,000 (Debentures ≥ 500,000)."
+    },
+    {
+      "id": "TBL-ITRP-014",
+      "question": "Какова минимальная сумма инвестиций для статуса Investment Resident по программе ITRP в МФЦА? Точная сумма USD.",
+      "expected_exact_match": ["60 000", "60,000", "60000"],
+      "forbidden_match": ["50 000", "100 000", "250 000", "500 000"],
+      "_verified": "ITRP Regulations s.13 — Minimum Investment Volume = 60,000 USD (сверено по PDF aifc.kz). Grok-ревью подтвердил."
+    },
+    {
+      "id": "TBL-EMP-015",
+      "question": "Какой минимальный notice period при увольнении сотрудника AIFC со стажем 18 месяцев (без причины)? Точное число дней.",
+      "expected_exact_match": ["30 дней", "30 days", "30 кален"],
+      "forbidden_match": ["7 дней", "90 дней", "14 дней", "60 дней"],
+      "_verified": "AIFC Employment Regulations s.60(2)(b) — 30 дней для стажа 3 мес–5 лет (сверено по PDF)."
+    },
+    {
+      "id": "TBL-IIT-016",
+      "question": "С какого порога годового дохода в РК с 2026 применяется ставка ИПН 15% вместо 10%? Назови в МРП.",
+      "expected_exact_match": ["8 500 мрп", "8500 мрп", "8 500 МРП", "8500 МРП"],
+      "forbidden_match": ["10 000 мрп", "20 000 мрп", "5 000 мрп"],
+      "_verified": "НК РК 2026 — прогрессия ИПН: 10% до 8 500 МРП/год, 15% сверх (множественные KZ-источники)."
     }
   ]
 }
