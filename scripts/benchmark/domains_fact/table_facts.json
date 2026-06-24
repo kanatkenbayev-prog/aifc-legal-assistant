@@ -1,6 +1,6 @@
 {
   "domain": "Table Facts (числа из таблиц актов — сборы, капитал, пороги)",
-  "total_questions": 19,
+  "total_questions": 21,
   "_note": "Детерминированный exact-match. Эталоны сверены с первоисточниками (orderly.myafsa.com PRU(INV) 3.3; aifc.kz FEES v16; BBR v6 4.10; CIS v8 2.2; COB v14 2.3.1; PINS Schedule 4 / 14.4; AIX MLR 11). Закрывают класс багов «таблицы терялись при текстовой заливке RAG». Залито в RAG: pru-inv-base-capital-3-3, afsa-fees-schedule, bbr-base-capital-4-10, cis-fund-types-2-2, pins-capital-floor, aix-listing-mlr.",
   "questions": [
     {
@@ -34,23 +34,37 @@
     {
       "id": "TBL-FEE-APP-005",
       "question": "Сколько стоит подать заявку на лицензию (application fee) Managing Investments в МФЦА? Точная сумма USD.",
-      "expected_exact_match": ["5 000", "5,000", "5000"],
-      "forbidden_match": ["3 000", "10 000", "15 000"],
-      "_verified": "FEES Schedule 1 — application fee Managing Investments = 5,000 USD."
+      "expected_exact_match": ["7 000", "7,000", "7000"],
+      "forbidden_match": ["5 000", "3 000", "15 000"],
+      "_verified": "FEES v18 (с 01.12.2025) — application fee Managing Investments = 7,000 USD (повышено с 5,000)."
     },
     {
       "id": "TBL-FEE-SUP-006",
-      "question": "Каков годовой надзорный сбор AFSA (annual supervision fee) для Managing Investments? Точная сумма USD.",
-      "expected_exact_match": ["3 000", "3,000", "3000"],
-      "forbidden_match": ["5 000", "1 000", "10 000"],
-      "_verified": "FEES — annual supervision fee Managing Investments = 3,000 USD/год."
+      "question": "Каков годовой надзорный сбор AFSA (annual supervision fee) для Managing Investments? Назови фиксированную часть в USD.",
+      "expected_exact_match": ["4 200", "4,200", "4200"],
+      "forbidden_match": ["3 000", "1 000", "10 000"],
+      "_verified": "FEES v18 — annual supervision fee Managing Investments: фикс. часть 4,200 USD + переменная (повышено с 3,000)."
     },
     {
       "id": "TBL-FEE-SUP-007",
       "question": "Каков годовой надзорный сбор AFSA для банка (Accepting Deposits)? Точная сумма USD.",
-      "expected_exact_match": ["10 000", "10,000", "10000"],
-      "forbidden_match": ["15 000", "8 000", "3 000"],
-      "_verified": "FEES — annual supervision fee Accepting Deposits = 10,000 USD (application fee = 15,000)."
+      "expected_exact_match": ["14 000", "14,000", "14000"],
+      "forbidden_match": ["10 000", "8 000", "3 000"],
+      "_verified": "FEES v18 — annual supervision fee Accepting Deposits = 14,000 USD (application fee = 21,000; повышено)."
+    },
+    {
+      "id": "TBL-CAPTIVE-020",
+      "question": "Каков Base Capital Requirement для Class 2 Captive Insurer в МФЦА? Точная сумма USD.",
+      "expected_exact_match": ["200 000", "200,000", "200000"],
+      "forbidden_match": ["100 000", "300 000", "7 000 000"],
+      "_verified": "PINS 14.4 — BCR Captive Class 2 = 200,000 USD (Class 1=100k, Class 3=300k)."
+    },
+    {
+      "id": "TBL-CONTROL-021",
+      "question": "При каком пороге увеличения доли требуется предварительное одобрение AFSA на change of control Authorised Person в МФЦА?",
+      "expected_exact_match": ["30%", "50%"],
+      "forbidden_match": ["25%", "75%", "5%"],
+      "_verified": "GEN 3.2.1 / FSFR s.48 — одобрение AFSA при увеличении relevant holding ниже 30%→30%+ или ниже 50%→50%+ (Controller квалифицируется с 10%)."
     },
     {
       "id": "TBL-CIS-008",
