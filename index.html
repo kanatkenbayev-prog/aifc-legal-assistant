@@ -1267,10 +1267,15 @@
             <div class="editor-sub" id="editorSub"></div>
           </div>
           <div class="editor-actions">
+            <input type="file" id="docUpload" accept=".docx,.pdf" style="display:none" onchange="handleDocUpload(this)">
+            <button class="calc-btn" style="width:auto;padding:8px 14px;background:#fff;color:var(--navy);border:1px solid var(--border)" onclick="document.getElementById('docUpload').click()" title="Загрузить .docx или .pdf — текст извлечётся в редактор">📎 Загрузить файл</button>
             <button class="calc-btn" style="width:auto;padding:8px 14px;background:#fff;color:var(--navy);border:1px solid var(--border)" onclick="resetTemplate()">↺ Оригинал</button>
             <button class="calc-btn" style="width:auto;padding:8px 14px;background:var(--gold);color:var(--navy)" onclick="downloadTemplate()">⬇ .txt</button>
             <button class="calc-btn" style="width:auto;padding:8px 14px" id="checkBtn" onclick="checkCompliance()">⚖️ Проверить на соответствие</button>
           </div>
+        </div>
+        <div class="upload-note" style="margin:0 0 10px;padding:8px 12px;background:#fbf6e8;border:1px solid var(--gold);border-radius:8px;font-size:11.5px;line-height:1.55;color:var(--navy)">
+          ⚠️ <b>Загрузка файла:</b> размер — <b>не более 8 МБ</b>. Предпочтительно загружать <b>Word (.docx)</b> — текст извлекается точнее всего. Сканированные документы, фотографии и PDF из изображений распознаются плохо или вовсе не читаются (распознавание текста / OCR не поддерживается) — в таком случае вставьте текст вручную. Файл обрабатывается в вашем браузере; на сервер для проверки уходит только извлечённый текст.
         </div>
         <div class="editor-grid">
           <textarea id="templateEditor" class="template-editor" spellcheck="false" placeholder="Текст шаблона..."></textarea>
@@ -3268,10 +3273,10 @@ function openCustomDoc() {
     `</select> · <span id="customReg">ИИ сам определит применимые нормы по тексту документа</span>`;
   const editor = document.getElementById('templateEditor');
   editor.value = '';
-  editor.placeholder = 'Вставьте сюда текст вашего документа (устав, соглашение, политику)...';
+  editor.placeholder = 'Вставьте текст документа (устав, соглашение, политику) или загрузите файл .docx / .pdf кнопкой «📎 Загрузить файл» выше...';
   wrap.style.display = 'block';
   document.getElementById('compliancePanel').innerHTML =
-    '<div class="compliance-empty">Вставьте текст документа слева, выберите область права и нажмите «Проверить на соответствие».</div>';
+    '<div class="compliance-empty">Вставьте текст документа слева <b>или загрузите .docx / .pdf</b> («📎 Загрузить файл»), выберите область права и нажмите «Проверить на соответствие».<br><span style="color:var(--text-muted);font-size:11px">Файл обрабатывается в вашем браузере; для проверки на сервер уходит только извлечённый текст. Сканы/фото-PDF не распознаются.</span></div>';
   wrap.scrollIntoView({ behavior: 'smooth' });
   editor.focus();
 }
@@ -3309,6 +3314,61 @@ function downloadTemplate() {
   a.download = activeTemplate.id + '_edited.txt';
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+// ── Загрузка документа из файла (.docx / .pdf) — извлечение текста на клиенте ──
+function loadScriptOnce(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) return resolve();
+    const s = document.createElement('script');
+    s.src = src; s.onload = () => resolve(); s.onerror = () => reject(new Error('Не удалось загрузить библиотеку'));
+    document.head.appendChild(s);
+  });
+}
+async function extractDocxText(file) {
+  await loadScriptOnce('https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js');
+  const arrayBuffer = await file.arrayBuffer();
+  const r = await window.mammoth.extractRawText({ arrayBuffer });
+  return r.value || '';
+}
+async function extractPdfText(file) {
+  await loadScriptOnce('https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js');
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  const data = await file.arrayBuffer();
+  const pdf = await window.pdfjsLib.getDocument({ data }).promise;
+  let out = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const tc = await page.getTextContent();
+    out += tc.items.map(it => it.str).join(' ') + '\n';
+  }
+  return out;
+}
+async function handleDocUpload(input) {
+  const file = input.files && input.files[0];
+  input.value = ''; // сброс, чтобы можно было загрузить тот же файл повторно
+  if (!file) return;
+  const editor = document.getElementById('templateEditor');
+  const name = (file.name || '').toLowerCase();
+  const MAX = 8 * 1024 * 1024;
+  if (file.size > MAX) { alert('Файл больше 8 МБ. Загрузите документ поменьше или вставьте текст вручную.'); return; }
+  if (!name.endsWith('.docx') && !name.endsWith('.pdf')) { alert('Поддерживаются только .docx и .pdf'); return; }
+  const prev = editor.value;
+  editor.value = '⏳ Извлекаю текст из файла…';
+  try {
+    let text = name.endsWith('.docx') ? await extractDocxText(file) : await extractPdfText(file);
+    text = (text || '').replace(/ /g, '').trim();
+    if (text.length < 30) {
+      editor.value = prev;
+      alert('Не удалось извлечь текст. Если это скан или фото документа (PDF из изображений) — распознавание (OCR) не поддерживается, вставьте текст вручную.');
+      return;
+    }
+    editor.value = text;
+    if (activeTemplate && activeTemplate.custom) editor.dispatchEvent(new Event('input'));
+  } catch (e) {
+    editor.value = prev;
+    alert('Ошибка чтения файла: ' + (e && e.message ? e.message : e));
+  }
 }
 
 async function checkCompliance() {
