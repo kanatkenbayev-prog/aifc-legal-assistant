@@ -1141,7 +1141,7 @@
   <div class="page db-page" id="page-database">
     <div class="db-inner">
       <div class="db-controls">
-        <input type="text" class="db-search" id="dbSearch" placeholder="🔍 Поиск по названию акта..." oninput="filterActs()">
+        <input type="text" class="db-search" id="dbSearch" placeholder="🔍 Поиск по названию акта..." data-en-ph="🔍 Search acts by name..." oninput="filterActs()">
       </div>
       <div class="cat-filter" id="catFilter"></div>
       <div class="acts-count" id="actsCount"></div>
@@ -1155,10 +1155,10 @@
 
       <!-- Comparison: AIFC vs RK -->
       <section class="tool-block">
-        <h2 class="tool-h">⚖️ МФЦА vs Республика Казахстан — ключевые отличия</h2>
+        <h2 class="tool-h" data-en="⚖️ AIFC vs Republic of Kazakhstan — key differences">⚖️ МФЦА vs Республика Казахстан — ключевые отличия</h2>
         <div class="cmp-wrap">
           <table class="cmp-table">
-            <thead><tr><th>Параметр</th><th>МФЦА (AIFC)</th><th>РК (общий режим)</th></tr></thead>
+            <thead><tr><th data-en="Parameter">Параметр</th><th>МФЦА (AIFC)</th><th data-en="RK (general regime)">РК (общий режим)</th></tr></thead>
             <tbody id="cmpBody"></tbody>
           </table>
         </div>
@@ -1166,7 +1166,7 @@
 
       <!-- Checklists -->
       <section class="tool-block">
-        <h2 class="tool-h">✅ Пошаговые чек-листы</h2>
+        <h2 class="tool-h" data-en="✅ Step-by-step checklists">✅ Пошаговые чек-листы</h2>
         <div class="checklist-tabs" id="checklistTabs"></div>
         <div class="checklist-body" id="checklistBody"></div>
         <div class="checklist-progress" id="checklistProgress"></div>
@@ -1174,37 +1174,37 @@
 
       <!-- Calculators -->
       <section class="tool-block">
-        <h2 class="tool-h">🧮 Калькуляторы</h2>
+        <h2 class="tool-h" data-en="🧮 Calculators">🧮 Калькуляторы</h2>
         <div class="calc-grid">
           <div class="calc-card">
-            <h3>Налог у источника (CIT) в периметре МФЦА</h3>
-            <p class="calc-note">Доход участника МФЦА от «финансовых услуг» из утверждённого перечня освобождён от КПН до 1 января 2066 г.</p>
-            <label>Годовой доход, ₸ <input type="number" id="calcIncome" placeholder="например 100000000"></label>
-            <label>Тип дохода
+            <h3 data-en="Corporate income tax (CIT) within the AIFC perimeter">Налог у источника (CIT) в периметре МФЦА</h3>
+            <p class="calc-note" data-en="Income of an AIFC participant from “financial services” on the approved list is exempt from CIT until 1 January 2066.">Доход участника МФЦА от «финансовых услуг» из утверждённого перечня освобождён от КПН до 1 января 2066 г.</p>
+            <label><span data-en="Annual income, ₸">Годовой доход, ₸</span> <input type="number" id="calcIncome" placeholder="например 100000000" data-en-ph="e.g. 100000000"></label>
+            <label><span data-en="Income type">Тип дохода</span>
               <select id="calcType">
-                <option value="exempt">Финансовые услуги из перечня МФЦА (освобождён)</option>
-                <option value="standard">Прочий доход (общий режим РК)</option>
+                <option value="exempt" data-en="Financial services on the AIFC list (exempt)">Финансовые услуги из перечня МФЦА (освобождён)</option>
+                <option value="standard" data-en="Other income (RK general regime)">Прочий доход (общий режим РК)</option>
               </select>
             </label>
-            <button class="calc-btn" onclick="calcCit()">Рассчитать</button>
+            <button class="calc-btn" onclick="calcCit()" data-en="Calculate">Рассчитать</button>
             <div class="calc-result" id="calcCitResult"></div>
           </div>
 
           <div class="calc-card">
-            <h3>Срок регистрации компании в МФЦА</h3>
-            <p class="calc-note">Ориентировочные сроки по данным AFSA (рабочие дни).</p>
-            <label>Тип организации
+            <h3 data-en="Company registration timeline in the AIFC">Срок регистрации компании в МФЦА</h3>
+            <p class="calc-note" data-en="Indicative timelines based on AFSA data (business days).">Ориентировочные сроки по данным AFSA (рабочие дни).</p>
+            <label><span data-en="Entity type">Тип организации</span>
               <select id="calcOrg">
-                <option value="13">Private Company (Ltd) — без лицензии (~10–15 р.дн.)</option>
-                <option value="13">Partnership / LLP (~10–15 р.дн.)</option>
-                <option value="17">Branch иностранной компании (~15–20 р.дн.)</option>
-                <option value="45">Лицензируемая финансовая фирма AFSA (~30–60 р.дн.)</option>
+                <option value="13" data-en="Private Company (Ltd) — unlicensed (~10–15 b.d.)">Private Company (Ltd) — без лицензии (~10–15 р.дн.)</option>
+                <option value="13" data-en="Partnership / LLP (~10–15 b.d.)">Partnership / LLP (~10–15 р.дн.)</option>
+                <option value="17" data-en="Branch of a foreign company (~15–20 b.d.)">Branch иностранной компании (~15–20 р.дн.)</option>
+                <option value="45" data-en="AFSA-licensed financial firm (~30–60 b.d.)">Лицензируемая финансовая фирма AFSA (~30–60 р.дн.)</option>
               </select>
             </label>
-            <label>Нужна виза/разрешение на работу?
-              <select id="calcVisa"><option value="0">Нет</option><option value="10">Да (+10 дн.)</option></select>
+            <label><span data-en="Work visa / permit needed?">Нужна виза/разрешение на работу?</span>
+              <select id="calcVisa"><option value="0" data-en="No">Нет</option><option value="10" data-en="Yes (+10 days)">Да (+10 дн.)</option></select>
             </label>
-            <button class="calc-btn" onclick="calcTerm()">Рассчитать</button>
+            <button class="calc-btn" onclick="calcTerm()" data-en="Calculate">Рассчитать</button>
             <div class="calc-result" id="calcTermResult"></div>
           </div>
         </div>
@@ -1212,8 +1212,8 @@
 
       <!-- Substance Checker -->
       <section class="tool-block" id="substanceSection">
-        <h2 class="tool-h">🔬 Substance Checker — проверка критериев реального присутствия</h2>
-        <p class="calc-note" style="margin-bottom:14px">Оцените, соответствует ли ваша компания требованиям <a href="https://orderly.myafsa.com/articles/rules-on-the-substantial-presence-of-the-aifc-participants-applying-tax-exemptions-for-the-payment-of-cit-vat" target="_blank">Rules on Substantial Presence</a> для получения льгот по КПН (0%) и НДС (0%). Результат — справочный, не юридическое заключение.</p>
+        <h2 class="tool-h" data-en="🔬 Substance Checker — real-presence criteria review">🔬 Substance Checker — проверка критериев реального присутствия</h2>
+        <p class="calc-note" style="margin-bottom:14px" data-en-html="Assess whether your company meets the <a href=&quot;https://orderly.myafsa.com/articles/rules-on-the-substantial-presence-of-the-aifc-participants-applying-tax-exemptions-for-the-payment-of-cit-vat&quot; target=&quot;_blank&quot;>Rules on Substantial Presence</a> to qualify for CIT (0%) and VAT (0%) exemptions. The result is informational, not legal advice.">Оцените, соответствует ли ваша компания требованиям <a href="https://orderly.myafsa.com/articles/rules-on-the-substantial-presence-of-the-aifc-participants-applying-tax-exemptions-for-the-payment-of-cit-vat" target="_blank">Rules on Substantial Presence</a> для получения льгот по КПН (0%) и НДС (0%). Результат — справочный, не юридическое заключение.</p>
         <div class="wiz-steps" id="subSteps"></div>
         <div id="subPanels"></div>
         <div class="wiz-nav" id="subNav"></div>
@@ -1222,8 +1222,8 @@
 
       <!-- Registration Wizard -->
       <section class="tool-block" id="regSection">
-        <h2 class="tool-h">🏗️ Registration Wizard — регистрация компании в МФЦА</h2>
-        <p class="calc-note" style="margin-bottom:14px">Ответьте на 4 вопроса — получите персональный план регистрации с точными сроками, документами и ссылками на нормы. Источник: <a href="https://orderly.myafsa.com/articles/general-legislation" target="_blank">AIFC Companies Regulations</a> + данные AFSA.</p>
+        <h2 class="tool-h" data-en="🏗️ Registration Wizard — company registration in the AIFC">🏗️ Registration Wizard — регистрация компании в МФЦА</h2>
+        <p class="calc-note" style="margin-bottom:14px" data-en-html="Answer 4 questions to get a personalised registration plan with exact timelines, documents and references to the rules. Source: <a href=&quot;https://orderly.myafsa.com/articles/general-legislation&quot; target=&quot;_blank&quot;>AIFC Companies Regulations</a> + AFSA data.">Ответьте на 4 вопроса — получите персональный план регистрации с точными сроками, документами и ссылками на нормы. Источник: <a href="https://orderly.myafsa.com/articles/general-legislation" target="_blank">AIFC Companies Regulations</a> + данные AFSA.</p>
         <div class="wiz-steps" id="regSteps"></div>
         <div id="regPanels"></div>
         <div class="wiz-nav" id="regNav"></div>
@@ -1232,16 +1232,16 @@
 
       <!-- Document generator -->
       <section class="tool-block">
-        <h2 class="tool-h">📝 Генератор документов</h2>
-        <p class="calc-note" style="margin-bottom:14px">Заполните поля — получите черновик документа. Это шаблон-заготовка, а не юридический документ: перед использованием проверьте у юриста.</p>
+        <h2 class="tool-h" data-en="📝 Document generator">📝 Генератор документов</h2>
+        <p class="calc-note" style="margin-bottom:14px" data-en="Fill in the fields to get a draft document. This is a template draft, not a legal document — have a lawyer review it before use.">Заполните поля — получите черновик документа. Это шаблон-заготовка, а не юридический документ: перед использованием проверьте у юриста.</p>
         <div class="doc-tabs" id="docTabs"></div>
         <div class="doc-grid">
           <div class="doc-form" id="docForm"></div>
           <div class="doc-preview-wrap">
             <div class="doc-preview" id="docPreview"></div>
             <div class="doc-actions">
-              <button class="calc-btn" style="width:auto;padding:9px 16px" onclick="copyDoc()">📋 Копировать</button>
-              <button class="calc-btn" style="width:auto;padding:9px 16px;background:var(--gold);color:var(--navy)" onclick="downloadDoc()">⬇ Скачать .txt</button>
+              <button class="calc-btn" style="width:auto;padding:9px 16px" onclick="copyDoc()" data-en="📋 Copy">📋 Копировать</button>
+              <button class="calc-btn" style="width:auto;padding:9px 16px;background:var(--gold);color:var(--navy)" onclick="downloadDoc()" data-en="⬇ Download .txt">⬇ Скачать .txt</button>
             </div>
           </div>
         </div>
@@ -1254,8 +1254,8 @@
   <div class="page docs-page" id="page-docs">
     <div class="docs-inner">
       <div class="docs-intro">
-        <h2 class="tool-h">📋 Учредительные документы МФЦА</h2>
-        <p class="calc-note">Официальные типовые формы AFSA. Откройте в редакторе, измените под свои нужды и проверьте правки на соответствие правилам МФЦА с помощью ИИ. Оригиналы можно скачать в .docx с afsa.aifc.kz.</p>
+        <h2 class="tool-h" data-en="📋 AIFC constitutional documents">📋 Учредительные документы МФЦА</h2>
+        <p class="calc-note" data-en="Official AFSA template forms. Open in the editor, adapt them to your needs and check the edits against AIFC rules with AI. Originals can be downloaded as .docx from afsa.aifc.kz.">Официальные типовые формы AFSA. Откройте в редакторе, измените под свои нужды и проверьте правки на соответствие правилам МФЦА с помощью ИИ. Оригиналы можно скачать в .docx с afsa.aifc.kz.</p>
       </div>
 
       <div class="docs-catalog" id="docsCatalog"></div>
@@ -1268,25 +1268,25 @@
           </div>
           <div class="editor-actions">
             <input type="file" id="docUpload" accept=".docx,.pdf" style="display:none" onchange="handleDocUpload(this)">
-            <button class="calc-btn" style="width:auto;padding:8px 14px;background:#fff;color:var(--navy);border:1px solid var(--border)" onclick="document.getElementById('docUpload').click()" title="Загрузить .docx или .pdf — текст извлечётся в редактор">📎 Загрузить файл</button>
-            <button class="calc-btn" style="width:auto;padding:8px 14px;background:#fff;color:var(--navy);border:1px solid var(--border)" onclick="resetTemplate()">↺ Оригинал</button>
+            <button class="calc-btn" style="width:auto;padding:8px 14px;background:#fff;color:var(--navy);border:1px solid var(--border)" onclick="document.getElementById('docUpload').click()" title="Загрузить .docx или .pdf — текст извлечётся в редактор" data-en="📎 Upload file">📎 Загрузить файл</button>
+            <button class="calc-btn" style="width:auto;padding:8px 14px;background:#fff;color:var(--navy);border:1px solid var(--border)" onclick="resetTemplate()" data-en="↺ Original">↺ Оригинал</button>
             <button class="calc-btn" style="width:auto;padding:8px 14px;background:var(--gold);color:var(--navy)" onclick="downloadTemplate()">⬇ .txt</button>
-            <button class="calc-btn" style="width:auto;padding:8px 14px" id="checkBtn" onclick="checkCompliance()">⚖️ Проверить на соответствие</button>
+            <button class="calc-btn" style="width:auto;padding:8px 14px" id="checkBtn" onclick="checkCompliance()" data-en="⚖️ Check compliance">⚖️ Проверить на соответствие</button>
           </div>
         </div>
-        <div class="upload-note" style="margin:0 0 10px;padding:8px 12px;background:#fbf6e8;border:1px solid var(--gold);border-radius:8px;font-size:11.5px;line-height:1.55;color:var(--navy)">
+        <div class="upload-note" style="margin:0 0 10px;padding:8px 12px;background:#fbf6e8;border:1px solid var(--gold);border-radius:8px;font-size:11.5px;line-height:1.55;color:var(--navy)" data-en-html="⚠️ <b>File upload:</b> size — <b>up to 8 MB</b>. Word (<b>.docx</b>) is preferred — text is extracted most accurately. Scanned documents, photos and image-based PDFs are read poorly or not at all (text recognition / OCR is not supported) — in that case paste the text manually. The file is processed in your browser; only the extracted text is sent to the server for the check.">
           ⚠️ <b>Загрузка файла:</b> размер — <b>не более 8 МБ</b>. Предпочтительно загружать <b>Word (.docx)</b> — текст извлекается точнее всего. Сканированные документы, фотографии и PDF из изображений распознаются плохо или вовсе не читаются (распознавание текста / OCR не поддерживается) — в таком случае вставьте текст вручную. Файл обрабатывается в вашем браузере; на сервер для проверки уходит только извлечённый текст.
         </div>
         <div class="editor-grid">
-          <textarea id="templateEditor" class="template-editor" spellcheck="false" placeholder="Текст шаблона..."></textarea>
+          <textarea id="templateEditor" class="template-editor" spellcheck="false" placeholder="Текст шаблона..." data-en-ph="Template text..."></textarea>
           <div class="compliance-panel" id="compliancePanel">
-            <div class="compliance-empty">Нажмите «Проверить на соответствие» — ИИ сверит ваши правки с Companies Regulations / Rules МФЦА и отметит нарушения, риски и рекомендации.</div>
+            <div class="compliance-empty" data-en="Click “Check compliance” — the AI will compare your edits against the AIFC Companies Regulations / Rules and flag violations, risks and recommendations.">Нажмите «Проверить на соответствие» — ИИ сверит ваши правки с Companies Regulations / Rules МФЦА и отметит нарушения, риски и рекомендации.</div>
           </div>
         </div>
       </div>
 
       <div class="tool-block" style="margin-top:8px">
-        <h2 class="tool-h">📎 Другие официальные формы AFSA</h2>
+        <h2 class="tool-h" data-en="📎 Other official AFSA forms">📎 Другие официальные формы AFSA</h2>
         <div class="catalog-list" id="otherForms"></div>
       </div>
     </div>
@@ -1911,6 +1911,22 @@ function applyI18n() {
   setPh('msgInput', s.msgInputPh);
   setPh('dbSearch', s.dbSearchPh);
   set('areaLabel', s.areaNames[currentArea] || currentArea);
+
+  // Универсальный свап для статических элементов вкладок: атрибут data-en содержит
+  // английский вариант; русский оригинал запоминаем в data-ru при первом проходе.
+  document.querySelectorAll('[data-en]').forEach(el => {
+    if (!el.hasAttribute('data-ru')) el.setAttribute('data-ru', el.textContent);
+    el.textContent = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ru');
+  });
+  document.querySelectorAll('[data-en-ph]').forEach(el => {
+    if (!el.hasAttribute('data-ru-ph')) el.setAttribute('data-ru-ph', el.getAttribute('placeholder') || '');
+    el.setAttribute('placeholder', currentLang === 'en' ? el.getAttribute('data-en-ph') : el.getAttribute('data-ru-ph'));
+  });
+  // HTML-элементы со вложенными тегами (ссылки внутри) — свап innerHTML через data-en-html
+  document.querySelectorAll('[data-en-html]').forEach(el => {
+    if (!el.hasAttribute('data-ru-html')) el.setAttribute('data-ru-html', el.innerHTML);
+    el.innerHTML = currentLang === 'en' ? el.getAttribute('data-en-html') : el.getAttribute('data-ru-html');
+  });
 }
 
 // ── localStorage persistence ──────────────────
@@ -1976,10 +1992,17 @@ function setLang(lang) {
   currentLang = lang;
   document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
   document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-  applyI18n();
   renderDisclaimer();
   renderPrivacy();
   renderOffer();
+  // перерисовать контент открытой вкладки, чтобы динамические строки подхватили язык
+  try {
+    if (document.getElementById('page-database')?.classList.contains('active')) renderDatabase();
+    if (document.getElementById('page-tools')?.classList.contains('active')) renderTools();
+    if (document.getElementById('page-docs')?.classList.contains('active')) renderDocs();
+    if (document.getElementById('page-news')?.classList.contains('active')) renderNews();
+  } catch (e) {}
+  applyI18n(); // после ре-рендера — чтобы свапнуть и вновь отрисованные data-en узлы
 }
 
 function setArea(btn, area) {
@@ -2000,6 +2023,7 @@ function showPage(id, btn) {
   if (id === 'tools')    renderTools();
   if (id === 'docs')     renderDocs();
   if (id === 'news')     renderNews();
+  applyI18n(); // свапнуть язык для только что отрисованного контента вкладки
 }
 
 // ── New Chat ──────────────────────────────────
@@ -2008,15 +2032,16 @@ function newChat() {
   saveHistory();
   const msgs = document.getElementById('messages');
   msgs.innerHTML = `<div class="welcome" id="welcome">
-    <h2>AIFCLex</h2>
-    <p>Задайте вопрос по праву МФЦА (AIFC) — а также по смежным вопросам РК: налоги, валютный контроль, трудовые отношения. Отвечу по существу, со ссылками на конкретные нормы официальных актов и судебную практику МФЦА.</p>
+    <h2 id="welcomeH">AIFCLex</h2>
+    <p id="welcomeP"></p>
     <div class="welcome-chips">
-      <button class="welcome-chip" onclick="sendStarter(this.textContent)">Как зарегистрировать компанию в МФЦА?</button>
-      <button class="welcome-chip" onclick="sendStarter(this.textContent)">Какие налоговые льготы есть в МФЦА?</button>
-      <button class="welcome-chip" onclick="sendStarter(this.textContent)">Как работает суд МФЦА?</button>
-      <button class="welcome-chip" onclick="sendStarter(this.textContent)">Требования AML/KYC для банков МФЦА</button>
+      <button class="welcome-chip" id="wc-1" onclick="sendStarter(this.textContent)"></button>
+      <button class="welcome-chip" id="wc-2" onclick="sendStarter(this.textContent)"></button>
+      <button class="welcome-chip" id="wc-3" onclick="sendStarter(this.textContent)"></button>
+      <button class="welcome-chip" id="wc-4" onclick="sendStarter(this.textContent)"></button>
     </div>
   </div>`;
+  applyI18n(); // заполнить приветствие на текущем языке
 }
 
 function exportPDF() {
@@ -2420,17 +2445,71 @@ const CAT_COLORS = {
   'Налоговое право':    {bg:'rgba(184,134,11,.12)', color:'#B8860B'},
 };
 
+// ── Перевод динамического контента вкладок (RU→EN) ────────────────────────────
+const TR = {
+  // Категории базы актов и UI базы
+  'Все':'All', 'AIFC Bodies':'AIFC Bodies', 'Корпоративное право':'Corporate law',
+  'Финансовые услуги':'Financial services', 'AML/CTF':'AML/CTF', 'Трудовое право':'Employment law',
+  'Разрешение споров':'Dispute resolution', 'Налоговое право':'Tax law',
+  'Платёжные системы':'Payment systems', 'Трасты':'Trusts', 'Интеллектуальная собственность':'Intellectual property',
+  'Сборы':'Fees', 'Иерархия актов МФЦА':'Hierarchy of AIFC acts', 'Общие':'General',
+  'Открыть →':'Open →',
+  // Сравнение МФЦА vs РК
+  'Применимое право':'Applicable law', 'Английское общее право (acts МФЦА)':'English common law (AIFC acts)',
+  'Континентальное право РК':'Continental law of RK',
+  'Язык права/судов':'Language of law/courts', 'Английский':'English', 'Казахский / русский':'Kazakh / Russian',
+  'Корпоративный налог (КПН)':'Corporate income tax (CIT)', '0% на фин. услуги из перечня до 2066 г.':'0% on listed financial services until 2066',
+  '20% общий режим':'20% general regime',
+  'НДС':'VAT', '0% на освобождённые фин. услуги':'0% on exempt financial services', '12% общий режим':'12% general regime',
+  'Индивидуальный подоходный налог':'Individual income tax', 'Льготы для иностранных сотрудников':'Exemptions for foreign employees',
+  '10% общий режим':'10% general regime',
+  'Регулятор фин. услуг':'Financial services regulator', 'АРРФР / Нацбанк РК':'ARDFM / National Bank of RK',
+  'Суд':'Court', 'Суд МФЦА (по модели английского)':'AIFC Court (English-model)', 'Суды общей юрисдикции РК':'RK courts of general jurisdiction',
+  'Арбитраж':'Arbitration', 'IAC (Международный арбитражный центр)':'IAC (International Arbitration Centre)',
+  'Арбитражи по Закону «Об арбитраже»':'Arbitration under the “On Arbitration” Law',
+  'Валютное регулирование':'Currency regulation', 'Свободный режим':'Free regime', 'Закон РК «О валютном регулировании»':'RK “On Currency Regulation” Law',
+  'Иностранная рабочая сила':'Foreign workforce', 'Без квот и спец. разрешений':'No quotas or special permits', 'Квоты и разрешения МТСЗН':'Quotas and permits (MLSPP)',
+  'Репатриация прибыли':'Profit repatriation', 'Без ограничений':'No restrictions', 'С учётом валютного контроля':'Subject to currency control',
+  // Названия чек-листов
+  'Регистрация компании':'Company registration', 'Получение лицензии AFSA':'Obtaining an AFSA licence', 'Комплаенс AML/CTF':'AML/CTF compliance',
+  // Шаги чек-листов
+  'Выбрать организационно-правовую форму (Private/Public Company, LLP, Foundation)':'Choose a legal form (Private/Public Company, LLP, Foundation)',
+  'Зарезервировать наименование компании в AFSA':'Reserve the company name with AFSA',
+  'Подготовить учредительные документы (Articles of Association)':'Prepare constitutional documents (Articles of Association)',
+  'Определить зарегистрированный офис в периметре МФЦА':'Establish a registered office within the AIFC perimeter',
+  'Назначить директора(ов) и секретаря':'Appoint director(s) and a secretary',
+  'Подать заявление через портал AFSA (digital onboarding)':'Submit the application via the AFSA portal (digital onboarding)',
+  'Оплатить регистрационный сбор':'Pay the registration fee',
+  'Получить Certificate of Incorporation':'Obtain the Certificate of Incorporation',
+  'Открыть банковский счёт и зарегистрироваться в налоговой':'Open a bank account and register with the tax authority',
+  'Определить регулируемый вид деятельности (Regulated Activity)':'Identify the Regulated Activity',
+  'Подготовить Regulatory Business Plan':'Prepare a Regulatory Business Plan',
+  'Сформировать структуру капитала по пруденциальным требованиям':'Structure capital per prudential requirements',
+  'Назначить Approved Individuals (SEO, Compliance, MLRO)':'Appoint Approved Individuals (SEO, Compliance, MLRO)',
+  'Разработать политику AML/CTF':'Develop an AML/CTF policy',
+  'Подать заявление в AFSA и пройти интервью':'Submit the application to AFSA and attend an interview',
+  'Получить In-Principle Approval, затем лицензию':'Obtain In-Principle Approval, then the licence',
+  'Назначить MLRO (Money Laundering Reporting Officer)':'Appoint an MLRO (Money Laundering Reporting Officer)',
+  'Провести оценку рисков (Business Risk Assessment)':'Conduct a Business Risk Assessment',
+  'Внедрить процедуры CDD/KYC по клиентам':'Implement customer CDD/KYC procedures',
+  'Настроить мониторинг транзакций и скрининг санкций':'Set up transaction monitoring and sanctions screening',
+  'Вести учёт и хранить документы 5+ лет':'Keep records and retain documents for 5+ years',
+  'Подавать Annual AML Return в AFSA':'File the Annual AML Return with AFSA',
+  'Обучать персонал и обновлять политики':'Train staff and update policies',
+};
+function tr(s){ return currentLang === 'en' ? (TR[s] || s) : s; }
+
 function renderDatabase() {
   const cats = ['Все', ...Object.keys(CAT_COLORS)];
   document.getElementById('catFilter').innerHTML = cats.map(c =>
-    `<button class="cat-btn${c === activeDbCat ? ' active' : ''}" onclick="setCat('${c}')">${c}</button>`
+    `<button class="cat-btn${c === activeDbCat ? ' active' : ''}" data-cat="${c}" onclick="setCat(this.dataset.cat)">${tr(c)}</button>`
   ).join('');
   filterActs();
 }
 
 function setCat(cat) {
   activeDbCat = cat;
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.textContent === cat));
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
   filterActs();
 }
 
@@ -2441,15 +2520,17 @@ function filterActs() {
     const matchQ   = !q || a.name.toLowerCase().includes(q) || a.cat.toLowerCase().includes(q);
     return matchCat && matchQ;
   });
-  document.getElementById('actsCount').textContent = `Найдено: ${filtered.length} из ${ACTS.length} документов`;
+  document.getElementById('actsCount').textContent = currentLang === 'en'
+    ? `Found: ${filtered.length} of ${ACTS.length} documents`
+    : `Найдено: ${filtered.length} из ${ACTS.length} документов`;
   document.getElementById('actsGrid').innerHTML = filtered.map(a => {
     const s = CAT_COLORS[a.cat] || {bg:'#eee', color:'#333'};
     return `<div class="act-card" onclick="window.open('${a.url}','_blank')">
-      <div class="act-card-cat" style="background:${s.bg};color:${s.color}">${a.cat}</div>
+      <div class="act-card-cat" style="background:${s.bg};color:${s.color}">${tr(a.cat)}</div>
       <div class="act-card-name">${a.name}</div>
       <div class="act-card-footer">
         <span>aifc.kz</span>
-        <a class="act-card-link" href="${a.url}" target="_blank" onclick="event.stopPropagation()">Открыть →</a>
+        <a class="act-card-link" href="${a.url}" target="_blank" onclick="event.stopPropagation()">${tr('Открыть →')}</a>
       </div>
     </div>`;
   }).join('');
@@ -2512,10 +2593,10 @@ function clSave(s) { try { localStorage.setItem(CL_KEY, JSON.stringify(s)); } ca
 function renderTools() {
   // Comparison table
   document.getElementById('cmpBody').innerHTML = COMPARISON.map(r =>
-    `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');
+    `<tr><td>${tr(r[0])}</td><td>${tr(r[1])}</td><td>${tr(r[2])}</td></tr>`).join('');
   // Checklist tabs
   document.getElementById('checklistTabs').innerHTML = Object.keys(CHECKLISTS).map(name =>
-    `<button class="cl-tab${name === activeChecklist ? ' active' : ''}" onclick="setChecklist('${name}')">${name}</button>`).join('');
+    `<button class="cl-tab${name === activeChecklist ? ' active' : ''}" data-cl="${name}" onclick="setChecklist(this.dataset.cl)">${tr(name)}</button>`).join('');
   renderChecklist();
   renderDocGen();
   // Init wizards only if not already running
@@ -2525,7 +2606,7 @@ function renderTools() {
 
 function setChecklist(name) {
   activeChecklist = name;
-  document.querySelectorAll('.cl-tab').forEach(b => b.classList.toggle('active', b.textContent === name));
+  document.querySelectorAll('.cl-tab').forEach(b => b.classList.toggle('active', b.dataset.cl === name));
   renderChecklist();
 }
 
@@ -2538,14 +2619,15 @@ function renderChecklist() {
     const src = it[1] ? `<small>📄 <a href="${it[2]}" target="_blank" onclick="event.stopPropagation()">${it[1]}</a></small>` : '';
     return `<div class="cl-item${isDone}" onclick="toggleChecklistItem(${i})">
       <div class="cl-check">✓</div>
-      <div class="cl-text">${it[0]}${src}</div>
+      <div class="cl-text">${tr(it[0])}${src}</div>
     </div>`;
   }).join('');
   const total = items.length;
   const count = Object.values(done).filter(Boolean).length;
   const pct = Math.round(count / total * 100);
+  const label = currentLang === 'en' ? `Completed: ${count} of ${total} (${pct}%)` : `Выполнено: ${count} из ${total} (${pct}%)`;
   document.getElementById('checklistProgress').innerHTML =
-    `Выполнено: ${count} из ${total} (${pct}%)<div class="cl-bar"><span style="width:${pct}%"></span></div>`;
+    `${label}<div class="cl-bar"><span style="width:${pct}%"></span></div>`;
 }
 
 function toggleChecklistItem(i) {
