@@ -1,6 +1,6 @@
 {
   "domain": "Table Facts (числа из таблиц актов — сборы, капитал, пороги)",
-  "total_questions": 21,
+  "total_questions": 22,
   "_note": "Детерминированный exact-match. Эталоны сверены с первоисточниками (orderly.myafsa.com PRU(INV) 3.3; aifc.kz FEES v16; BBR v6 4.10; CIS v8 2.2; COB v14 2.3.1; PINS Schedule 4 / 14.4; AIX MLR 11). Закрывают класс багов «таблицы терялись при текстовой заливке RAG». Залито в RAG: pru-inv-base-capital-3-3, afsa-fees-schedule, bbr-base-capital-4-10, cis-fund-types-2-2, pins-capital-floor, aix-listing-mlr.",
   "questions": [
     {
@@ -58,6 +58,13 @@
       "expected_exact_match": ["200 000", "200,000", "200000"],
       "forbidden_match": ["100 000", "300 000", "7 000 000"],
       "_verified": "PINS 14.4 — BCR Captive Class 2 = 200,000 USD (Class 1=100k, Class 3=300k)."
+    },
+    {
+      "id": "TBL-DATF-022",
+      "question": "Каков минимальный капитал оператора Digital Asset Trading Facility в МФЦА по DAA v5 (с 01.01.2026)? Точная сумма USD.",
+      "expected_exact_match": ["200 000", "200,000", "200000"],
+      "forbidden_match": ["98 000", "150 000", "500 000"],
+      "_verified": "DAA v5 Table 1 (поправки с 01.01.2026) — Operating a DATF: higher of USD 200,000 / 12-мес opex. 98,000 — это application-сбор FEES, не капитал."
     },
     {
       "id": "TBL-CONTROL-021",
