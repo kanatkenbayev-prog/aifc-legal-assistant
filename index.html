@@ -3363,31 +3363,33 @@ async function renderDocs() {
       docsManifest = await res.json();
     } catch (e) {
       console.error('Загрузка templates/manifest.json не удалась:', e);
+      const enErr = currentLang === 'en';
       const hint = location.protocol === 'file:'
-        ? ' Похоже, страница открыта как локальный файл — откройте сайт по ссылке (https), браузер блокирует загрузку шаблонов с file://.'
+        ? (enErr ? ' The page appears to be opened as a local file — open the site via its (https) link; the browser blocks loading templates from file://.' : ' Похоже, страница открыта как локальный файл — откройте сайт по ссылке (https), браузер блокирует загрузку шаблонов с file://.')
         : '';
       document.getElementById('docsCatalog').innerHTML =
-        `<p style="color:var(--kz-red)">Не удалось загрузить список шаблонов.${hint} <button class="tmpl-btn ghost" style="margin-left:8px" onclick="docsManifest=null;renderDocs()">↻ Повторить</button></p>`;
+        `<p style="color:var(--kz-red)">${enErr ? 'Could not load the template list.' : 'Не удалось загрузить список шаблонов.'}${hint} <button class="tmpl-btn ghost" style="margin-left:8px" onclick="docsManifest=null;renderDocs()">${enErr ? '↻ Retry' : '↻ Повторить'}</button></p>`;
       return;
     }
   }
   // Editable template cards + custom document card
+  const en = currentLang === 'en';
   document.getElementById('docsCatalog').innerHTML = docsManifest.editable.map(t => `
     <div class="tmpl-card">
       <span class="tmpl-badge">${t.entity}</span>
-      <div class="tmpl-name">${t.titleRu}</div>
+      <div class="tmpl-name">${en ? (t.title || t.titleRu) : t.titleRu}</div>
       <div class="tmpl-reg">📘 ${t.regulation}</div>
       <div class="tmpl-actions">
-        <button class="tmpl-btn primary" onclick="openTemplate('${t.id}')">✎ Открыть в редакторе</button>
-        <a class="tmpl-btn ghost" href="${t.source}" target="_blank" rel="noopener">⬇ Оригинал .docx</a>
+        <button class="tmpl-btn primary" onclick="openTemplate('${t.id}')">${en ? '✎ Open in editor' : '✎ Открыть в редакторе'}</button>
+        <a class="tmpl-btn ghost" href="${t.source}" target="_blank" rel="noopener">${en ? '⬇ Original .docx' : '⬇ Оригинал .docx'}</a>
       </div>
     </div>`).join('') + `
     <div class="tmpl-card" style="border-style:dashed;border-color:var(--gold)">
-      <span class="tmpl-badge" style="background:rgba(201,168,76,.18);color:#9B7B2E">Свой документ</span>
-      <div class="tmpl-name">📄 Проверить свой документ</div>
-      <div class="tmpl-reg">Вставьте любой документ (устав, соглашение, политику) — ИИ сверит его с нормами МФЦА по выбранной области права.</div>
+      <span class="tmpl-badge" style="background:rgba(201,168,76,.18);color:#9B7B2E">${en ? 'Custom document' : 'Свой документ'}</span>
+      <div class="tmpl-name">${en ? '📄 Check your document' : '📄 Проверить свой документ'}</div>
+      <div class="tmpl-reg">${en ? 'Paste any document (charter, agreement, policy) — the AI will check it against AIFC rules for the selected area of law.' : 'Вставьте любой документ (устав, соглашение, политику) — ИИ сверит его с нормами МФЦА по выбранной области права.'}</div>
       <div class="tmpl-actions">
-        <button class="tmpl-btn primary" onclick="openCustomDoc()">＋ Вставить и проверить</button>
+        <button class="tmpl-btn primary" onclick="openCustomDoc()">${en ? '＋ Paste and check' : '＋ Вставить и проверить'}</button>
       </div>
     </div>`;
   // Other official forms catalog
