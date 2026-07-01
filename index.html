@@ -991,25 +991,25 @@
     <div class="tab-dropdown" id="dbTabDropdown">
       <button class="tab" id="tab-database" data-page="database" onclick="showPage('database',this); dbTabMenu(false)">📚 База актов <span class="tab-arrow">▾</span></button>
       <div class="tab-drop-menu" id="dbTabMenu">
-        <a onclick="goDb('Все')">📋 Все документы</a>
+        <a onclick="goDb('Все')" data-en="📋 All documents">📋 Все документы</a>
         <a onclick="goDb('AIFC Bodies')">🏛 AIFC Bodies</a>
-        <a onclick="goDb('Корпоративное право')">🏢 Корпоративное право</a>
-        <a onclick="goDb('Финансовые услуги')">💼 Финансовые услуги</a>
-        <a onclick="goDb('Налоговое право')">🧾 Налоговое право</a>
+        <a onclick="goDb('Корпоративное право')" data-en="🏢 Corporate law">🏢 Корпоративное право</a>
+        <a onclick="goDb('Финансовые услуги')" data-en="💼 Financial services">💼 Финансовые услуги</a>
+        <a onclick="goDb('Налоговое право')" data-en="🧾 Tax law">🧾 Налоговое право</a>
         <a onclick="goDb('AML/CTF')">🔐 AML/CTF</a>
-        <a onclick="goDb('Трудовое право')">👷 Трудовое право</a>
-        <a onclick="goDb('Разрешение споров')">⚖️ Разрешение споров</a>
+        <a onclick="goDb('Трудовое право')" data-en="👷 Employment law">👷 Трудовое право</a>
+        <a onclick="goDb('Разрешение споров')" data-en="⚖️ Dispute resolution">⚖️ Разрешение споров</a>
       </div>
     </div>
     <div class="tab-dropdown" id="toolsTabDropdown">
       <button class="tab" id="tab-tools" data-page="tools" onclick="showPage('tools',this); toolsTabMenu(false)">🧰 Инструменты <span class="tab-arrow">▾</span></button>
       <div class="tab-drop-menu" id="toolsTabMenu">
-        <a onclick="goTool('cmp')">⚖️ МФЦА vs РК</a>
-        <a onclick="goTool('checklist')">✅ Чек-листы</a>
-        <a onclick="goTool('calc')">🧮 Калькуляторы</a>
+        <a onclick="goTool('cmp')" data-en="⚖️ AIFC vs RK">⚖️ МФЦА vs РК</a>
+        <a onclick="goTool('checklist')" data-en="✅ Checklists">✅ Чек-листы</a>
+        <a onclick="goTool('calc')" data-en="🧮 Calculators">🧮 Калькуляторы</a>
         <a onclick="goTool('substance')">🔬 Substance Checker</a>
         <a onclick="goTool('reg')">🏗️ Registration Wizard</a>
-        <a onclick="goTool('doc')">📝 Генератор документов</a>
+        <a onclick="goTool('doc')" data-en="📝 Document generator">📝 Генератор документов</a>
       </div>
     </div>
     <button class="tab"        id="tab-docs"     data-page="docs"     onclick="showPage('docs',this)">📋 Учр. документы</button>
@@ -1437,14 +1437,14 @@ function renderUserWidget() {
   const plan    = userProfile?.plan   || 'free';
   w.innerHTML = `
     <span class="user-email" onclick="toggleUserMenu()">${email.split('@')[0]}</span>
-    <span class="credits-badge" onclick="toggleUserMenu()" title="Доступно кредитов">💎 ${credits}</span>
+    <span class="credits-badge" onclick="toggleUserMenu()" title="${currentLang==='en'?'Credits available':'Доступно кредитов'}">💎 ${credits}</span>
     <div class="user-menu" id="userMenu">
       <div style="padding:10px 14px;font-size:12px;color:var(--text-muted);border-bottom:1px solid var(--border)">
-        ${email}<br><b>${plan}</b> · ${credits} кредитов
+        ${email}<br><b>${plan}</b> · ${credits} ${currentLang==='en'?'credits':'кредитов'}
       </div>
-      <button class="user-menu-item" onclick="showPaywall()">💳 Пополнить кредиты</button>
+      <button class="user-menu-item" onclick="showPaywall()">${currentLang==='en'?'💳 Top up credits':'💳 Пополнить кредиты'}</button>
       <hr>
-      <button class="user-menu-item danger" onclick="signOut()">Выйти</button>
+      <button class="user-menu-item danger" onclick="signOut()">${currentLang==='en'?'Sign out':'Выйти'}</button>
     </div>`;
 }
 
@@ -3339,26 +3339,31 @@ const CUSTOM_AREAS = {
 };
 
 function openCustomDoc() {
+  const en = currentLang === 'en';
   activeTemplate = {
     id: 'custom_doc', custom: true,
-    title: 'Пользовательский документ',
+    title: en ? 'Custom document' : 'Пользовательский документ',
     regulation: '',
     ragArea: 'auto',
   };
   templateOriginal = '';
   const wrap = document.getElementById('editorWrap');
-  document.getElementById('editorTitle').textContent = '📄 Проверка своего документа';
+  document.getElementById('editorTitle').textContent = en ? '📄 Check your document' : '📄 Проверка своего документа';
+  const autoReg = en ? 'The AI will determine the applicable rules from the document text' : 'ИИ сам определит применимые нормы по тексту документа';
   document.getElementById('editorSub').innerHTML =
-    `Область права: <select id="customArea" onchange="setCustomArea(this.value)" style="margin-left:4px;padding:4px 8px;font-size:11.5px;font-family:inherit;border:1px solid var(--border);border-radius:6px;background:#fff">` +
-    `<option value="auto" selected>🔍 Все области (авто)</option>` +
-    Object.keys(CUSTOM_AREAS).map(a => `<option value="${a}">${a}</option>`).join('') +
-    `</select> · <span id="customReg">ИИ сам определит применимые нормы по тексту документа</span>`;
+    `${en ? 'Area of law:' : 'Область права:'} <select id="customArea" onchange="setCustomArea(this.value)" style="margin-left:4px;padding:4px 8px;font-size:11.5px;font-family:inherit;border:1px solid var(--border);border-radius:6px;background:#fff">` +
+    `<option value="auto" selected>${en ? '🔍 All areas (auto)' : '🔍 Все области (авто)'}</option>` +
+    Object.keys(CUSTOM_AREAS).map(a => `<option value="${a}">${tr(a)}</option>`).join('') +
+    `</select> · <span id="customReg">${autoReg}</span>`;
   const editor = document.getElementById('templateEditor');
   editor.value = '';
-  editor.placeholder = 'Вставьте текст документа (устав, соглашение, политику) или загрузите файл .docx / .pdf кнопкой «📎 Загрузить файл» выше...';
+  editor.placeholder = en
+    ? 'Paste the document text (charter, agreement, policy) or upload a .docx / .pdf file with the “📎 Upload file” button above...'
+    : 'Вставьте текст документа (устав, соглашение, политику) или загрузите файл .docx / .pdf кнопкой «📎 Загрузить файл» выше...';
   wrap.style.display = 'block';
-  document.getElementById('compliancePanel').innerHTML =
-    '<div class="compliance-empty">Вставьте текст документа слева <b>или загрузите .docx / .pdf</b> («📎 Загрузить файл»), выберите область права и нажмите «Проверить на соответствие».<br><span style="color:var(--text-muted);font-size:11px">Файл обрабатывается в вашем браузере; для проверки на сервер уходит только извлечённый текст. Сканы/фото-PDF не распознаются.</span></div>';
+  document.getElementById('compliancePanel').innerHTML = en
+    ? '<div class="compliance-empty">Paste the document text on the left <b>or upload a .docx / .pdf</b> (“📎 Upload file”), choose the area of law and click “Check compliance”.<br><span style="color:var(--text-muted);font-size:11px">The file is processed in your browser; only the extracted text is sent to the server for the check. Scanned / photo PDFs are not recognised.</span></div>'
+    : '<div class="compliance-empty">Вставьте текст документа слева <b>или загрузите .docx / .pdf</b> («📎 Загрузить файл»), выберите область права и нажмите «Проверить на соответствие».<br><span style="color:var(--text-muted);font-size:11px">Файл обрабатывается в вашем браузере; для проверки на сервер уходит только извлечённый текст. Сканы/фото-PDF не распознаются.</span></div>';
   wrap.scrollIntoView({ behavior: 'smooth' });
   editor.focus();
 }
@@ -3368,7 +3373,9 @@ function setCustomArea(area) {
   if (area === 'auto') {
     activeTemplate.ragArea = 'auto';
     activeTemplate.regulation = '';
-    document.getElementById('customReg').textContent = 'ИИ сам определит применимые нормы по тексту документа';
+    document.getElementById('customReg').textContent = currentLang === 'en'
+      ? 'The AI will determine the applicable rules from the document text'
+      : 'ИИ сам определит применимые нормы по тексту документа';
   } else {
     activeTemplate.ragArea = area;
     activeTemplate.regulation = CUSTOM_AREAS[area].regulation;
