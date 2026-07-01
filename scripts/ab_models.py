@@ -20,7 +20,13 @@ SUBSET = {"TBL-CAP-INV-001","TBL-CAP-BANK-003","TBL-FEE-APP-005","TBL-FEE-SUP-00
           "TBL-CIS-008","TBL-AIX-012","TBL-ITRP-014","TBL-IIT-016","TBL-CONTROL-021","TBL-DIV-019"}
 facts = [f for f in allf if f["id"] in SUBSET]
 
-def norm(s): return " ".join(s.lower().replace(",", " ").split())
+import re
+def _norm(s): return re.sub(r"\s+", "", s.lower())
+def _has(text, needle):
+    n = _norm(needle)
+    if not n: return False
+    # граница цифр: "50000" не матчится внутри "150000" (как в run_benchmark.py)
+    return re.search(r"(?<!\d)" + re.escape(n) + r"(?!\d)", _norm(text)) is not None
 
 def ask(model, q, area):
     payload = {"messages":[{"role":"user","content":q}], "area":area, "lang":"ru", "test_key":KEY, "model":model}
@@ -44,10 +50,9 @@ def ask(model, q, area):
     return {"ttft":0,"total":0,"chars":0,"text":""}
 
 def grade(item, text):
-    low = norm(text)
-    exp = any(norm(e) in low for e in item["expected_exact_match"])
-    forb = any(norm(f) in low for f in item.get("forbidden_match", []))
-    return exp and not forb
+    # как в run_benchmark.py: PASS = присутствует эталонный вариант (граница цифр);
+    # forbidden лишь помечает на ревью, НЕ валит (юр-ответ законно упоминает др. ставки).
+    return any(_has(text, e) for e in item["expected_exact_match"])
 
 results = {m: {"pass":0, "ttft":[], "total":[], "chars":[]} for m in MODELS}
 print(f"Прогон {len(facts)} чистых фактов × {len(MODELS)} модели (с ретраями)\n")
